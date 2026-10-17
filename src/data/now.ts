@@ -12,13 +12,5 @@ export const now: { updated: string; items: Text[] } = {
       en: 'Autumn semester at ETH — currently deep into control systems and mechatronics.',
       de: 'Herbstsemester an der ETH — aktuell vertieft in Regelungstechnik und Mechatronik.',
     },
-    {
-      en: 'Finishing the VELOVE website rebuild and writing an editing guide for volunteers.',
-      de: 'Abschluss des VELOVE-Website-Neuaufbaus und Bearbeitungsanleitung für Freiwillige.',
-    },
-    {
-      en: 'Looking for an engineering internship in mechatronics or product development.',
-      de: 'Auf der Suche nach einem Ingenieurpraktikum in Mechatronik oder Produktentwicklung.',
-    },
   ],
 };
