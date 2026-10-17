@@ -7,7 +7,9 @@ interface Props {
 }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const basePath = stripLang(Astro.url.pathname);
+// On the 404 page there is no equivalent page to switch to, so link to the home pages.
+const stripped = stripLang(Astro.url.pathname);
+const basePath = stripped.startsWith('/404') ? '/' : stripped;
 ---
 
 <ul class="flex items-center font-mono text-2xs" aria-label={t('lang.label')}>

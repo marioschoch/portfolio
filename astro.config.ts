@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
+import { existsSync } from 'node:fs';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
@@ -42,6 +43,12 @@ export default defineConfig({
     mdx(),
     sitemap({
       i18n: { defaultLocale: 'en', locales: { en: 'en-GB', de: 'de-CH' } },
+      // German project pages without a de.mdx only show the English text (canonical → English),
+      // so they are left out of the sitemap until a translation exists.
+      filter: (page) => {
+        const slug = /\/de\/projects\/([^/]+)\/$/.exec(page)?.[1];
+        return !slug || existsSync(`./src/content/projects/${slug}/de.mdx`);
+      },
     }),
   ],
 

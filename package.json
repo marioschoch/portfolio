@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Personal portfolio of Mario Schoch — static Astro site deployed on Cloudflare.",
   "engines": {
-    "node": ">=22.12"
+    "node": ">=22.22"
   },
   "scripts": {
     "dev": "astro dev",
