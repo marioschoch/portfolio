@@ -36,8 +36,8 @@ export interface Cv {
 
 export const cv: Cv = {
   headline: {
-    en: 'Mechanical engineering student (BSc) at ETH Zürich with a focus on mechatronics and embedded systems.',
-    de: 'Maschinenbaustudent (BSc) an der ETH Zürich mit Schwerpunkt Mechatronik und Embedded Systems.',
+    en: 'Mechanical engineering student (BSc) at ETH Zürich.',
+    de: 'Maschinenbaustudent (BSc) an der ETH Zürich.',
   },
 
   education: [
