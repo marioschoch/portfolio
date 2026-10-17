@@ -1,0 +1,31 @@
+---
+/**
+ * Inline, render-blocking theme script. It runs before first paint so there is
+ * no flash of the wrong theme. Stored choice wins; otherwise the system preference.
+ */
+---
+
+<script is:inline>
+  (() => {
+    const root = document.documentElement;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    let stored = null;
+    try {
+      stored = localStorage.getItem('theme');
+    } catch {
+      /* storage blocked: follow the system */
+    }
+    const apply = (theme) => (root.dataset.theme = theme);
+    apply(stored === 'light' || stored === 'dark' ? stored : media.matches ? 'dark' : 'light');
+    // Follow live system changes as long as the visitor has not picked a theme.
+    media.addEventListener('change', (e) => {
+      let current = null;
+      try {
+        current = localStorage.getItem('theme');
+      } catch {
+        /* ignore */
+      }
+      if (!current) apply(e.matches ? 'dark' : 'light');
+    });
+  })();
+</script>

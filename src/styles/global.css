@@ -1,0 +1,293 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Design tokens
+   Colours are CSS variables so light/dark mode is a single attribute switch
+   (`<html data-theme="dark">`, set before first paint in ThemeScript.astro).
+   One restrained accent colour; everything else is neutral.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+  --c-bg: #fafaf9;
+  --c-surface: #ffffff;
+  --c-fg: #15171b;
+  --c-fg-soft: #343840;
+  --c-muted: #5d6370; /* 5.9:1 on --c-bg */
+  --c-rule: #e2e3e6;
+  --c-rule-strong: #c7cad1;
+  --c-accent: #1d55c4; /* technical blue, 6.3:1 on --c-bg */
+  --c-accent-soft: #e8eefb;
+  --c-grid: rgb(21 23 27 / 0.045);
+}
+
+/* Without JS (no data-theme attribute) the system preference still applies. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --c-bg: #0d0f12;
+    --c-surface: #14171c;
+    --c-fg: #e8eaed;
+    --c-fg-soft: #c9cdd3;
+    --c-muted: #9aa1ac; /* 7.4:1 on --c-bg */
+    --c-rule: #252a31;
+    --c-rule-strong: #363c45;
+    --c-accent: #7ea6ff; /* 8.1:1 on --c-bg */
+    --c-accent-soft: #172240;
+    --c-grid: rgb(232 234 237 / 0.04);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --c-bg: #0d0f12;
+  --c-surface: #14171c;
+  --c-fg: #e8eaed;
+  --c-fg-soft: #c9cdd3;
+  --c-muted: #9aa1ac;
+  --c-rule: #252a31;
+  --c-rule-strong: #363c45;
+  --c-accent: #7ea6ff;
+  --c-accent-soft: #172240;
+  --c-grid: rgb(232 234 237 / 0.04);
+}
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-fg: var(--c-fg);
+  --color-fg-soft: var(--c-fg-soft);
+  --color-muted: var(--c-muted);
+  --color-rule: var(--c-rule);
+  --color-rule-strong: var(--c-rule-strong);
+  --color-accent: var(--c-accent);
+  --color-accent-soft: var(--c-accent-soft);
+
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+@theme {
+  --container-page: 72rem;
+  --container-text: 42rem;
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+    font-feature-settings: 'kern', 'liga';
+  }
+
+  ::selection {
+    background: var(--c-accent-soft);
+    color: var(--c-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-semibold tracking-tight text-balance;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+
+  hr {
+    @apply border-rule;
+  }
+}
+
+/* Small uppercase monospace label: the "spec sheet" look. */
+@utility label {
+  @apply font-mono text-2xs font-medium tracking-[0.08em] text-muted uppercase;
+}
+
+/* Accent text link with a thin underline that strengthens on hover. */
+@utility link {
+  @apply text-accent underline decoration-accent/40 hover:decoration-accent;
+}
+
+/* ==========================================================================
+   Components
+   ========================================================================== */
+
+@layer components {
+  /* Page container with a 16 px (mobile) → 32 px gutter. */
+  .container-page {
+    @apply mx-auto w-full max-w-page px-4 sm:px-8;
+  }
+
+  /* Faint engineering grid, fading out towards the bottom. Used only in page headers. */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, var(--c-grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--c-grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: linear-gradient(to bottom, black 40%, transparent);
+  }
+
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-sm border border-rule-strong bg-surface px-3.5 py-2 font-mono text-xs font-medium tracking-wide text-fg transition-colors hover:border-fg;
+  }
+
+  .btn-primary {
+    @apply border-accent bg-accent text-bg hover:border-fg hover:bg-fg;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-sm border border-rule px-1.5 py-0.5 font-mono text-2xs text-muted;
+  }
+
+  /* Long-form content (project write-ups, updates, about). */
+  .prose {
+    @apply max-w-text text-[1.0625rem] leading-[1.7] text-fg-soft;
+  }
+  .prose > * + * {
+    margin-top: 1.1em;
+  }
+  .prose h2 {
+    @apply mt-14 mb-4 flex items-baseline gap-3 border-t border-rule pt-6 text-xl text-fg;
+  }
+  .prose h3 {
+    @apply mt-8 text-lg text-fg;
+  }
+  .prose a {
+    @apply link;
+  }
+  .prose strong {
+    @apply font-semibold text-fg;
+  }
+  .prose ul {
+    @apply list-none pl-0;
+  }
+  .prose ul > li {
+    @apply relative pl-5;
+  }
+  .prose ul > li::before {
+    content: '';
+    @apply absolute top-[0.8em] left-0 h-px w-2.5 bg-muted;
+  }
+  .prose ol {
+    @apply list-decimal pl-5 marker:font-mono marker:text-sm marker:text-muted;
+  }
+  .prose li + li {
+    margin-top: 0.4em;
+  }
+  .prose code:not(pre code) {
+    @apply rounded-sm bg-accent-soft px-1 py-0.5 font-mono text-[0.85em] text-fg;
+  }
+  .prose pre {
+    @apply overflow-x-auto rounded-sm border border-rule p-4 font-mono text-sm leading-relaxed;
+  }
+  .prose blockquote {
+    @apply border-l-2 border-accent pl-4 text-fg italic;
+  }
+  .prose table {
+    @apply w-full border-collapse font-mono text-sm;
+  }
+  .prose th {
+    @apply border-b border-rule-strong py-2 pr-4 text-left label;
+  }
+  .prose td {
+    @apply border-b border-rule py-2 pr-4 align-top;
+  }
+  .prose figure {
+    @apply my-8;
+  }
+  .prose figcaption {
+    @apply mt-2 font-mono text-xs text-muted;
+  }
+}
+
+/* Shiki dual themes: switch code colours with the site theme. */
+:root[data-theme='dark'] .astro-code,
+:root[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+/* ==========================================================================
+   Page transitions — native cross-document View Transitions (no JS).
+   Browsers without support simply navigate normally.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 160ms;
+    animation-timing-function: ease-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Print (A4). The CV page is designed to print cleanly; other pages degrade sensibly.
+   ========================================================================== */
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 16mm;
+  }
+  :root,
+  :root[data-theme='dark'] {
+    color-scheme: light;
+    --c-bg: #fff;
+    --c-surface: #fff;
+    --c-fg: #000;
+    --c-fg-soft: #1a1a1a;
+    --c-muted: #555;
+    --c-rule: #ccc;
+    --c-rule-strong: #999;
+    --c-accent: #1d55c4;
+    --c-accent-soft: #fff;
+    --c-grid: transparent;
+  }
+  html {
+    font-size: 10pt;
+  }
+  .no-print {
+    display: none !important;
+  }
+  a {
+    text-decoration: none !important;
+  }
+  .print-break-avoid {
+    break-inside: avoid;
+  }
+}

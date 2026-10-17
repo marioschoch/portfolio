@@ -1,0 +1,203 @@
+---
+/**
+ * Command palette (Ctrl/Cmd + K, or the search button in the header).
+ * The index (pages + projects of the current language) is embedded as a small JSON blob,
+ * so no extra request is needed. Built on the native <dialog> element for focus trapping,
+ * Esc handling and accessibility.
+ */
+import { getProjects } from '@/lib/content';
+import { localizePath, useTranslations, type Lang, type UiKey } from '@/i18n/utils';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const pages: { key: UiKey; path: string }[] = [
+  { key: 'nav.home', path: '/' },
+  { key: 'nav.projects', path: '/projects/' },
+  { key: 'nav.updates', path: '/updates/' },
+  { key: 'nav.cv', path: '/cv/' },
+  { key: 'nav.about', path: '/about/' },
+  { key: 'nav.contact', path: '/contact/' },
+];
+const projects = await getProjects(lang);
+
+const items = [
+  ...pages.map((p) => ({
+    group: t('palette.pages'),
+    title: t(p.key),
+    hint: localizePath(p.path, lang),
+    href: localizePath(p.path, lang),
+    keywords: '',
+  })),
+  ...projects.map((p) => ({
+    group: t('palette.projects'),
+    title: p.title,
+    hint: p.entry.data.tags.join(' · '),
+    href: localizePath(`/projects/${p.id}/`, lang),
+    keywords: [...p.entry.data.tools, ...p.entry.data.tags, p.summary].join(' '),
+  })),
+];
+---
+
+<dialog
+  id="command-palette"
+  aria-label={t('palette.title')}
+  class="no-print m-0 mx-auto mt-[12vh] w-[calc(100%-2rem)] max-w-xl rounded-sm border border-rule-strong bg-surface p-0 text-fg shadow-2xl backdrop:bg-black/40 backdrop:backdrop-blur-[2px]"
+>
+  <div class="flex items-center gap-3 border-b border-rule px-4">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" class="text-muted">
+      <circle cx="7" cy="7" r="4.75" stroke="currentColor" stroke-width="1.5"></circle>
+      <path d="m10.5 10.5 3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+      ></path>
+    </svg>
+    <input
+      type="text"
+      role="combobox"
+      aria-expanded="true"
+      aria-controls="palette-results"
+      aria-autocomplete="list"
+      aria-label={t('palette.title')}
+      placeholder={t('palette.placeholder')}
+      autocomplete="off"
+      spellcheck="false"
+      class="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted"
+    />
+    <kbd class="label shrink-0">Esc</kbd>
+  </div>
+  <ul id="palette-results" role="listbox" class="max-h-[50vh] overflow-y-auto py-2"></ul>
+  <p class="hidden px-4 py-6 text-center text-sm text-muted" data-empty>{t('palette.empty')}</p>
+  <p class="border-t border-rule px-4 py-2 font-mono text-2xs text-muted">{t('palette.hint')}</p>
+  <script type="application/json" data-palette-items set:html={JSON.stringify(items)} />
+</dialog>
+
+<script>
+  interface Item {
+    group: string;
+    title: string;
+    hint: string;
+    href: string;
+    keywords: string;
+  }
+
+  const dialog = document.getElementById('command-palette') as HTMLDialogElement | null;
+  if (dialog) {
+    const input = dialog.querySelector('input')!;
+    const list = dialog.querySelector('ul')!;
+    const empty = dialog.querySelector<HTMLElement>('[data-empty]')!;
+    const items: Item[] = JSON.parse(
+      dialog.querySelector('[data-palette-items]')?.textContent ?? '[]',
+    );
+    let results: Item[] = items;
+    let active = 0;
+
+    /** Simple scoring: prefix match on title > substring in title > substring in keywords. */
+    const search = (query: string): Item[] => {
+      const q = query.trim().toLowerCase();
+      if (!q) return items;
+      return items
+        .map((item) => {
+          const title = item.title.toLowerCase();
+          const score = title.startsWith(q)
+            ? 3
+            : title.includes(q)
+              ? 2
+              : item.keywords.toLowerCase().includes(q)
+                ? 1
+                : 0;
+          return { item, score };
+        })
+        .filter((r) => r.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map((r) => r.item);
+    };
+
+    const render = () => {
+      list.replaceChildren();
+      let lastGroup = '';
+      results.forEach((item, i) => {
+        if (item.group !== lastGroup) {
+          lastGroup = item.group;
+          const heading = document.createElement('li');
+          heading.className = 'label px-4 pt-3 pb-1';
+          heading.setAttribute('role', 'presentation');
+          heading.textContent = item.group;
+          list.append(heading);
+        }
+        const li = document.createElement('li');
+        li.id = `palette-item-${i}`;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', String(i === active));
+        li.className =
+          'mx-2 flex cursor-pointer items-baseline justify-between gap-4 rounded-sm px-2 py-2 text-sm aria-selected:bg-accent-soft aria-selected:text-fg';
+        const title = document.createElement('span');
+        title.textContent = item.title;
+        const hint = document.createElement('span');
+        hint.className = 'truncate font-mono text-2xs text-muted';
+        hint.textContent = item.hint;
+        li.append(title, hint);
+        li.addEventListener('mousemove', () => {
+          if (active !== i) {
+            active = i;
+            render();
+          }
+        });
+        li.addEventListener('click', () => go(item));
+        list.append(li);
+      });
+      empty.classList.toggle('hidden', results.length > 0);
+      input.setAttribute('aria-activedescendant', results.length ? `palette-item-${active}` : '');
+      document.getElementById(`palette-item-${active}`)?.scrollIntoView({ block: 'nearest' });
+    };
+
+    const go = (item: Item) => {
+      dialog.close();
+      window.location.href = item.href;
+    };
+
+    const open = () => {
+      input.value = '';
+      results = items;
+      active = 0;
+      render();
+      dialog.showModal();
+      input.focus();
+    };
+
+    input.addEventListener('input', () => {
+      results = search(input.value);
+      active = 0;
+      render();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!results.length) return;
+        active = (active + (e.key === 'ArrowDown' ? 1 : -1) + results.length) % results.length;
+        render();
+      } else if (e.key === 'Enter' && results[active]) {
+        e.preventDefault();
+        go(results[active]);
+      }
+    });
+
+    // Close when clicking the backdrop.
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (dialog.open) dialog.close();
+        else open();
+      }
+    });
+    for (const btn of document.querySelectorAll('[data-palette-open]')) {
+      btn.addEventListener('click', open);
+    }
+  }
+</script>

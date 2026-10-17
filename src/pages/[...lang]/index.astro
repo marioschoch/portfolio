@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { langPaths, type Lang } from '@/i18n/utils';
+import { site } from '@/data/site';
+
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+---
+
+<BaseLayout lang={lang} title="Home" description={site.tagline[lang]}>
+  <div class="container-page py-16"><h1 class="text-3xl">{site.name}</h1></div>
+</BaseLayout>

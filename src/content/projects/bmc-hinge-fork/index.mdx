@@ -1,0 +1,55 @@
+---
+# TODO: verify every value in this file — it is a realistic draft, not your real data.
+title: Design Analysis of the BMC Hinge Fork
+summary: >-
+  Engineering analysis of BMC's "Hinge Fork" bicycle fork: load cases, a simplified FE model of the
+  hinge region, and an assessment of how the design trades stiffness, compliance and weight.
+role: Analysis & report author # TODO
+timeframe:
+  start: 2024-10-01 # TODO
+  end: 2024-12-20 # TODO
+teamSize: 2 # TODO
+tools: [SolidWorks, ANSYS Mechanical, MATLAB, LaTeX] # TODO
+tags: [analysis, cad, bikes]
+status: completed
+featured: true
+order: 2
+links: {} # TODO: add `report: /files/hinge-fork-report.pdf` once the PDF is in public/files/
+keyFigures: # TODO: replace with your actual results
+  - value: '3'
+    label: Standardised load cases (ISO 4210)
+  - value: '18'
+    unit: '%'
+    label: Higher fore-aft compliance vs. rigid reference
+  - value: '1.9'
+    label: Minimum safety factor (fatigue)
+---
+
+{/* TODO: Placeholder text — replace with the content of your actual analysis. */}
+
+## Problem
+
+Road and gravel forks have to be laterally stiff for precise steering, yet compliant in the
+fore-aft direction to absorb road vibration. BMC's Hinge Fork addresses this with a deliberate
+flex zone near the dropouts. The goal of this project was to understand *how* that design works
+and to quantify its trade-offs.
+
+## Approach
+
+- **Reverse-engineered geometry** from product photos, published dimensions and measurements,
+  modelled parametrically in SolidWorks.
+- **Load cases** derived from ISO 4210 (frontal impact, braking, fatigue under alternating
+  fore-aft load).
+- **FE model** of the fork in ANSYS with a simplified layup represented as orthotropic shell
+  properties; mesh convergence checked in the hinge region.
+- **Comparison** against a rigid reference fork of equal mass to isolate the effect of the hinge.
+
+## Result
+
+The hinge geometry increases fore-aft compliance by roughly **18 %** while lateral stiffness drops
+by less than **5 %** — a favourable trade-off for comfort without vague steering. The lowest fatigue
+safety factor (**1.9**) occurs at the transition between hinge and dropout, which matches where the
+manufacturer appears to have added material.
+
+**Limitations:** the composite layup is unknown, so absolute values are estimates; the relative
+comparison is the meaningful result.

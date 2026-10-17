@@ -1,0 +1,51 @@
+---
+# TODO: verify every value in this file — it is a realistic draft, not your real data.
+title: VELOVE Website Rebuild
+summary: >-
+  Rebuild of the website for VELOVE Uni ZH, a student non-profit offering free bike repairs:
+  a fast Next.js site that volunteers can update without touching code.
+role: Board member · lead developer # TODO
+timeframe:
+  start: 2025-09-01 # TODO
+teamSize: 1 # TODO
+tools: [Next.js, TypeScript, Tailwind CSS, Vercel] # TODO
+tags: [web, bikes]
+status: in-progress
+featured: true
+order: 3
+links:
+  website: https://example.org # TODO: VELOVE website URL
+  github: https://github.com/marioschoch # TODO: repository URL (if public)
+keyFigures: # TODO: replace with real numbers
+  - value: '98'
+    label: Lighthouse performance score (mobile)
+  - value: '< 1'
+    unit: s
+    label: Largest Contentful Paint
+  - value: '0'
+    unit: CHF
+    label: Monthly hosting cost
+---
+
+{/* TODO: Placeholder text — rewrite with the real story of the project. */}
+
+## Problem
+
+VELOVE Uni ZH runs free repair sessions for students. The old website was hard to update, slow on
+phones and did not make the most important information — *when and where is the next repair
+session?* — easy to find. Volunteers change every semester, so the site has to be maintainable by
+people who are not developers.
+
+## Approach
+
+- **Content first:** interviewed volunteers and visitors, then restructured the site around three
+  tasks: find the next session, learn what can be repaired, get involved.
+- **Next.js with static generation** for speed and zero-cost hosting; session dates come from a
+  single data file that volunteers can edit through GitHub's web editor.
+- **Accessible, mobile-first design** with large tap targets, high contrast and bilingual content.
+
+## Result
+
+The new site is in progress. {/* TODO */} The first version loads in under a second on mobile and
+costs nothing to host. Next steps: a simple booking flow and an editing guide for future
+volunteers.
