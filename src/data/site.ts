@@ -10,8 +10,8 @@ export const site = {
   url: 'https://marioschoch.ch',
   // One-line positioning, shown under the name on the home page and used as default meta description.
   tagline: {
-    en: 'Mechanical engineering student at ETH Zürich, working on mechatronics, embedded systems and mechanical design.',
-    de: 'Maschinenbaustudent an der ETH Zürich mit Fokus auf Mechatronik, Embedded Systems und Konstruktion.',
+    en: 'Mechanical engineering student at ETH Zürich.',
+    de: 'Maschinenbaustudent an der ETH Zürich.',
   },
   status: {
     en: 'BSc Mechanical Engineering @ ETH Zürich',
