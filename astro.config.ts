@@ -55,5 +55,7 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    // <model-viewer> (~1 MB incl. three.js) is a lazily imported chunk, loaded only on demand.
+    build: { chunkSizeWarningLimit: 1200 },
   },
 });

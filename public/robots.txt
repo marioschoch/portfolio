@@ -1,0 +1,5 @@
+# TODO: update the domain once it is final.
+User-agent: *
+Allow: /
+
+Sitemap: https://marioschoch.ch/sitemap-index.xml

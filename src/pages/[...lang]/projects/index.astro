@@ -1,0 +1,121 @@
+---
+/**
+ * Projects index: grid of cards with filters by tag and status.
+ * Without JavaScript every project is shown; with JS the filters work instantly and are
+ * reflected in the URL (?tag=embedded&status=completed) so filtered views can be shared.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/PageHeader.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import { getProjects } from '@/lib/content';
+import { projectStatuses, projectTags } from '@/content.config';
+import { langPaths, useTranslations, type Lang } from '@/i18n/utils';
+
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useTranslations(lang);
+const projects = await getProjects(lang);
+
+// Only offer tags that are actually used, in the canonical order of the schema.
+const usedTags = projectTags.filter((tag) => projects.some((p) => p.entry.data.tags.includes(tag)));
+---
+
+<BaseLayout lang={lang} title={t('projects.title')} description={t('projects.intro')}>
+  <PageHeader
+    label={`${String(projects.length).padStart(2, '0')} / ${t('projects.title')}`}
+    title={t('projects.title')}
+    intro={t('projects.intro')}
+  />
+
+  <div class="container-page py-10">
+    <div class="no-print mb-10 hidden flex-col gap-4 border-b border-rule pb-6 sm:flex-row sm:items-center sm:gap-10" data-filters>
+      <fieldset class="flex flex-wrap items-center gap-2">
+        <legend class="label mb-2 w-full sm:float-left sm:mr-2 sm:mb-0 sm:w-auto">{t('projects.filter.tag')}</legend>
+        <button type="button" class="filter-btn" data-filter="tag" data-value="" aria-pressed="true">
+          {t('projects.filter.all')}
+        </button>
+        {
+          usedTags.map((tag) => (
+            <button type="button" class="filter-btn" data-filter="tag" data-value={tag} aria-pressed="false">
+              {tag}
+            </button>
+          ))
+        }
+      </fieldset>
+      <fieldset class="flex flex-wrap items-center gap-2">
+        <legend class="label mb-2 w-full sm:float-left sm:mr-2 sm:mb-0 sm:w-auto">{t('projects.filter.status')}</legend>
+        <button type="button" class="filter-btn" data-filter="status" data-value="" aria-pressed="true">
+          {t('projects.filter.all')}
+        </button>
+        {
+          projectStatuses.map((status) => (
+            <button type="button" class="filter-btn" data-filter="status" data-value={status} aria-pressed="false">
+              {t(`status.${status}`)}
+            </button>
+          ))
+        }
+      </fieldset>
+      <p class="label sm:ml-auto" aria-live="polite" data-count></p>
+    </div>
+
+    <div class="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+      {projects.map((project, i) => <ProjectCard project={project} lang={lang} index={i} eager={i === 0} />)}
+    </div>
+    <p class="hidden py-16 text-center text-muted" data-empty>{t('projects.none')}</p>
+  </div>
+</BaseLayout>
+
+<style>
+  @reference '../../../styles/global.css';
+  .filter-btn {
+    @apply rounded-sm border border-rule px-2.5 py-1 font-mono text-xs text-fg-soft transition-colors hover:border-rule-strong hover:text-fg;
+  }
+  .filter-btn[aria-pressed='true'] {
+    @apply border-fg bg-fg text-bg;
+  }
+</style>
+
+<script>
+  const filters = document.querySelector<HTMLElement>('[data-filters]');
+  if (filters) {
+    filters.classList.remove('hidden');
+    filters.classList.add('flex');
+    const cards = [...document.querySelectorAll<HTMLElement>('[data-project-card]')];
+    const count = filters.querySelector<HTMLElement>('[data-count]')!;
+    const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+    const params = new URLSearchParams(location.search);
+    const state = { tag: params.get('tag') ?? '', status: params.get('status') ?? '' };
+    const shownLabel = document.documentElement.lang.startsWith('de') ? 'angezeigt' : 'shown';
+
+    const apply = () => {
+      let visible = 0;
+      for (const card of cards) {
+        const match =
+          (!state.tag || (card.dataset.tags ?? '').split(' ').includes(state.tag)) &&
+          (!state.status || card.dataset.status === state.status);
+        card.hidden = !match;
+        if (match) visible++;
+      }
+      for (const btn of filters.querySelectorAll<HTMLButtonElement>('[data-filter]')) {
+        const key = btn.dataset.filter as 'tag' | 'status';
+        btn.setAttribute('aria-pressed', String(state[key] === btn.dataset.value));
+      }
+      count.textContent = `${visible} / ${cards.length} ${shownLabel}`;
+      empty.classList.toggle('hidden', visible > 0);
+      const url = new URL(location.href);
+      for (const key of ['tag', 'status'] as const) {
+        if (state[key]) url.searchParams.set(key, state[key]);
+        else url.searchParams.delete(key);
+      }
+      history.replaceState(null, '', url);
+    };
+
+    filters.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-filter]');
+      if (!btn) return;
+      state[btn.dataset.filter as 'tag' | 'status'] = btn.dataset.value ?? '';
+      apply();
+    });
+    apply();
+  }
+</script>

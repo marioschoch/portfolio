@@ -1,0 +1,49 @@
+---
+/** Contact: obfuscated e-mail, LinkedIn, GitHub. No form (no backend needed). */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/PageHeader.astro';
+import ObfuscatedEmail from '@/components/ObfuscatedEmail.astro';
+import { site } from '@/data/site';
+import { langPaths, useTranslations, type Lang } from '@/i18n/utils';
+
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useTranslations(lang);
+
+const rows = [
+  { label: t('contact.linkedin'), href: site.links.linkedin, text: 'linkedin.com/in/mario-schoch' },
+  { label: t('contact.github'), href: site.links.github, text: 'github.com/marioschoch' },
+];
+---
+
+<BaseLayout lang={lang} title={t('contact.title')} description={t('contact.intro')}>
+  <PageHeader label={t('contact.title')} title={t('contact.title')} intro={t('contact.intro')} />
+
+  <div class="container-page py-12">
+    <dl class="max-w-2xl border-t border-rule">
+      <div class="grid gap-1 border-b border-rule py-5 sm:grid-cols-[10rem_1fr] sm:items-baseline">
+        <dt class="label">{t('contact.email')}</dt>
+        <dd class="text-lg">
+          <ObfuscatedEmail class="link" />
+          <noscript><p class="text-sm text-muted">{t('contact.emailFallback')}</p></noscript>
+        </dd>
+      </div>
+      {
+        rows.map((r) => (
+          <div class="grid gap-1 border-b border-rule py-5 sm:grid-cols-[10rem_1fr] sm:items-baseline">
+            <dt class="label">{r.label}</dt>
+            <dd class="text-lg">
+              <a href={r.href} class="link" rel="me noopener">
+                {r.text}
+              </a>
+            </dd>
+          </div>
+        ))
+      }
+      <div class="grid gap-1 border-b border-rule py-5 sm:grid-cols-[10rem_1fr] sm:items-baseline">
+        <dt class="label">{t('contact.location')}</dt>
+        <dd class="text-lg">{site.location}</dd>
+      </div>
+    </dl>
+  </div>
+</BaseLayout>

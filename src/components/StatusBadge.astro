@@ -1,0 +1,21 @@
+---
+/** "In progress" / "Completed" badge with a small status dot. */
+import { useTranslations, type Lang } from '@/i18n/utils';
+
+interface Props {
+  status: 'in-progress' | 'completed';
+  lang: Lang;
+}
+const { status, lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<span class="label inline-flex items-center gap-1.5 text-fg-soft">
+  <span
+    class:list={[
+      'size-1.5 rounded-full',
+      status === 'in-progress' ? 'bg-accent' : 'border border-muted',
+    ]}
+    aria-hidden="true"></span>
+  {t(`status.${status}`)}
+</span>

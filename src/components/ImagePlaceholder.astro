@@ -1,0 +1,48 @@
+---
+/**
+ * Technical-drawing style placeholder for projects without photos yet.
+ * Deliberately looks like a pending figure, not like a stock image.
+ */
+interface Props {
+  label: string;
+  /** Figure reference, e.g. "Fig. 01". */
+  figure?: string;
+  class?: string;
+}
+const { label, figure, class: className } = Astro.props;
+---
+
+<div
+  class:list={['relative aspect-[16/10] overflow-hidden border border-rule bg-surface', className]}
+  role="img"
+  aria-label={label}
+>
+  <div class="bg-grid absolute inset-0 [mask-image:none]" aria-hidden="true"></div>
+  <svg
+    class="absolute inset-0 size-full text-rule-strong"
+    viewBox="0 0 160 100"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <line
+      x1="0"
+      y1="0"
+      x2="160"
+      y2="100"
+      stroke="currentColor"
+      stroke-width="0.5"
+      vector-effect="non-scaling-stroke"></line>
+    <line
+      x1="160"
+      y1="0"
+      x2="0"
+      y2="100"
+      stroke="currentColor"
+      stroke-width="0.5"
+      vector-effect="non-scaling-stroke"></line>
+  </svg>
+  <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 border-t border-rule bg-surface/90 px-3 py-1.5">
+    <span class="label">{label}</span>
+    {figure && <span class="label">{figure}</span>}
+  </div>
+</div>

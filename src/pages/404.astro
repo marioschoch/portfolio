@@ -1,0 +1,28 @@
+---
+/**
+ * Custom 404. Cloudflare serves dist/404.html for unknown paths with a real 404 status
+ * (`not_found_handling: "404-page"` in wrangler.jsonc). Shown in English with a German line.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { useTranslations } from '@/i18n/utils';
+
+const t = useTranslations('en');
+const de = useTranslations('de');
+---
+
+<BaseLayout lang="en" title={t('notFound.title')} description={t('notFound.text')} noindex>
+  <section class="relative">
+    <div class="bg-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
+    <div class="relative container-page py-24 sm:py-32">
+      <p class="label mb-4">Error 404</p>
+      <h1 class="text-4xl sm:text-5xl">{t('notFound.title')}</h1>
+      <p class="mt-4 max-w-text text-lg text-fg-soft">{t('notFound.text')}</p>
+      <p class="mt-1 max-w-text text-fg-soft" lang="de-CH">{de('notFound.text')}</p>
+      <div class="mt-8 flex flex-wrap gap-2">
+        <a href="/" class="btn btn-primary">{t('notFound.back')}</a>
+        <a href="/de/" class="btn" lang="de-CH">{de('notFound.back')}</a>
+        <button type="button" class="btn" data-palette-open>⌘K · {t('palette.open')}</button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

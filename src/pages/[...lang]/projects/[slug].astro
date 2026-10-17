@@ -1,0 +1,144 @@
+---
+/**
+ * Project detail page: spec sheet, key figures, write-up (problem → approach → result),
+ * gallery, optional 3D model and the project log.
+ * German pages use de.mdx when present, otherwise the English text with a notice.
+ */
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SpecSheet from '@/components/SpecSheet.astro';
+import KeyFigures from '@/components/KeyFigures.astro';
+import Gallery from '@/components/Gallery.astro';
+import ModelViewer from '@/components/ModelViewer.astro';
+import Timeline from '@/components/Timeline.astro';
+import ImagePlaceholder from '@/components/ImagePlaceholder.astro';
+import { getCollection } from 'astro:content';
+import { getProjectUpdates, localizeProject } from '@/lib/content';
+import { site } from '@/data/site';
+import {
+  formatDate,
+  isoDate,
+  langs,
+  localizePath,
+  useTranslations,
+  type Lang,
+} from '@/i18n/utils';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('projects');
+  return entries.flatMap((entry) =>
+    langs.map((lang) => ({
+      params: { lang: lang === 'en' ? undefined : lang, slug: entry.id },
+      props: { lang, entry },
+    })),
+  );
+}
+
+const { lang, entry } = Astro.props as {
+  lang: Lang;
+  entry: Awaited<ReturnType<typeof getCollection<'projects'>>>[number];
+};
+const t = useTranslations(lang);
+const project = await localizeProject(entry, lang);
+const { data } = entry;
+const { Content } = await render(project.translation ?? entry);
+const updates = await getProjectUpdates(entry.id);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: project.title,
+  description: project.summary,
+  url: new URL(localizePath(`/projects/${entry.id}/`, lang), site.url).href,
+  dateCreated: isoDate(data.timeframe.start),
+  dateModified: isoDate(project.lastUpdated),
+  keywords: [...data.tags, ...data.tools].join(', '),
+  author: { '@type': 'Person', name: site.name, url: site.url },
+};
+---
+
+<BaseLayout
+  lang={lang}
+  title={project.title}
+  description={project.summary}
+  image={`/og/projects/${entry.id}.png`}
+  type="article"
+  translated={project.translated}
+  publishedTime={data.timeframe.start}
+  modifiedTime={project.lastUpdated}
+  jsonLd={jsonLd}
+>
+  <article>
+    <header class="relative border-b border-rule">
+      <div class="bg-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
+      <div class="relative container-page pt-10 pb-10 sm:pt-14">
+        <nav aria-label="Breadcrumb" class="label mb-8">
+          <a href={localizePath('/projects/', lang)} class="hover:text-fg">← {t('project.back')}</a>
+        </nav>
+        <ul class="mb-4 flex flex-wrap gap-x-3 gap-y-1" aria-label="Tags">
+          {data.tags.map((tag) => <li class="label text-accent">#{tag}</li>)}
+        </ul>
+        <h1 class="max-w-3xl text-3xl leading-tight sm:text-[2.75rem]">{project.title}</h1>
+        <p class="mt-5 max-w-text text-lg leading-relaxed text-fg-soft">{project.summary}</p>
+        <p class="mt-6 flex flex-wrap gap-x-5 gap-y-1 font-mono text-2xs text-muted">
+          <span>{project.minutesRead} {t('project.readingTime')}</span>
+          <span>
+            {t('project.lastUpdated')}
+            <time datetime={isoDate(project.lastUpdated)}>{formatDate(project.lastUpdated, lang)}</time>
+          </span>
+        </p>
+      </div>
+    </header>
+
+    <div class="container-page space-y-14 py-10">
+      <SpecSheet project={project} lang={lang} />
+
+      {
+        data.cover ? (
+          <Image
+            src={data.cover.src}
+            alt={data.cover.alt}
+            widths={[640, 960, 1280, 1920]}
+            sizes="(min-width: 1152px) 72rem, 100vw"
+            class="w-full border border-rule"
+            loading="eager"
+            fetchpriority="high"
+          />
+        ) : (
+          <ImagePlaceholder
+            label={t('project.imagePending')}
+            figure={`${t('project.figure')} 01`}
+            class="aspect-[21/9]!"
+          />
+        )
+      }
+
+      <KeyFigures figures={project.keyFigures} lang={lang} />
+
+      <div class="grid gap-14 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16">
+        <div class="prose min-w-0 [&>h2:first-child]:mt-0">
+          <Content />
+        </div>
+
+        <aside class="lg:sticky lg:top-24 lg:self-start" aria-labelledby="log-heading">
+          <h2 id="log-heading" class="label mb-5 flex items-center justify-between">
+            {t('project.log')}
+            <span>{String(updates.length).padStart(2, '0')}</span>
+          </h2>
+          {
+            updates.length ? (
+              <Timeline updates={updates} lang={lang} />
+            ) : (
+              <p class="text-sm text-muted">{t('project.logEmpty')}</p>
+            )
+          }
+        </aside>
+      </div>
+
+      <Gallery images={data.gallery} lang={lang} />
+
+      {data.model && <ModelViewer {...data.model} lang={lang} />}
+    </div>
+  </article>
+</BaseLayout>

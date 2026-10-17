@@ -1,0 +1,64 @@
+---
+/** Project card for grids (home + projects index). Data attributes drive client-side filtering. */
+import { Image } from 'astro:assets';
+import type { LocalizedProject } from '@/lib/content';
+import { formatMonth, localizePath, useTranslations, type Lang } from '@/i18n/utils';
+import ImagePlaceholder from './ImagePlaceholder.astro';
+import StatusBadge from './StatusBadge.astro';
+
+interface Props {
+  project: LocalizedProject;
+  lang: Lang;
+  index: number;
+  headingLevel?: 'h2' | 'h3';
+  /** Eager-load the cover (first card above the fold). */
+  eager?: boolean;
+}
+const { project, lang, index, headingLevel: Heading = 'h2', eager = false } = Astro.props;
+const t = useTranslations(lang);
+const { data } = project.entry;
+const figNo = String(index + 1).padStart(2, '0');
+---
+
+<article
+  class="group relative flex flex-col"
+  data-project-card
+  data-tags={data.tags.join(' ')}
+  data-status={data.status}
+>
+  {
+    data.cover ? (
+      <Image
+        src={data.cover.src}
+        alt={data.cover.alt}
+        widths={[400, 640, 960]}
+        sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 100vw"
+        class="aspect-[16/10] w-full border border-rule object-cover"
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : 'auto'}
+      />
+    ) : (
+      <ImagePlaceholder label={t('project.imagePending')} figure={`${t('project.figure')} ${figNo}`} />
+    )
+  }
+  <div class="mt-4 flex items-center justify-between gap-3">
+    <span class="label">
+      {formatMonth(data.timeframe.start, lang)} – {
+        data.timeframe.end ? formatMonth(data.timeframe.end, lang) : t('spec.present')
+      }
+    </span>
+    <StatusBadge status={data.status} lang={lang} />
+  </div>
+  <Heading class="mt-2 text-lg leading-snug">
+    <a
+      href={localizePath(`/projects/${project.id}/`, lang)}
+      class="decoration-accent decoration-1 underline-offset-4 after:absolute after:inset-0 group-hover:underline"
+    >
+      {project.title}
+    </a>
+  </Heading>
+  <p class="mt-2 text-sm leading-relaxed text-fg-soft">{project.summary}</p>
+  <ul class="mt-4 flex flex-wrap gap-1.5" aria-label={t('spec.tools')}>
+    {data.tools.slice(0, 5).map((tool) => <li class="chip">{tool}</li>)}
+  </ul>
+</article>
