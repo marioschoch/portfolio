@@ -58,17 +58,17 @@ export const cv: Cv = {
       ],
     },
     {
-      title: { en: 'Matura (Swiss baccalaureate)', de: 'Matura' }, // TODO
-      org: 'TODO: Gymnasium name',
-      location: 'TODO',
+      title: { en: 'Matura (Swiss baccalaureate)', de: 'Matura' },
+      org: 'Gymnasium Biel-Seeland',
+      location: 'Biel/Bienne',
       start: '2019-08', // TODO
       end: '2023-06', // TODO
       details: [
         {
-          en: 'Major: Physics and Applied Mathematics',
-          de: 'Schwerpunkt: Physik und Anwendungen der Mathematik',
+          en: 'Major: Italian',
+          de: 'Schwerpunktfach: Italienisch',
         },
-      ], // TODO
+      ],
     },
   ],
 
@@ -114,7 +114,7 @@ export const cv: Cv = {
       title: { en: 'Board member', de: 'Vorstandsmitglied' },
       org: 'VELOVE Uni ZH',
       location: 'Zürich',
-      start: '2024-09', // TODO
+      start: '2025-09', // TODO: month
       details: [
         {
           en: 'Non-profit offering free bike repairs to students: organising repair sessions, mentoring volunteers and rebuilding the website.',
