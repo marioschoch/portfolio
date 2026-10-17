@@ -63,7 +63,12 @@ export const cv: Cv = {
       location: 'TODO',
       start: '2019-08', // TODO
       end: '2023-06', // TODO
-      details: [{ en: 'Major: Physics and Applied Mathematics', de: 'Schwerpunkt: Physik und Anwendungen der Mathematik' }], // TODO
+      details: [
+        {
+          en: 'Major: Physics and Applied Mathematics',
+          de: 'Schwerpunkt: Physik und Anwendungen der Mathematik',
+        },
+      ], // TODO
     },
   ],
 
@@ -75,7 +80,9 @@ export const cv: Cv = {
       location: 'TODO',
       start: '2024-07',
       end: '2024-08',
-      details: [{ en: 'TODO: What you did and what came out of it.', de: 'TODO: Tätigkeit und Ergebnis.' }],
+      details: [
+        { en: 'TODO: What you did and what came out of it.', de: 'TODO: Tätigkeit und Ergebnis.' },
+      ],
     },
   ],
 
@@ -83,7 +90,10 @@ export const cv: Cv = {
 
   skills: [
     { category: 'CAD / CAE', items: ['SolidWorks', 'ANSYS Mechanical', 'Siemens NX'] }, // TODO
-    { category: { en: 'Programming', de: 'Programmierung' }, items: ['C++', 'Python', 'MATLAB', 'TypeScript'] }, // TODO
+    {
+      category: { en: 'Programming', de: 'Programmierung' },
+      items: ['C++', 'Python', 'MATLAB', 'TypeScript'],
+    }, // TODO
     { category: 'Embedded', items: ['Arduino', 'KiCad', 'Sensors & actuators', 'PID control'] }, // TODO
     { category: 'Web', items: ['Next.js', 'Astro', 'Tailwind CSS'] },
     { category: { en: 'Workshop', de: 'Werkstatt' }, items: ['3D printing', 'Bicycle mechanics'] }, // TODO

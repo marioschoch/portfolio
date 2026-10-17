@@ -17,11 +17,19 @@ const de = useTranslations('de');
       <p class="label mb-4">Error 404</p>
       <h1 class="text-4xl sm:text-5xl">{t('notFound.title')}</h1>
       <p class="mt-4 max-w-text text-lg text-fg-soft">{t('notFound.text')}</p>
-      <p class="mt-1 max-w-text text-fg-soft" lang="de-CH">{de('notFound.text')}</p>
+      <p class="mt-1 max-w-text text-fg-soft" lang="de-CH">
+        {de('notFound.text')}
+      </p>
       <div class="mt-8 flex flex-wrap gap-2">
-        <a href="/" class="btn btn-primary">{t('notFound.back')}</a>
-        <a href="/de/" class="btn" lang="de-CH">{de('notFound.back')}</a>
-        <button type="button" class="btn" data-palette-open>⌘K · {t('palette.open')}</button>
+        <a href="/" class="btn btn-primary">
+          {t('notFound.back')}
+        </a>
+        <a href="/de/" class="btn" lang="de-CH">
+          {de('notFound.back')}
+        </a>
+        <button type="button" class="btn" data-palette-open>
+          ⌘K · {t('palette.open')}
+        </button>
       </div>
     </div>
   </section>

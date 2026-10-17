@@ -19,15 +19,28 @@ const t = useTranslations(lang);
 const posterSrc = poster ? (await getImage({ src: poster, width: 1200, format: 'webp' })).src : '';
 ---
 
-<section aria-labelledby="model-heading" data-model-viewer data-src={src} data-alt={alt} data-poster={posterSrc}>
-  <h2 id="model-heading" class="label mb-4">{t('project.model')}</h2>
+<section
+  aria-labelledby="model-heading"
+  data-model-viewer
+  data-src={src}
+  data-alt={alt}
+  data-poster={posterSrc}
+>
+  <h2 id="model-heading" class="label mb-4">
+    {t('project.model')}
+  </h2>
   <div class="relative aspect-[16/10] overflow-hidden border border-rule bg-surface" data-stage>
     <div class="bg-grid absolute inset-0 [mask-image:none]" aria-hidden="true"></div>
     {posterSrc && <img src={posterSrc} alt="" class="absolute inset-0 size-full object-contain" />}
     <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4 text-center">
       <button type="button" class="btn btn-primary" data-load>
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M8 1.5 14 5v6l-6 3.5L2 11V5l6-3.5Zm0 0V8m0 0 6-3M8 8 2 5m6 3v6.5" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path>
+          <path
+            d="M8 1.5 14 5v6l-6 3.5L2 11V5l6-3.5Zm0 0V8m0 0 6-3M8 8 2 5m6 3v6.5"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linejoin="round"
+          ></path>
         </svg>
         {t('project.modelLoad')}
       </button>

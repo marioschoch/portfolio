@@ -84,18 +84,24 @@ const copy = {
     </aside>
 
     <div class="prose">
-      {copy.body.map((p) => <p>{p}</p>)}
+      {copy.body.map((p) => (
+        <p>{p}</p>
+      ))}
 
       <h2>{t('about.lookingFor')}</h2>
       <ul>
-        {copy.lookingFor.map((item) => <li>{item}</li>)}
+        {copy.lookingFor.map((item) => (
+          <li>{item}</li>
+        ))}
       </ul>
       <p>
         <a href={localizePath('/contact/', lang)}>{t('nav.contact')} →</a>
       </p>
 
       <h2>{t('about.beyond')}</h2>
-      {copy.beyond.map((p) => <p>{p}</p>)}
+      {copy.beyond.map((p) => (
+        <p>{p}</p>
+      ))}
     </div>
   </div>
 </BaseLayout>

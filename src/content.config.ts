@@ -12,14 +12,7 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 /** Allowed project tags — extend this list to add a new filter. */
-export const projectTags = [
-  'mechatronics',
-  'embedded',
-  'cad',
-  'analysis',
-  'web',
-  'bikes',
-] as const;
+export const projectTags = ['mechatronics', 'embedded', 'cad', 'analysis', 'web', 'bikes'] as const;
 export const projectStatuses = ['in-progress', 'completed'] as const;
 
 /** Folder name = slug, e.g. `projects/delivery-robot/index.mdx` → `delivery-robot`. */
@@ -29,7 +22,11 @@ const slugFromFolder = ({ entry }: { entry: string }) => entry.split('/')[0]!;
 const altText = z.string().min(8, 'Alt text must describe the image (min. 8 characters).');
 
 const projects = defineCollection({
-  loader: glob({ pattern: '*/index.{md,mdx}', base: './src/content/projects', generateId: slugFromFolder }),
+  loader: glob({
+    pattern: '*/index.{md,mdx}',
+    base: './src/content/projects',
+    generateId: slugFromFolder,
+  }),
   schema: ({ image }) =>
     z.object({
       title: z.string().max(80),
@@ -82,7 +79,11 @@ const projects = defineCollection({
 
 /** German translation of a project: only the texts, all specs come from the English entry. */
 const projectsDe = defineCollection({
-  loader: glob({ pattern: '*/de.{md,mdx}', base: './src/content/projects', generateId: slugFromFolder }),
+  loader: glob({
+    pattern: '*/de.{md,mdx}',
+    base: './src/content/projects',
+    generateId: slugFromFolder,
+  }),
   schema: z.object({
     title: z.string().max(80),
     summary: z.string().min(40).max(220),

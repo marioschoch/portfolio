@@ -11,24 +11,22 @@ const basePath = stripLang(Astro.url.pathname);
 ---
 
 <ul class="flex items-center font-mono text-2xs" aria-label={t('lang.label')}>
-  {
-    langs.map((l, i) => (
-      <li class="flex items-center">
-        {i > 0 && (
-          <span class="text-rule-strong" aria-hidden="true">
-            /
-          </span>
-        )}
-        <a
-          href={localizePath(basePath, l)}
-          hreflang={l}
-          lang={l}
-          aria-current={l === lang ? 'true' : undefined}
-          class="px-1.5 py-1 tracking-wider text-muted uppercase transition-colors hover:text-fg aria-[current=true]:text-fg"
-        >
-          {l}
-        </a>
-      </li>
-    ))
-  }
+  {langs.map((l, i) => (
+    <li class="flex items-center">
+      {i > 0 && (
+        <span class="text-rule-strong" aria-hidden="true">
+          /
+        </span>
+      )}
+      <a
+        href={localizePath(basePath, l)}
+        hreflang={l}
+        lang={l}
+        aria-current={l === lang ? 'true' : undefined}
+        class="px-1.5 py-1 tracking-wider text-muted uppercase transition-colors hover:text-fg aria-[current=true]:text-fg"
+      >
+        {l}
+      </a>
+    </li>
+  ))}
 </ul>

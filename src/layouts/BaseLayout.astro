@@ -31,9 +31,17 @@ const t = useTranslations(lang);
     <meta name="generator" content={Astro.generator} />
     <meta name="author" content={site.name} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" type="application/rss+xml" title={`${site.name} — Updates`} href="/rss.xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.name} — Updates`}
+      href="/rss.xml"
+    />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <Font cssVariable="--font-plex-sans" preload={[{ weight: '400', style: 'normal', subset: 'latin' }]} />
+    <Font
+      cssVariable="--font-plex-sans"
+      preload={[{ weight: '400', style: 'normal', subset: 'latin' }]}
+    />
     <Font cssVariable="--font-plex-mono" />
     <Seo {...props} />
     <slot name="head" />
@@ -42,32 +50,29 @@ const t = useTranslations(lang);
     <a
       href="#main"
       class="sr-only z-50 bg-accent px-3 py-2 font-mono text-xs text-bg focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
-      >{t('nav.skip')}</a
     >
+      {t('nav.skip')}
+    </a>
     <Header lang={lang} />
-    {
-      !translated && lang !== 'en' && (
-        <div class="no-print border-b border-rule bg-accent-soft">
-          <p class="container-page py-2 font-mono text-xs text-fg-soft" lang={locales[lang]}>
-            {t('fallback.notice')}
-          </p>
-        </div>
-      )
-    }
+    {!translated && lang !== 'en' && (
+      <div class="no-print border-b border-rule bg-accent-soft">
+        <p class="container-page py-2 font-mono text-xs text-fg-soft" lang={locales[lang]}>
+          {t('fallback.notice')}
+        </p>
+      </div>
+    )}
     <main id="main" class="flex-1" lang={translated ? undefined : locales.en}>
       <slot />
     </main>
     <Footer lang={lang} />
     <CommandPalette lang={lang} />
-    {
-      import.meta.env.PROD && site.analyticsToken && (
-        <script
-          is:inline
-          defer
-          src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon={JSON.stringify({ token: site.analyticsToken })}
-        />
-      )
-    }
+    {import.meta.env.PROD && site.analyticsToken && (
+      <script
+        is:inline
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: site.analyticsToken })}
+      />
+    )}
   </body>
 </html>

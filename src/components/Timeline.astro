@@ -15,39 +15,39 @@ interface Props {
   headingLevel?: 'h2' | 'h3';
 }
 const { updates, lang, projectTitles, headingLevel: Heading = 'h3' } = Astro.props;
-const rendered = await Promise.all(updates.map(async (u) => ({ u, Content: (await render(u)).Content })));
+const rendered = await Promise.all(
+  updates.map(async (u) => ({ u, Content: (await render(u)).Content })),
+);
 ---
 
 <ol class="relative border-l border-rule">
-  {
-    rendered.map(({ u, Content }) => (
-      <li class="relative pb-10 pl-6 last:pb-0 sm:pl-8" id={u.id}>
-        <span
-          class="absolute top-1.5 -left-[4.5px] size-2 rounded-full border border-accent bg-bg"
-          aria-hidden="true"
-        />
-        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <time class="label text-fg-soft" datetime={isoDate(u.data.date)}>
-            {formatDate(u.data.date, lang)}
-          </time>
-          {projectTitles && (
-            <a
-              href={localizePath(`/projects/${u.data.project.id}/`, lang)}
-              class="label hover:text-accent"
-            >
-              ↳ {projectTitles[u.data.project.id]}
-            </a>
-          )}
-        </div>
-        <Heading class="mt-1.5 text-base leading-snug text-fg">
-          <a href={`#${u.id}`} class="hover:underline hover:decoration-accent">
-            {u.data.title}
+  {rendered.map(({ u, Content }) => (
+    <li class="relative pb-10 pl-6 last:pb-0 sm:pl-8" id={u.id}>
+      <span
+        class="absolute top-1.5 -left-[4.5px] size-2 rounded-full border border-accent bg-bg"
+        aria-hidden="true"
+      />
+      <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <time class="label text-fg-soft" datetime={isoDate(u.data.date)}>
+          {formatDate(u.data.date, lang)}
+        </time>
+        {projectTitles && (
+          <a
+            href={localizePath(`/projects/${u.data.project.id}/`, lang)}
+            class="label hover:text-accent"
+          >
+            ↳ {projectTitles[u.data.project.id]}
           </a>
-        </Heading>
-        <div class="prose mt-2 text-[0.9375rem]">
-          <Content />
-        </div>
-      </li>
-    ))
-  }
+        )}
+      </div>
+      <Heading class="mt-1.5 text-base leading-snug text-fg">
+        <a href={`#${u.id}`} class="hover:underline hover:decoration-accent">
+          {u.data.title}
+        </a>
+      </Heading>
+      <div class="prose mt-2 text-[0.9375rem]">
+        <Content />
+      </div>
+    </li>
+  ))}
 </ol>

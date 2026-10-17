@@ -8,7 +8,14 @@ import { personJsonLd } from '@/lib/person';
 import { site } from '@/data/site';
 import { now } from '@/data/now';
 import { tx } from '@/data/cv';
-import { formatDate, isoDate, langPaths, localizePath, useTranslations, type Lang } from '@/i18n/utils';
+import {
+  formatDate,
+  isoDate,
+  langPaths,
+  localizePath,
+  useTranslations,
+  type Lang,
+} from '@/i18n/utils';
 
 export const getStaticPaths = langPaths;
 const { lang } = Astro.props as { lang: Lang };
@@ -20,7 +27,12 @@ const latest = (await getUpdates()).slice(0, 3);
 const nowDate = new Date(`${now.updated}T00:00:00Z`);
 ---
 
-<BaseLayout lang={lang} title={site.status[lang]} description={site.tagline[lang]} jsonLd={personJsonLd}>
+<BaseLayout
+  lang={lang}
+  title={site.status[lang]}
+  description={site.tagline[lang]}
+  jsonLd={personJsonLd}
+>
   <!-- Intro -->
   <section class="relative border-b border-rule">
     <div class="bg-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
@@ -31,38 +43,53 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
           {site.status[lang]}
         </p>
         <h1 class="text-4xl leading-[1.05] sm:text-6xl">{site.name}</h1>
-        <p class="mt-6 max-w-2xl text-lg leading-relaxed text-fg-soft sm:text-xl">{site.tagline[lang]}</p>
-        {
-          site.availableFrom && (
-            <p class="mt-4 font-mono text-sm text-fg">
-              → {t('home.openTo')} {site.availableFrom[lang]}
-            </p>
-          )
-        }
+        <p class="mt-6 max-w-2xl text-lg leading-relaxed text-fg-soft sm:text-xl">
+          {site.tagline[lang]}
+        </p>
+        {site.availableFrom && (
+          <p class="mt-4 font-mono text-sm text-fg">
+            → {t('home.openTo')} {site.availableFrom[lang]}
+          </p>
+        )}
         <ul class="mt-8 flex flex-wrap gap-2">
-          <li><a href={localizePath('/cv/', lang)} class="btn btn-primary">{t('nav.cv')}</a></li>
-          <li><a href={site.links.github} class="btn" rel="me noopener">GitHub ↗</a></li>
-          <li><a href={site.links.linkedin} class="btn" rel="me noopener">LinkedIn ↗</a></li>
-          <li><ObfuscatedEmail class="btn" label={t('contact.email')} /></li>
+          <li>
+            <a href={localizePath('/cv/', lang)} class="btn btn-primary">
+              {t('nav.cv')}
+            </a>
+          </li>
+          <li>
+            <a href={site.links.github} class="btn" rel="me noopener">
+              GitHub ↗
+            </a>
+          </li>
+          <li>
+            <a href={site.links.linkedin} class="btn" rel="me noopener">
+              LinkedIn ↗
+            </a>
+          </li>
+          <li>
+            <ObfuscatedEmail class="btn" label={t('contact.email')} />
+          </li>
         </ul>
       </div>
 
       <!-- Now -->
       <aside class="border border-rule bg-surface/80 p-5" aria-labelledby="now-heading">
         <div class="mb-4 flex items-baseline justify-between">
-          <h2 id="now-heading" class="label text-fg">{t('home.now')}</h2>
+          <h2 id="now-heading" class="label text-fg">
+            {t('home.now')}
+          </h2>
           <p class="label">
-            {t('home.nowUpdated')} <time datetime={isoDate(nowDate)}>{formatDate(nowDate, lang)}</time>
+            {t('home.nowUpdated')}{' '}
+            <time datetime={isoDate(nowDate)}>{formatDate(nowDate, lang)}</time>
           </p>
         </div>
         <ul class="space-y-3 text-sm leading-relaxed text-fg-soft">
-          {
-            now.items.map((item) => (
-              <li class="relative pl-4 before:absolute before:top-[0.7em] before:left-0 before:h-px before:w-2 before:bg-accent">
-                {tx(item, lang)}
-              </li>
-            ))
-          }
+          {now.items.map((item) => (
+            <li class="relative pl-4 before:absolute before:top-[0.7em] before:left-0 before:h-px before:w-2 before:bg-accent">
+              {tx(item, lang)}
+            </li>
+          ))}
         </ul>
       </aside>
     </div>
@@ -71,11 +98,17 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
   <!-- Featured projects -->
   <section class="container-page py-16" aria-labelledby="featured-heading">
     <div class="mb-8 flex items-baseline justify-between gap-4">
-      <h2 id="featured-heading" class="text-2xl">{t('home.featured')}</h2>
-      <a href={localizePath('/projects/', lang)} class="label hover:text-fg">{t('home.allProjects')} →</a>
+      <h2 id="featured-heading" class="text-2xl">
+        {t('home.featured')}
+      </h2>
+      <a href={localizePath('/projects/', lang)} class="label hover:text-fg">
+        {t('home.allProjects')} →
+      </a>
     </div>
     <div class="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-      {featured.map((p, i) => <ProjectCard project={p} lang={lang} index={i} headingLevel="h3" eager={i === 0} />)}
+      {featured.map((p, i) => (
+        <ProjectCard project={p} lang={lang} index={i} headingLevel="h3" eager={i === 0} />
+      ))}
     </div>
   </section>
 
@@ -83,31 +116,33 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
   <section class="border-t border-rule" aria-labelledby="latest-heading">
     <div class="container-page py-16">
       <div class="mb-8 flex items-baseline justify-between gap-4">
-        <h2 id="latest-heading" class="text-2xl">{t('home.latest')}</h2>
-        <a href={localizePath('/updates/', lang)} class="label hover:text-fg">{t('home.allUpdates')} →</a>
+        <h2 id="latest-heading" class="text-2xl">
+          {t('home.latest')}
+        </h2>
+        <a href={localizePath('/updates/', lang)} class="label hover:text-fg">
+          {t('home.allUpdates')} →
+        </a>
       </div>
       <ol class="divide-y divide-rule border-y border-rule">
-        {
-          latest.map((u) => (
-            <li class="group relative grid gap-1 py-5 sm:grid-cols-[9rem_14rem_minmax(0,1fr)] sm:gap-6">
-              <time class="label pt-0.5 text-fg-soft" datetime={isoDate(u.data.date)}>
-                {formatDate(u.data.date, lang)}
-              </time>
-              <p class="label pt-0.5">{projectTitles[u.data.project.id]}</p>
-              <div>
-                <h3 class="font-medium">
-                  <a
-                    href={localizePath(`/projects/${u.data.project.id}/`, lang) + `#${u.id}`}
-                    class="after:absolute after:inset-0 group-hover:text-accent"
-                  >
-                    {u.data.title}
-                  </a>
-                </h3>
-                <p class="mt-1 text-sm text-fg-soft">{updateTeaser(u, 160)}</p>
-              </div>
-            </li>
-          ))
-        }
+        {latest.map((u) => (
+          <li class="group relative grid gap-1 py-5 sm:grid-cols-[9rem_14rem_minmax(0,1fr)] sm:gap-6">
+            <time class="label pt-0.5 text-fg-soft" datetime={isoDate(u.data.date)}>
+              {formatDate(u.data.date, lang)}
+            </time>
+            <p class="label pt-0.5">{projectTitles[u.data.project.id]}</p>
+            <div>
+              <h3 class="font-medium">
+                <a
+                  href={localizePath(`/projects/${u.data.project.id}/`, lang) + `#${u.id}`}
+                  class="after:absolute after:inset-0 group-hover:text-accent"
+                >
+                  {u.data.title}
+                </a>
+              </h3>
+              <p class="mt-1 text-sm text-fg-soft">{updateTeaser(u, 160)}</p>
+            </div>
+          </li>
+        ))}
       </ol>
     </div>
   </section>

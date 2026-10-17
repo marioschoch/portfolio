@@ -17,7 +17,7 @@ export function fontsourceVariants(
   subsets: string[] = ['latin', 'latin-ext'],
 ) {
   const dir = `./node_modules/@fontsource/${pkg}`;
-  return weights.flatMap((weight) =>
+  const variants = weights.flatMap((weight) =>
     styles.flatMap((style) =>
       subsets.map((subset) => {
         const suffix = style === 'italic' ? `${weight}-italic` : `${weight}`;
@@ -32,4 +32,7 @@ export function fontsourceVariants(
       }),
     ),
   );
+  if (!variants[0]) throw new Error(`No font variants for ${pkg}`);
+  // Astro's type requires a non-empty tuple.
+  return variants as [(typeof variants)[0], ...typeof variants];
 }

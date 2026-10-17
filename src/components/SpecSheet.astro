@@ -27,9 +27,7 @@ const links = (
   .filter((l): l is { href: string; label: string } => Boolean(l.href));
 ---
 
-<dl
-  class="grid grid-cols-2 border-t border-l border-rule text-sm sm:grid-cols-3 lg:grid-cols-6 [&>div]:border-r [&>div]:border-b [&>div]:border-rule [&>div]:p-3.5"
->
+<dl class="grid grid-cols-2 border-t border-l border-rule text-sm sm:grid-cols-3 lg:grid-cols-6 [&>div]:border-r [&>div]:border-b [&>div]:border-rule [&>div]:p-3.5">
   <div class="col-span-2 sm:col-span-1 lg:col-span-1">
     <dt class="label">{t('spec.role')}</dt>
     <dd class="mt-1.5 text-fg">{project.role}</dd>
@@ -37,15 +35,15 @@ const links = (
   <div>
     <dt class="label">{t('spec.timeframe')}</dt>
     <dd class="mt-1.5 font-mono text-xs text-fg">
-      <time datetime={isoDate(data.timeframe.start)}>{formatMonth(data.timeframe.start, lang)}</time>
+      <time datetime={isoDate(data.timeframe.start)}>
+        {formatMonth(data.timeframe.start, lang)}
+      </time>
       –
-      {
-        data.timeframe.end ? (
-          <time datetime={isoDate(data.timeframe.end)}>{formatMonth(data.timeframe.end, lang)}</time>
-        ) : (
-          t('spec.present')
-        )
-      }
+      {data.timeframe.end ? (
+        <time datetime={isoDate(data.timeframe.end)}>{formatMonth(data.timeframe.end, lang)}</time>
+      ) : (
+        t('spec.present')
+      )}
     </dd>
   </div>
   <div>
@@ -56,33 +54,35 @@ const links = (
   </div>
   <div>
     <dt class="label">{t('spec.status')}</dt>
-    <dd class="mt-1.5"><StatusBadge status={data.status} lang={lang} /></dd>
+    <dd class="mt-1.5">
+      <StatusBadge status={data.status} lang={lang} />
+    </dd>
   </div>
   <div class="col-span-2">
     <dt class="label">{t('spec.tools')}</dt>
     <dd class="mt-1.5">
       <ul class="flex flex-wrap gap-1.5">
-        {data.tools.map((tool) => <li class="chip text-fg-soft">{tool}</li>)}
+        {data.tools.map((tool) => (
+          <li class="chip text-fg-soft">{tool}</li>
+        ))}
       </ul>
     </dd>
   </div>
-  {
-    links.length > 0 && (
-      <div class="col-span-2 sm:col-span-3 lg:col-span-6">
-        <dt class="sr-only">{t('spec.links')}</dt>
-        <dd>
-          <ul class="flex flex-wrap gap-2">
-            {links.map((l) => (
-              <li>
-                <a href={l.href} class="btn" rel="noopener">
-                  {l.label}
-                  <span aria-hidden="true">↗</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </dd>
-      </div>
-    )
-  }
+  {links.length > 0 && (
+    <div class="col-span-2 sm:col-span-3 lg:col-span-6">
+      <dt class="sr-only">{t('spec.links')}</dt>
+      <dd>
+        <ul class="flex flex-wrap gap-2">
+          {links.map((l) => (
+            <li>
+              <a href={l.href} class="btn" rel="noopener">
+                {l.label}
+                <span aria-hidden="true">↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </dd>
+    </div>
+  )}
 </dl>

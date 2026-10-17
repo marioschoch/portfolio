@@ -11,6 +11,13 @@ export const personJsonLd = {
   affiliation: { '@type': 'CollegeOrUniversity', name: 'ETH Zürich', url: 'https://ethz.ch' },
   memberOf: { '@type': 'Organization', name: 'VELOVE Uni ZH' },
   address: { '@type': 'PostalAddress', addressLocality: 'Zürich', addressCountry: 'CH' },
-  knowsAbout: ['Mechatronics', 'Embedded systems', 'Mechanical design', 'CAD', 'Bicycle mechanics', 'Web development'],
+  knowsAbout: [
+    'Mechatronics',
+    'Embedded systems',
+    'Mechanical design',
+    'CAD',
+    'Bicycle mechanics',
+    'Web development',
+  ],
   sameAs: [site.links.github, site.links.linkedin],
 };

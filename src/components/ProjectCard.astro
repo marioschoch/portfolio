@@ -26,26 +26,26 @@ const figNo = String(index + 1).padStart(2, '0');
   data-tags={data.tags.join(' ')}
   data-status={data.status}
 >
-  {
-    data.cover ? (
-      <Image
-        src={data.cover.src}
-        alt={data.cover.alt}
-        widths={[400, 640, 960]}
-        sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 100vw"
-        class="aspect-[16/10] w-full border border-rule object-cover"
-        loading={eager ? 'eager' : 'lazy'}
-        fetchpriority={eager ? 'high' : 'auto'}
-      />
-    ) : (
-      <ImagePlaceholder label={t('project.imagePending')} figure={`${t('project.figure')} ${figNo}`} />
-    )
-  }
+  {data.cover ? (
+    <Image
+      src={data.cover.src}
+      alt={data.cover.alt}
+      widths={[400, 640, 960]}
+      sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 100vw"
+      class="aspect-[16/10] w-full border border-rule object-cover"
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : 'auto'}
+    />
+  ) : (
+    <ImagePlaceholder
+      label={t('project.imagePending')}
+      figure={`${t('project.figure')} ${figNo}`}
+    />
+  )}
   <div class="mt-4 flex items-center justify-between gap-3">
     <span class="label">
-      {formatMonth(data.timeframe.start, lang)} – {
-        data.timeframe.end ? formatMonth(data.timeframe.end, lang) : t('spec.present')
-      }
+      {formatMonth(data.timeframe.start, lang)} –{' '}
+      {data.timeframe.end ? formatMonth(data.timeframe.end, lang) : t('spec.present')}
     </span>
     <StatusBadge status={data.status} lang={lang} />
   </div>
@@ -59,6 +59,8 @@ const figNo = String(index + 1).padStart(2, '0');
   </Heading>
   <p class="mt-2 text-sm leading-relaxed text-fg-soft">{project.summary}</p>
   <ul class="mt-4 flex flex-wrap gap-1.5" aria-label={t('spec.tools')}>
-    {data.tools.slice(0, 5).map((tool) => <li class="chip">{tool}</li>)}
+    {data.tools.slice(0, 5).map((tool) => (
+      <li class="chip">{tool}</li>
+    ))}
   </ul>
 </article>

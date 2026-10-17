@@ -48,9 +48,20 @@ const items = [
   class="no-print m-0 mx-auto mt-[12vh] w-[calc(100%-2rem)] max-w-xl rounded-sm border border-rule-strong bg-surface p-0 text-fg shadow-2xl backdrop:bg-black/40 backdrop:backdrop-blur-[2px]"
 >
   <div class="flex items-center gap-3 border-b border-rule px-4">
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" class="text-muted">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+      class="text-muted"
+    >
       <circle cx="7" cy="7" r="4.75" stroke="currentColor" stroke-width="1.5"></circle>
-      <path d="m10.5 10.5 3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+      <path
+        d="m10.5 10.5 3.5 3.5"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
       ></path>
     </svg>
     <input
@@ -68,7 +79,9 @@ const items = [
     <kbd class="label shrink-0">Esc</kbd>
   </div>
   <ul id="palette-results" role="listbox" class="max-h-[50vh] overflow-y-auto py-2"></ul>
-  <p class="hidden px-4 py-6 text-center text-sm text-muted" data-empty>{t('palette.empty')}</p>
+  <p class="hidden px-4 py-6 text-center text-sm text-muted" data-empty>
+    {t('palette.empty')}
+  </p>
   <p class="border-t border-rule px-4 py-2 font-mono text-2xs text-muted">{t('palette.hint')}</p>
   <script type="application/json" data-palette-items set:html={JSON.stringify(items)} />
 </dialog>

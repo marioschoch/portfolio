@@ -25,21 +25,21 @@ const rows = [
         <dt class="label">{t('contact.email')}</dt>
         <dd class="text-lg">
           <ObfuscatedEmail class="link" />
-          <noscript><p class="text-sm text-muted">{t('contact.emailFallback')}</p></noscript>
+          <noscript>
+            <p class="text-sm text-muted">{t('contact.emailFallback')}</p>
+          </noscript>
         </dd>
       </div>
-      {
-        rows.map((r) => (
-          <div class="grid gap-1 border-b border-rule py-5 sm:grid-cols-[10rem_1fr] sm:items-baseline">
-            <dt class="label">{r.label}</dt>
-            <dd class="text-lg">
-              <a href={r.href} class="link" rel="me noopener">
-                {r.text}
-              </a>
-            </dd>
-          </div>
-        ))
-      }
+      {rows.map((r) => (
+        <div class="grid gap-1 border-b border-rule py-5 sm:grid-cols-[10rem_1fr] sm:items-baseline">
+          <dt class="label">{r.label}</dt>
+          <dd class="text-lg">
+            <a href={r.href} class="link" rel="me noopener">
+              {r.text}
+            </a>
+          </dd>
+        </div>
+      ))}
       <div class="grid gap-1 border-b border-rule py-5 sm:grid-cols-[10rem_1fr] sm:items-baseline">
         <dt class="label">{t('contact.location')}</dt>
         <dd class="text-lg">{site.location}</dd>

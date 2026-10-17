@@ -16,14 +16,7 @@ import ImagePlaceholder from '@/components/ImagePlaceholder.astro';
 import { getCollection } from 'astro:content';
 import { getProjectUpdates, localizeProject } from '@/lib/content';
 import { site } from '@/data/site';
-import {
-  formatDate,
-  isoDate,
-  langs,
-  localizePath,
-  useTranslations,
-  type Lang,
-} from '@/i18n/utils';
+import { formatDate, isoDate, langs, localizePath, useTranslations, type Lang } from '@/i18n/utils';
 
 export async function getStaticPaths() {
   const entries = await getCollection('projects');
@@ -74,18 +67,26 @@ const jsonLd = {
       <div class="bg-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
       <div class="relative container-page pt-10 pb-10 sm:pt-14">
         <nav aria-label="Breadcrumb" class="label mb-8">
-          <a href={localizePath('/projects/', lang)} class="hover:text-fg">← {t('project.back')}</a>
+          <a href={localizePath('/projects/', lang)} class="hover:text-fg">
+            ← {t('project.back')}
+          </a>
         </nav>
         <ul class="mb-4 flex flex-wrap gap-x-3 gap-y-1" aria-label="Tags">
-          {data.tags.map((tag) => <li class="label text-accent">#{tag}</li>)}
+          {data.tags.map((tag) => (
+            <li class="label text-accent">#{tag}</li>
+          ))}
         </ul>
         <h1 class="max-w-3xl text-3xl leading-tight sm:text-[2.75rem]">{project.title}</h1>
         <p class="mt-5 max-w-text text-lg leading-relaxed text-fg-soft">{project.summary}</p>
         <p class="mt-6 flex flex-wrap gap-x-5 gap-y-1 font-mono text-2xs text-muted">
-          <span>{project.minutesRead} {t('project.readingTime')}</span>
           <span>
-            {t('project.lastUpdated')}
-            <time datetime={isoDate(project.lastUpdated)}>{formatDate(project.lastUpdated, lang)}</time>
+            {project.minutesRead} {t('project.readingTime')}
+          </span>
+          <span>
+            {t('project.lastUpdated')}{' '}
+            <time datetime={isoDate(project.lastUpdated)}>
+              {formatDate(project.lastUpdated, lang)}
+            </time>
           </span>
         </p>
       </div>
@@ -94,25 +95,23 @@ const jsonLd = {
     <div class="container-page space-y-14 py-10">
       <SpecSheet project={project} lang={lang} />
 
-      {
-        data.cover ? (
-          <Image
-            src={data.cover.src}
-            alt={data.cover.alt}
-            widths={[640, 960, 1280, 1920]}
-            sizes="(min-width: 1152px) 72rem, 100vw"
-            class="w-full border border-rule"
-            loading="eager"
-            fetchpriority="high"
-          />
-        ) : (
-          <ImagePlaceholder
-            label={t('project.imagePending')}
-            figure={`${t('project.figure')} 01`}
-            class="aspect-[21/9]!"
-          />
-        )
-      }
+      {data.cover ? (
+        <Image
+          src={data.cover.src}
+          alt={data.cover.alt}
+          widths={[640, 960, 1280, 1920]}
+          sizes="(min-width: 1152px) 72rem, 100vw"
+          class="w-full border border-rule"
+          loading="eager"
+          fetchpriority="high"
+        />
+      ) : (
+        <ImagePlaceholder
+          label={t('project.imagePending')}
+          figure={`${t('project.figure')} 01`}
+          class="aspect-[3/1]!"
+        />
+      )}
 
       <KeyFigures figures={project.keyFigures} lang={lang} />
 
@@ -126,13 +125,11 @@ const jsonLd = {
             {t('project.log')}
             <span>{String(updates.length).padStart(2, '0')}</span>
           </h2>
-          {
-            updates.length ? (
-              <Timeline updates={updates} lang={lang} />
-            ) : (
-              <p class="text-sm text-muted">{t('project.logEmpty')}</p>
-            )
-          }
+          {updates.length ? (
+            <Timeline updates={updates} lang={lang} />
+          ) : (
+            <p class="text-sm text-muted">{t('project.logEmpty')}</p>
+          )}
         </aside>
       </div>
 

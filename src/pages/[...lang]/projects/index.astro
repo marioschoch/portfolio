@@ -28,40 +28,71 @@ const usedTags = projectTags.filter((tag) => projects.some((p) => p.entry.data.t
   />
 
   <div class="container-page py-10">
-    <div class="no-print mb-10 hidden flex-col gap-4 border-b border-rule pb-6 sm:flex-row sm:items-center sm:gap-10" data-filters>
+    <div
+      class="no-print mb-10 hidden flex-col gap-4 border-b border-rule pb-6 sm:flex-row sm:items-center sm:gap-10"
+      data-filters
+    >
       <fieldset class="flex flex-wrap items-center gap-2">
-        <legend class="label mb-2 w-full sm:float-left sm:mr-2 sm:mb-0 sm:w-auto">{t('projects.filter.tag')}</legend>
-        <button type="button" class="filter-btn" data-filter="tag" data-value="" aria-pressed="true">
+        <legend class="label mb-2 w-full sm:float-left sm:mr-2 sm:mb-0 sm:w-auto">
+          {t('projects.filter.tag')}
+        </legend>
+        <button
+          type="button"
+          class="filter-btn"
+          data-filter="tag"
+          data-value=""
+          aria-pressed="true"
+        >
           {t('projects.filter.all')}
         </button>
-        {
-          usedTags.map((tag) => (
-            <button type="button" class="filter-btn" data-filter="tag" data-value={tag} aria-pressed="false">
-              {tag}
-            </button>
-          ))
-        }
+        {usedTags.map((tag) => (
+          <button
+            type="button"
+            class="filter-btn"
+            data-filter="tag"
+            data-value={tag}
+            aria-pressed="false"
+          >
+            {tag}
+          </button>
+        ))}
       </fieldset>
       <fieldset class="flex flex-wrap items-center gap-2">
-        <legend class="label mb-2 w-full sm:float-left sm:mr-2 sm:mb-0 sm:w-auto">{t('projects.filter.status')}</legend>
-        <button type="button" class="filter-btn" data-filter="status" data-value="" aria-pressed="true">
+        <legend class="label mb-2 w-full sm:float-left sm:mr-2 sm:mb-0 sm:w-auto">
+          {t('projects.filter.status')}
+        </legend>
+        <button
+          type="button"
+          class="filter-btn"
+          data-filter="status"
+          data-value=""
+          aria-pressed="true"
+        >
           {t('projects.filter.all')}
         </button>
-        {
-          projectStatuses.map((status) => (
-            <button type="button" class="filter-btn" data-filter="status" data-value={status} aria-pressed="false">
-              {t(`status.${status}`)}
-            </button>
-          ))
-        }
+        {projectStatuses.map((status) => (
+          <button
+            type="button"
+            class="filter-btn"
+            data-filter="status"
+            data-value={status}
+            aria-pressed="false"
+          >
+            {t(`status.${status}`)}
+          </button>
+        ))}
       </fieldset>
       <p class="label sm:ml-auto" aria-live="polite" data-count></p>
     </div>
 
     <div class="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-      {projects.map((project, i) => <ProjectCard project={project} lang={lang} index={i} eager={i === 0} />)}
+      {projects.map((project, i) => (
+        <ProjectCard project={project} lang={lang} index={i} eager={i === 0} />
+      ))}
     </div>
-    <p class="hidden py-16 text-center text-muted" data-empty>{t('projects.none')}</p>
+    <p class="hidden py-16 text-center text-muted" data-empty>
+      {t('projects.none')}
+    </p>
   </div>
 </BaseLayout>
 

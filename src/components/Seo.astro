@@ -50,26 +50,18 @@ const fullTitle = basePath === '/' ? `${site.name} · ${title}` : `${title} · $
 <link rel="canonical" href={canonical} />
 {noindex && <meta name="robots" content="noindex" />}
 
-{
-  translated &&
-    !noindex &&
-    langs.map((l) => (
-      <link
-        rel="alternate"
-        hreflang={l}
-        href={new URL(localizePath(basePath, l), site.url).href}
-      />
-    ))
-}
-{
-  translated && !noindex && (
-    <link
-      rel="alternate"
-      hreflang="x-default"
-      href={new URL(localizePath(basePath, 'en'), site.url).href}
-    />
-  )
-}
+{translated &&
+  !noindex &&
+  langs.map((l) => (
+    <link rel="alternate" hreflang={l} href={new URL(localizePath(basePath, l), site.url).href} />
+  ))}
+{translated && !noindex && (
+  <link
+    rel="alternate"
+    hreflang="x-default"
+    href={new URL(localizePath(basePath, 'en'), site.url).href}
+  />
+)}
 
 <!-- Open Graph / LinkedIn -->
 <meta property="og:type" content={type} />

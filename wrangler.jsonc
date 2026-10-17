@@ -9,6 +9,6 @@
     // Serve dist/404.html with a real 404 status for unknown paths.
     "not_found_handling": "404-page",
     // /about → /about/ (matches Astro's directory build format and canonical URLs).
-    "html_handling": "force-trailing-slash"
-  }
+    "html_handling": "force-trailing-slash",
+  },
 }

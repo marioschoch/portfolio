@@ -29,7 +29,8 @@ const byOrderThenDate = (a: ProjectEntry, b: ProjectEntry) =>
   a.data.order - b.data.order ||
   b.data.timeframe.start.getTime() - a.data.timeframe.start.getTime();
 
-const byDateDesc = (a: UpdateEntry, b: UpdateEntry) => b.data.date.getTime() - a.data.date.getTime();
+const byDateDesc = (a: UpdateEntry, b: UpdateEntry) =>
+  b.data.date.getTime() - a.data.date.getTime();
 
 /** All updates, newest first. */
 export async function getUpdates(): Promise<UpdateEntry[]> {
@@ -47,7 +48,12 @@ export async function localizeProject(entry: ProjectEntry, lang: Lang): Promise<
   const translation =
     lang === 'de' ? (await getCollection('projectsDe')).find((t) => t.id === entry.id) : undefined;
   const updates = await getProjectUpdates(entry.id);
-  const dates = [entry.data.updated, updates[0]?.data.date, entry.data.timeframe.end, entry.data.timeframe.start]
+  const dates = [
+    entry.data.updated,
+    updates[0]?.data.date,
+    entry.data.timeframe.end,
+    entry.data.timeframe.start,
+  ]
     .filter((d): d is Date => d instanceof Date)
     .map((d) => d.getTime());
   const body = translation?.body ?? entry.body;

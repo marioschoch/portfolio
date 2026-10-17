@@ -31,21 +31,19 @@ const years = [...new Set(updates.map((u) => u.data.date.getUTCFullYear()))];
   </PageHeader>
 
   <div class="container-page space-y-14 py-12">
-    {
-      years.map((year) => (
-        <section class="grid gap-6 sm:grid-cols-[6rem_minmax(0,1fr)]" aria-labelledby={`y-${year}`}>
-          <h2 id={`y-${year}`} class="font-mono text-sm text-muted sm:pt-0.5">
-            {year}
-          </h2>
-          <div class="max-w-text">
-            <Timeline
-              updates={updates.filter((u) => u.data.date.getUTCFullYear() === year)}
-              lang={lang}
-              projectTitles={projectTitles}
-            />
-          </div>
-        </section>
-      ))
-    }
+    {years.map((year) => (
+      <section class="grid gap-6 sm:grid-cols-[6rem_minmax(0,1fr)]" aria-labelledby={`y-${year}`}>
+        <h2 id={`y-${year}`} class="font-mono text-sm text-muted sm:pt-0.5">
+          {year}
+        </h2>
+        <div class="max-w-text">
+          <Timeline
+            updates={updates.filter((u) => u.data.date.getUTCFullYear() === year)}
+            lang={lang}
+            projectTitles={projectTitles}
+          />
+        </div>
+      </section>
+    ))}
   </div>
 </BaseLayout>

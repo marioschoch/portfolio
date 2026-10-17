@@ -22,7 +22,9 @@ export default defineConfig({
       name: 'IBM Plex Sans',
       cssVariable: '--font-plex-sans',
       provider: fontProviders.local(),
-      options: { variants: fontsourceVariants('ibm-plex-sans', [400, 500, 600], ['normal', 'italic']) },
+      options: {
+        variants: fontsourceVariants('ibm-plex-sans', [400, 500, 600], ['normal', 'italic']),
+      },
       fallbacks: ['system-ui', 'sans-serif'],
       display: 'swap',
     },

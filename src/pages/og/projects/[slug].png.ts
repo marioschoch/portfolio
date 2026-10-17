@@ -8,7 +8,10 @@ const shorten = (text: string, max: number) =>
   text.length <= max ? text : `${text.slice(0, max).replace(/[\s,:;.–-]+\S*$/, '')}…`;
 
 export const getStaticPaths: GetStaticPaths = async () =>
-  (await getCollection('projects')).map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+  (await getCollection('projects')).map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
 
 export const GET: APIRoute = async ({ props }) => {
   const { data } = (props as { entry: CollectionEntry<'projects'> }).entry;
