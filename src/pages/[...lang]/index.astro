@@ -1,5 +1,6 @@
 ---
 /** Home: intro + status, quick links, Now, featured projects, latest updates. */
+import { Picture } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
 import ObfuscatedEmail from '@/components/ObfuscatedEmail.astro';
@@ -8,6 +9,7 @@ import { personJsonLd } from '@/lib/person';
 import { site } from '@/data/site';
 import { now } from '@/data/now';
 import { tx } from '@/data/cv';
+import heroImage from '@/assets/home/hero-cycling.jpg';
 import {
   formatDate,
   isoDate,
@@ -34,9 +36,27 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
   jsonLd={personJsonLd}
 >
   <!-- Intro -->
-  <section class="relative border-b border-rule">
-    <div class="bg-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
-    <div class="relative container-page grid gap-12 pt-16 pb-14 sm:pt-24 sm:pb-20 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
+  <section class="relative isolate overflow-hidden border-b border-rule">
+    <!-- Background photo: theme-coloured fades keep the text readable in light and dark mode -->
+    <div
+      class="absolute inset-x-0 top-0 -z-10 h-72 sm:h-96 lg:inset-0 lg:h-auto"
+      aria-hidden="true"
+    >
+      <Picture
+        src={heroImage}
+        alt=""
+        layout="full-width"
+        formats={['avif', 'webp']}
+        loading="eager"
+        fetchpriority="high"
+        class="size-full object-cover object-[60%_center]"
+      />
+      <!-- Phones: photo as a band on top, fading into the page; desktop: full background, faded on the text side -->
+      <div class="absolute inset-0 bg-linear-to-b from-transparent via-bg/30 to-bg lg:hidden"></div>
+      <div class="absolute inset-0 hidden bg-linear-to-r from-bg from-25% via-bg/75 via-50% to-bg/5 lg:block"></div>
+      <div class="absolute inset-x-0 bottom-0 hidden h-24 bg-linear-to-t from-bg to-transparent lg:block"></div>
+    </div>
+    <div class="relative container-page grid gap-12 pt-52 pb-14 sm:pt-72 sm:pb-20 lg:min-h-[36rem] lg:pt-24 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
       <div>
         <p class="label mb-6 flex items-center gap-2">
           <span class="size-1.5 rounded-full bg-accent" aria-hidden="true"></span>
@@ -74,7 +94,10 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
       </div>
 
       <!-- Now -->
-      <aside class="border border-rule bg-surface/80 p-5" aria-labelledby="now-heading">
+      <aside
+        class="border border-rule bg-surface/85 p-5 backdrop-blur-sm"
+        aria-labelledby="now-heading"
+      >
         <div class="mb-4 flex items-baseline justify-between">
           <h2 id="now-heading" class="label text-fg">
             {t('home.now')}
@@ -93,6 +116,9 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
         </ul>
       </aside>
     </div>
+    <p class="label absolute right-4 bottom-3 text-2xs opacity-70 sm:right-6">
+      {t('home.photoCredit')} Lars Meier
+    </p>
   </section>
 
   <!-- Featured projects -->

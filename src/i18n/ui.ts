@@ -33,6 +33,7 @@ const en = {
   'home.latest': 'Latest updates',
   'home.allUpdates': 'All updates',
   'home.now': 'Now',
+  'home.photoCredit': 'Photo:',
   'home.nowUpdated': 'As of',
   'projects.title': 'Projects',
   'projects.intro':
@@ -150,6 +151,7 @@ const de: Partial<Record<UiKey, string>> = {
   'home.latest': 'Neueste Updates',
   'home.allUpdates': 'Alle Updates',
   'home.now': 'Aktuell',
+  'home.photoCredit': 'Foto:',
   'home.nowUpdated': 'Stand',
   'projects.title': 'Projekte',
   'projects.intro':
