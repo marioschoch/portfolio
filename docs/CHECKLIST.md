@@ -9,15 +9,15 @@
 - [ ] Apache & nginx Settings: untick "Serve static files directly by nginx" (or ask support)
 - [ ] Set/note the system user password (Hosting-Einstellungen → Anmeldedaten für Systembenutzer)
 - [ ] Test the login with Cyberduck/FileZilla: FTP over explicit TLS, `venus.kreativmedia.ch`, port 21 —
-      confirm you see the `httpdocs` folder
+      confirm you see the `marioschoch.ch` folder (= Plesk Dokumentstamm)
 - [ ] Optional: ask kreativmedia to open SSH port 22 if you'd rather use SFTP with an SSH key
-- [ ] After the first deploy: delete Plesk's leftover default files in `httpdocs` (keep `.well-known/`)
+- [ ] After the first deploy: delete Plesk's leftover default files in `marioschoch.ch/` (keep `.well-known/`)
 
 **GitHub:**
 
 - [ ] Create the repository and `git push -u origin main`
 - [ ] Secrets: `DEPLOY_PROTOCOL`=`ftps`, `DEPLOY_HOST`=`venus.kreativmedia.ch`, `DEPLOY_PORT`=`21`,
-      `DEPLOY_USER`=`marioschoch`, `DEPLOY_PASSWORD`, `DEPLOY_REMOTE_PATH`=`/httpdocs`
+      `DEPLOY_USER`=`marioschoch`, `DEPLOY_PASSWORD`, `DEPLOY_REMOTE_PATH`=`/marioschoch.ch`
 - [ ] Optional: `PUBLIC_CF_ANALYTICS_TOKEN` (Cloudflare Web Analytics site for `marioschoch.ch`, JS snippet)
 - [ ] Run Actions → Deploy → Run workflow, then check the site, the redirects and the 404 page
 

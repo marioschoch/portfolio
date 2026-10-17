@@ -188,7 +188,7 @@ never slows down the page. `public/models/delivery-robot.glb` is a generated **p
 ## How to deploy
 
 Push to `main`. GitHub Actions (`.github/workflows/deploy.yml`) installs, lints and builds the site, then
-uploads only the changed files to `httpdocs` over FTPS (or SFTP) (about 2 minutes). Stale files from earlier deploys
+uploads only the changed files to the web root (`/marioschoch.ch`) over FTPS (or SFTP) (about 2 minutes). Stale files from earlier deploys
 are removed; nothing else on the server is touched.
 
 - **First-time setup** (Plesk login, Let's Encrypt, GitHub Secrets, first deploy):
@@ -210,7 +210,7 @@ are removed; nothing else on the server is touched.
 - **Deploy script** (`scripts/deploy.mjs`): FTPS (explicit TLS, certificate always verified) or SFTP
   (server host key pinned via `DEPLOY_KNOWN_HOSTS`), chosen by `DEPLOY_PROTOCOL`. It keeps a
   `.deploy-manifest.json` (path → SHA-256) on the server, uploads only changed files, deletes only files it
-  uploaded itself, and refuses any target that isn't an `httpdocs` folder. On kreativmedia, port 22 (SSH)
+  uploaded itself, and refuses any target folder other than the web root (`WEB_ROOT_NAMES`). On kreativmedia, port 22 (SSH)
   is currently firewalled, so FTPS via `venus.kreativmedia.ch` is used.
 - **Page transitions** use native cross-document View Transitions (pure CSS, disabled under
   `prefers-reduced-motion`), not Astro's `<ClientRouter>`. No router JavaScript is needed, and every page

@@ -1,5 +1,5 @@
 /**
- * Deploys dist/ to the web root (httpdocs) over SFTP or FTPS — used by .github/workflows/deploy.yml.
+ * Deploys dist/ to the web root (Plesk "Dokumentstamm") over SFTP or FTPS — used by .github/workflows/deploy.yml.
  *
  * How it decides what to do:
  *   - The server keeps a manifest (.deploy-manifest.json: path → SHA-256) of the files that
@@ -19,7 +19,8 @@
  *   DEPLOY_USER
  *   DEPLOY_PASSWORD     FTPS: required. SFTP: or use DEPLOY_PRIVATE_KEY (+ DEPLOY_PASSPHRASE)
  *   DEPLOY_KNOWN_HOSTS  SFTP only: output of `ssh-keyscan -p <port> <host>`; the server key must match
- *   DEPLOY_REMOTE_PATH  e.g. /httpdocs — must end in "httpdocs" (safety check)
+ *   DEPLOY_REMOTE_PATH  the web root, e.g. /marioschoch.ch — its folder name must be in WEB_ROOT_NAMES
+ *                       (safety check, so a typo can never sync into the wrong folder)
  *
  * FTPS uses explicit TLS (AUTH TLS) and always verifies the server certificate; plain,
  * unencrypted FTP is not supported.
@@ -38,6 +39,11 @@ const DIST = 'dist';
 const MANIFEST = '.deploy-manifest.json';
 /** Paths that are never uploaded to or deleted from the server. */
 const PROTECTED = [/^\.well-known(\/|$)/, /^\.deploy-manifest/];
+/**
+ * Folder names accepted as deploy target. On kreativmedia the Plesk document root ("Dokumentstamm")
+ * is named after the domain; `httpdocs` is the Plesk default elsewhere.
+ */
+const WEB_ROOT_NAMES = ['marioschoch.ch', 'httpdocs'];
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
@@ -224,8 +230,10 @@ async function main() {
   if (!localTarget) {
     // Safety: never deploy into anything but a Plesk web root.
     const clean = remoteRoot.replace(/\/+$/, '');
-    if (!clean || clean === '/' || posix.basename(clean) !== 'httpdocs') {
-      fail(`DEPLOY_REMOTE_PATH must point to the httpdocs folder (got "${remoteRoot}").`);
+    if (!clean || clean === '/' || !WEB_ROOT_NAMES.includes(posix.basename(clean))) {
+      fail(
+        `DEPLOY_REMOTE_PATH must point to the web root folder (${WEB_ROOT_NAMES.join(' or ')}), got "${remoteRoot}".`,
+      );
     }
   }
 

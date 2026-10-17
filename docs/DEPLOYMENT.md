@@ -5,14 +5,14 @@ or PHP runs on it. Domain, DNS and e-mail stay at kreativmedia; **nothing in you
 changes.**
 
 ```
-git push (main) ──▶ GitHub Actions: npm ci → lint → build → upload changed files (FTPS) ──▶ httpdocs/
+git push (main) ──▶ GitHub Actions: npm ci → lint → build → upload changed files (FTPS) ──▶ /marioschoch.ch/
 ```
 
 - `npm run build` produces `dist/`: every page, the RSS feed, sitemap, link-preview images, and an
   `.htaccess` with redirects, caching and security headers.
 - `scripts/deploy.mjs` uploads only files that changed and deletes only files that an earlier deploy
-  uploaded and that no longer exist. It never touches anything else in `httpdocs` (e.g. `.well-known/`
-  for Let's Encrypt) and refuses to run if the target folder isn't called `httpdocs`.
+  uploaded and that no longer exist. It never touches anything else in the web root (e.g. `.well-known/`
+  for Let's Encrypt) and refuses to run if the target isn't the web root folder (`marioschoch.ch`).
 
 **Connection type.** The script supports two encrypted transfer methods:
 
@@ -34,7 +34,8 @@ Plan about 30 minutes for the first setup.
 Log in to Plesk (link in your kreativmedia customer centre) → **Websites & Domains** → `marioschoch.ch`.
 
 1. **Hosting settings** (_Hosting & DNS → Hosting_, or _Hosting-Einstellungen_):
-   - Document root: `httpdocs` (the default).
+   - Document root (_Dokumentstamm_): **`marioschoch.ch`**. On kreativmedia it's named after the domain,
+     not Plesk's usual `httpdocs`. Leave it as it is.
    - **Preferred domain** (_Bevorzugte Domain_): `marioschoch.ch` (without www). The site's `.htaccess`
      also redirects www → marioschoch.ch, so either way there is only one address.
    - **PHP support:** can be switched **off**. The site doesn't use PHP, and switching it off means less
@@ -74,9 +75,10 @@ The deploy logs in as the Plesk **system user**. That's the same login FTP uses.
    - Server: `venus.kreativmedia.ch`, port `21`.
    - Username `marioschoch`, your password.
 
-   After connecting you should see a folder **`httpdocs`** (plus e.g. `logs`, `error_docs`). The deploy
-   path is therefore **`/httpdocs`**. If you only see the _contents_ of `httpdocs` (index.html etc.), tell
-   me: the path would then be different.
+   After connecting you see the folder **`marioschoch.ch`**: that is the web root (Plesk _Dokumentstamm_).
+   Next to it are `logs`, `error_docs` and system folders like `dev`, `etc`, `usr`, `var` (they come with the
+   chrooted SSH setting; the deploy never touches them). The deploy path is therefore
+   **`/marioschoch.ch`**.
 
 ### Optional, later: SFTP instead of FTPS
 
@@ -84,7 +86,7 @@ If kreativmedia opens port 22 for you, SFTP lets you log in with an SSH key inst
 
 ```bash
 # Test (Terminal):
-sftp -P 22 marioschoch@HOST      # HOST/port as given by support; `pwd` and `ls` show the path to httpdocs
+sftp -P 22 marioschoch@HOST      # HOST/port as given by support; `pwd` and `ls` show the path to the web root
 
 # Create a key just for deployments:
 ssh-keygen -t ed25519 -C "github-deploy marioschoch.ch" -f ~/.ssh/marioschoch_deploy -N ""
@@ -121,7 +123,7 @@ and never shown in logs.
 | `DEPLOY_PORT`               | `21`                                 |
 | `DEPLOY_USER`               | `marioschoch`                        |
 | `DEPLOY_PASSWORD`           | The system user password from step 2 |
-| `DEPLOY_REMOTE_PATH`        | `/httpdocs`                          |
+| `DEPLOY_REMOTE_PATH`        | `/marioschoch.ch`                    |
 | `PUBLIC_CF_ANALYTICS_TOKEN` | Optional, see step 6                 |
 
 **To switch to SFTP later**, change or add:
@@ -130,14 +132,14 @@ and never shown in logs.
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `DEPLOY_PROTOCOL`             | `sftp`                                                                                                                 |
 | `DEPLOY_HOST` / `DEPLOY_PORT` | As given by kreativmedia (port usually `22`)                                                                           |
-| `DEPLOY_REMOTE_PATH`          | What `pwd` + `ls` showed, e.g. `/httpdocs`                                                                             |
+| `DEPLOY_REMOTE_PATH`          | What `pwd` + `ls` showed, e.g. `/marioschoch.ch`                                                                       |
 | `DEPLOY_KNOWN_HOSTS`          | Output of `ssh-keyscan -p PORT HOST` (paste all lines). Pins the server's identity                                     |
 | `DEPLOY_PRIVATE_KEY`          | The whole content of `~/.ssh/marioschoch_deploy` (`pbcopy < ~/.ssh/marioschoch_deploy`). Then delete `DEPLOY_PASSWORD` |
 
 ## 5. First deploy and checks
 
 1. GitHub → **Actions → Deploy → Run workflow** (branch `main`), or push any commit.
-2. Watch the log. The "Deploy to httpdocs" step prints something like
+2. Watch the log. The "Deploy to web root" step prints something like
    `upload: 50 (…) · delete: 0`. The final **Smoke test** fetches a few pages over HTTPS and fails the run
    if one doesn't return 200.
 3. Check in the browser:
@@ -149,7 +151,7 @@ and never shown in logs.
 4. Check headers: `curl -sI https://marioschoch.ch/ | grep -iE "strict|content-security|cache"`, or
    <https://securityheaders.com/?q=marioschoch.ch>.
 5. The old Plesk placeholder page (`index.html`) is overwritten by the first deploy. Other leftover default
-   files in `httpdocs` (e.g. `css/`, `img/`, `favicon.ico` from Plesk's template) aren't deleted
+   files in `marioschoch.ch/` (e.g. `css/`, `img/`, `favicon.ico` from Plesk's template) aren't deleted
    automatically, because the deploy only removes files it uploaded itself. Delete them once by hand in
    Plesk's File Manager (_Dateien_) or in Cyberduck. **Keep `.well-known/`.**
 
@@ -158,7 +160,7 @@ and never shown in logs.
 | Error in the log                                       | Fix                                                                                         |
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
 | `Missing DEPLOY_…`                                     | A secret is missing or misspelled (names are case-sensitive).                               |
-| `DEPLOY_REMOTE_PATH must point to the httpdocs folder` | Set the secret to the path ending in `httpdocs`.                                            |
+| `DEPLOY_REMOTE_PATH must point to the web root folder` | Set the secret to `/marioschoch.ch`.                                                        |
 | `530 Login incorrect`                                  | Wrong user or password. Reset the password in Plesk (step 2) and update the secret.         |
 | `Hostname/IP does not match certificate's altnames`    | `DEPLOY_HOST` must be `venus.kreativmedia.ch`, not `marioschoch.ch`.                        |
 | `certificate has expired` / `unable to verify`         | kreativmedia's FTP certificate has a problem. Contact support; don't switch off encryption. |
@@ -209,7 +211,7 @@ The same script works locally, with the secrets as environment variables:
 ```bash
 npm run build
 export DEPLOY_PROTOCOL=ftps DEPLOY_HOST=venus.kreativmedia.ch DEPLOY_PORT=21 \
-       DEPLOY_USER=marioschoch DEPLOY_REMOTE_PATH=/httpdocs
+       DEPLOY_USER=marioschoch DEPLOY_REMOTE_PATH=/marioschoch.ch
 read -s DEPLOY_PASSWORD && export DEPLOY_PASSWORD   # type the password (hidden), press Enter
 npm run deploy:dry     # shows what would change; use `npm run deploy` to actually upload
 ```

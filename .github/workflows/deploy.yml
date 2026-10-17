@@ -1,4 +1,4 @@
-# Build the site and deploy dist/ to the Plesk web root (httpdocs) over FTPS or SFTP.
+# Build the site and deploy dist/ to the Plesk web root (/marioschoch.ch) over FTPS or SFTP.
 #
 # Runs on every push to main, or manually (Actions → Deploy → Run workflow), where you can
 # pick an older commit/tag to roll back to, or force a full upload.
@@ -57,7 +57,7 @@ jobs:
         env:
           PUBLIC_CF_ANALYTICS_TOKEN: ${{ secrets.PUBLIC_CF_ANALYTICS_TOKEN }}
 
-      - name: Deploy to httpdocs
+      - name: Deploy to web root
         run: node scripts/deploy.mjs ${{ inputs.full && '--full' || '' }}
         env:
           DEPLOY_PROTOCOL: ${{ secrets.DEPLOY_PROTOCOL }}
