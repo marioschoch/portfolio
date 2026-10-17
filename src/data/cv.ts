@@ -76,8 +76,8 @@ export const cv: Cv = {
     {
       title: { en: 'R&D Intern', de: 'Praktikant Forschung & Entwicklung' },
       org: 'BMC Switzerland',
-      start: '2025-06',
-      end: '2025-06',
+      start: '2026-06',
+      end: '2026-06',
       details: [
         {
           en: 'One-month internship in the research & development department.',
