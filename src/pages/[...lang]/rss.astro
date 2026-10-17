@@ -1,0 +1,99 @@
+---
+/**
+ * Human-readable landing page for the RSS feed. Browsers show /rss.xml as raw XML,
+ * so site links point here; feed readers still use /rss.xml directly.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/PageHeader.astro';
+import { getUpdates } from '@/lib/content';
+import { site } from '@/data/site';
+import { formatDate, langPaths, localizePath, useTranslations, type Lang } from '@/i18n/utils';
+
+export const getStaticPaths = langPaths;
+const { lang } = Astro.props as { lang: Lang };
+const t = useTranslations(lang);
+
+const feedUrl = new URL('/rss.xml', site.url).href;
+const updates = await getUpdates();
+const steps = [t('rss.step1'), t('rss.step2'), t('rss.step3')];
+---
+
+<BaseLayout lang={lang} title={t('rss.title')} description={t('rss.intro')}>
+  <PageHeader label="RSS" title={t('rss.title')} intro={t('rss.intro')} />
+
+  <div class="container-page max-w-3xl! space-y-12 py-12">
+    <section>
+      <h2 class="label mb-3">{t('rss.address')}</h2>
+      <div class="flex flex-col gap-2 sm:flex-row">
+        <input
+          id="feed-url"
+          type="text"
+          readonly
+          value={feedUrl}
+          class="min-w-0 flex-1 rounded-sm border border-rule-strong bg-surface px-3 py-2 font-mono text-sm text-fg"
+          aria-label={t('rss.address')}
+        />
+        <button
+          type="button"
+          id="feed-copy"
+          class="btn btn-primary justify-center"
+          data-copied={t('rss.copied')}
+        >
+          {t('rss.copy')}
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="label mb-4">{t('rss.how')}</h2>
+      <ol class="space-y-3">
+        {steps.map((step, i) => (
+          <li class="grid grid-cols-[2rem_1fr] text-fg-soft">
+            <span class="font-mono text-sm text-accent">{String(i + 1).padStart(2, '0')}</span>
+            {step}
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="border-t border-rule pt-8">
+      {updates.length === 0 ? (
+        <p class="text-muted">{t('rss.empty')}</p>
+      ) : (
+        <p class="text-fg-soft">
+          <span class="label">{t('rss.count')}</span>
+          <span class="ml-2 font-mono">{updates.length}</span>
+          <span class="text-muted"> · {formatDate(updates[0]!.data.date, lang)}</span>
+        </p>
+      )}
+      <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        <a href={localizePath('/updates/', lang)} class="link">
+          {t('nav.updates')} →
+        </a>
+        <a href="/rss.xml" class="link" type="application/rss+xml">
+          {t('rss.raw')}
+        </a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  const input = document.getElementById('feed-url') as HTMLInputElement | null;
+  const button = document.getElementById('feed-copy');
+  if (input && button) {
+    const label = button.textContent;
+    input.addEventListener('focus', () => input.select());
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(input.value);
+      } catch {
+        // Clipboard API unavailable (e.g. insecure context): select the text for manual copying.
+        input.select();
+        return;
+      }
+      button.textContent = button.dataset.copied ?? label;
+      setTimeout(() => (button.textContent = label), 2000);
+    });
+  }
+</script>

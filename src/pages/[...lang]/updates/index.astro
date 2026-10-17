@@ -4,7 +4,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeader from '@/components/PageHeader.astro';
 import Timeline from '@/components/Timeline.astro';
 import { getProjects, getUpdates } from '@/lib/content';
-import { langPaths, useTranslations, type Lang } from '@/i18n/utils';
+import { langPaths, localizePath, useTranslations, type Lang } from '@/i18n/utils';
 
 export const getStaticPaths = langPaths;
 const { lang } = Astro.props as { lang: Lang };
@@ -21,7 +21,7 @@ const years = [...new Set(updates.map((u) => u.data.date.getUTCFullYear()))];
     title={t('updates.title')}
     intro={t('updates.intro')}
   >
-    <a href="/rss.xml" class="btn mt-6">
+    <a href={localizePath('/rss/', lang)} class="btn mt-6">
       <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
         <circle cx="3" cy="13" r="2"></circle>
         <path d="M1 6.5A8.5 8.5 0 0 1 9.5 15H7a6 6 0 0 0-6-6V6.5Zm0-5A13.5 13.5 0 0 1 14.5 15H12A11 11 0 0 0 1 4V1.5Z"></path>
