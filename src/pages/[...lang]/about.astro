@@ -4,11 +4,10 @@
  * TODO: rewrite all texts in your own voice and add your photo (see README → Images).
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import PageHeader from '@/components/PageHeader.astro';
 import ImagePlaceholder from '@/components/ImagePlaceholder.astro';
 import { personJsonLd } from '@/lib/person';
 import { site } from '@/data/site';
-import { langPaths, localizePath, useTranslations, type Lang } from '@/i18n/utils';
+import { langPaths, useTranslations, type Lang } from '@/i18n/utils';
 
 // To add your photo: put it at src/assets/portrait.jpg, then uncomment these two lines
 // and replace <ImagePlaceholder … /> below with:
@@ -22,18 +21,13 @@ const t = useTranslations(lang);
 
 const copy = {
   en: {
+    /** Used as the meta description (no visible page header). */
     intro:
       'I study mechanical engineering at ETH Zürich and like problems where mechanics, electronics and software meet.',
     body: [
       // TODO: your own text
       'What draws me to engineering is the moment a design leaves the screen and has to work in the real world — when a mechanism that looked perfect in CAD meets friction, tolerances and noisy sensors. Most of my projects live at that boundary: robots, bicycle components and the software that ties them together.',
       'I enjoy the whole loop: modelling and analysing a part, building a prototype, measuring how it actually behaves and iterating. I document as I go, because a clear write-up is often what turns a working prototype into something a team can build on.',
-    ],
-    lookingFor: [
-      // TODO: be specific about timing, location and fields
-      'Internships in mechatronics, embedded systems or mechanical product development.',
-      'Master’s programmes with a focus on robotics, mechatronics or systems engineering.',
-      'Teams that build physical products and value careful testing and documentation.',
     ],
     beyond: [
       // TODO
@@ -48,11 +42,6 @@ const copy = {
       'Am Ingenieurwesen reizt mich der Moment, in dem ein Entwurf den Bildschirm verlässt und in der realen Welt funktionieren muss — wenn ein Mechanismus, der im CAD perfekt aussah, auf Reibung, Toleranzen und verrauschte Sensoren trifft. Die meisten meiner Projekte liegen genau an dieser Grenze: Roboter, Velokomponenten und die Software, die alles verbindet.',
       'Ich mag den ganzen Kreislauf: Bauteil modellieren und analysieren, Prototyp bauen, messen, wie er sich tatsächlich verhält, und iterieren. Ich dokumentiere laufend, weil eine klare Dokumentation oft das ist, was aus einem funktionierenden Prototyp etwas macht, worauf ein Team aufbauen kann.',
     ],
-    lookingFor: [
-      'Praktika in Mechatronik, Embedded Systems oder mechanischer Produktentwicklung.',
-      'Masterprogramme mit Schwerpunkt Robotik, Mechatronik oder Systems Engineering.',
-      'Teams, die physische Produkte bauen und sorgfältiges Testen und Dokumentieren schätzen.',
-    ],
     beyond: [
       'Velofahren ist meine Art nachzudenken — und der Grund, warum ich ein Laufrad schneller zentriere, als ich ein Motivationsschreiben verfasse. Als Vorstandsmitglied von VELOVE Uni ZH organisiere ich kostenlose Reparaturtage, an denen Studierende lernen, ihre Velos selbst zu flicken.',
       'Daneben baue ich kleine Webprojekte, meist für Organisationen, die mir wichtig sind.',
@@ -62,7 +51,7 @@ const copy = {
 ---
 
 <BaseLayout lang={lang} title={t('about.title')} description={copy.intro} jsonLd={personJsonLd}>
-  <PageHeader label={t('about.title')} title={copy.intro} />
+  <h1 class="sr-only">{t('about.title')}</h1>
 
   <div class="container-page grid gap-12 py-12 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-16">
     <aside class="max-w-72">
@@ -87,16 +76,6 @@ const copy = {
       {copy.body.map((p) => (
         <p>{p}</p>
       ))}
-
-      <h2>{t('about.lookingFor')}</h2>
-      <ul>
-        {copy.lookingFor.map((item) => (
-          <li>{item}</li>
-        ))}
-      </ul>
-      <p>
-        <a href={localizePath('/contact/', lang)}>{t('nav.contact')} →</a>
-      </p>
 
       <h2>{t('about.beyond')}</h2>
       {copy.beyond.map((p) => (

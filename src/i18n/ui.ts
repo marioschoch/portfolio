@@ -88,7 +88,6 @@ const en = {
   'cv.awards': 'Awards',
   'cv.volunteering': 'Volunteering',
   'about.title': 'About',
-  'about.lookingFor': 'What I am looking for',
   'about.beyond': 'Beyond engineering',
   'contact.title': 'Contact',
   'contact.intro':
@@ -221,7 +220,6 @@ const de: Partial<Record<UiKey, string>> = {
   'cv.awards': 'Auszeichnungen',
   'cv.volunteering': 'Ehrenamt',
   'about.title': 'Über mich',
-  'about.lookingFor': 'Was ich suche',
   'about.beyond': 'Neben dem Ingenieurwesen',
   'contact.title': 'Kontakt',
   'contact.intro':
