@@ -98,7 +98,7 @@ const en = {
   'contact.location': 'Location',
   'fallback.notice': 'This page is not yet available in German — showing the English version.',
   'footer.rss': 'RSS',
-  'footer.source': 'Built with Astro · hosted on Cloudflare',
+  'footer.source': 'Built with Astro · hosted in Switzerland',
   'notFound.title': 'Page not found',
   'notFound.text': 'The page you are looking for does not exist or has moved.',
   'notFound.back': 'Back to the home page',
@@ -199,7 +199,7 @@ const de: Partial<Record<UiKey, string>> = {
   'fallback.notice':
     'Diese Seite ist noch nicht auf Deutsch verfügbar — angezeigt wird die englische Version.',
   'footer.rss': 'RSS',
-  'footer.source': 'Gebaut mit Astro · gehostet auf Cloudflare',
+  'footer.source': 'Gebaut mit Astro · gehostet in der Schweiz',
   'notFound.title': 'Seite nicht gefunden',
   'notFound.text': 'Die gesuchte Seite existiert nicht oder wurde verschoben.',
   'notFound.back': 'Zur Startseite',

@@ -1,4 +1,3 @@
-# TODO: update the domain once it is final.
 User-agent: *
 Allow: /
 

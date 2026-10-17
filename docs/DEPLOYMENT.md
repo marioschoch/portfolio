@@ -1,31 +1,112 @@
-# Deployment guide
+# Deployment guide: GitHub → Plesk (kreativmedia.ch)
 
-From your local folder to a live site at your own domain, all on free tiers. Plan about 45 minutes, plus
-waiting time for DNS.
-
-**Overview**
+The site is plain static files (HTML, CSS, JS, images). The server only needs to deliver them; no Node.js
+or PHP runs on it. Domain, DNS and e-mail stay at kreativmedia; **nothing in your DNS or e-mail setup
+changes.**
 
 ```
-your Mac ──git push──▶ GitHub (repo) ──webhook──▶ Cloudflare Workers Builds
-                                                   └─ npm run build → wrangler deploy → <your domain>
+git push (main) ──▶ GitHub Actions: npm ci → lint → build → upload changed files via SFTP ──▶ httpdocs/
 ```
 
-The site is deployed as a **Cloudflare Worker with static assets**, which Cloudflare now recommends for
-static sites instead of Cloudflare Pages. No Worker code runs: Cloudflare serves the files from `dist/`
-according to `wrangler.jsonc`.
+- `npm run build` produces `dist/`: every page, the RSS feed, sitemap, link-preview images, and an
+  `.htaccess` with redirects, caching and security headers.
+- `scripts/deploy-sftp.mjs` uploads only files that changed and deletes only files that an earlier deploy
+  uploaded and that no longer exist. It never touches anything else in `httpdocs` (e.g. `.well-known/`
+  for Let's Encrypt) and refuses to run if the target folder isn't called `httpdocs`.
+
+Plan about 45 minutes for the first setup.
 
 ---
 
-## 1. Create the GitHub repository
+## 1. Plesk: check the domain and enable HTTPS
 
-The local folder is already a Git repository with commits on `main`.
+Log in to Plesk (link in your kreativmedia customer centre) → **Websites & Domains** → `marioschoch.ch`.
 
-1. Go to <https://github.com/new>.
-   - Owner: `marioschoch`, name e.g. `portfolio`.
-   - Visibility: **public** or **private**. Both work with Cloudflare. Public lets recruiters see the code;
-     private keeps drafts hidden.
-   - Do **not** add a README, .gitignore or license (the repo already has them).
-2. Connect and push (GitHub shows these commands too):
+1. **Hosting settings** (_Hosting & DNS → Hosting_, or _Hosting Settings_ in older layouts):
+   - Document root: `httpdocs` (the default).
+   - **Preferred domain:** `marioschoch.ch` (without www). The site's `.htaccess` also redirects
+     www → marioschoch.ch, so either way there is only one address.
+   - **PHP support:** can be switched **off**. The site doesn't use PHP, and switching it off means less
+     to attack. Leave it on if you host something else on this subscription that needs it.
+2. **SSL/TLS certificate (Let's Encrypt, free):** _SSL/TLS Certificates_ → under "Let's Encrypt" click
+   **Install** (or "Get it free").
+   - Tick **Secure the domain name** and **Include a "www" subdomain**. Without the www certificate, the
+     redirect from `https://www.marioschoch.ch` would show a certificate warning.
+   - Webmail/mail options: as you like (they don't affect the website).
+   - Plesk renews the certificate automatically.
+3. Back in the hosting settings, enable **Permanent SEO-safe 301 redirect from HTTP to HTTPS**. The
+   `.htaccess` does this too; having both is fine.
+4. **Apache & nginx Settings** (if your plan shows this page): **untick "Serve static files directly by
+   nginx"** (sometimes called "Smart static files processing").
+   - Reason: with it enabled, nginx delivers JS, CSS, images and fonts itself, and the cache and security
+     headers from `.htaccess` are skipped for those files.
+   - If you can't change it, the site still works, only with weaker caching. kreativmedia support can
+     change it for you.
+5. Check **DNS settings**: the `A` (and `AAAA`) records for `marioschoch.ch` and `www.marioschoch.ch`
+   should point to this hosting. That is normally already the case when domain and hosting are both at
+   kreativmedia. **Leave the mail records (MX, SPF/TXT, DKIM, DMARC) untouched.**
+
+## 2. Plesk: enable SFTP access
+
+The deploy needs an SFTP login that can write to `httpdocs`.
+
+1. _Websites & Domains → marioschoch.ch → Hosting & DNS → Hosting_ (or "Web Hosting Access") →
+   **Access to the server over SSH**.
+   - Choose **`/bin/bash (chrooted)`** if available (you'll be locked into your own web space, which is
+     what you want). Otherwise any SSH/SFTP option your plan offers.
+   - If the option is missing or greyed out, SSH/SFTP isn't enabled on your plan. **Ask kreativmedia
+     support to enable SFTP/SSH access for the subscription.** It's usually free, possibly limited to
+     certain plans.
+2. Note the **username** shown on the same page (the system user, often the subscription name) and set a
+   strong **password** there if you don't know it.
+3. **Host name:** use the server name from kreativmedia's welcome e-mail or Plesk's "Connection Info"
+   (the FTP/SSH host). `marioschoch.ch` itself also works once it points to this server. **Port:** usually
+   `22`.
+4. Test from your Mac (Terminal):
+
+   ```bash
+   sftp -P 22 USERNAME@HOST
+   sftp> pwd          # shows where you are, e.g. "/" (chrooted) or /var/www/vhosts/marioschoch.ch
+   sftp> ls           # you should see httpdocs (and logs, etc.)
+   sftp> exit
+   ```
+
+   The **remote path** for the deploy is the `httpdocs` folder as seen in this session: usually
+   **`/httpdocs`** (chrooted) or **`/var/www/vhosts/marioschoch.ch/httpdocs`**.
+
+### Recommended: log in with an SSH key instead of a password
+
+A key can't be guessed and can be revoked separately. Create one just for deployments:
+
+```bash
+ssh-keygen -t ed25519 -C "github-deploy marioschoch.ch" -f ~/.ssh/marioschoch_deploy -N ""
+```
+
+This creates `~/.ssh/marioschoch_deploy` (private, goes into GitHub) and `~/.ssh/marioschoch_deploy.pub`
+(public, goes onto the server). Put the public key on the server in **one** of these ways:
+
+- **Plesk "SSH Keys"** (_Websites & Domains → SSH Keys_, if your plan has it): **Add key** and paste the
+  content of `marioschoch_deploy.pub`.
+- **Manually via SFTP** (works with chrooted access): in your web space home, create `.ssh/authorized_keys`
+  containing the `.pub` line:
+
+  ```bash
+  sftp -P 22 USERNAME@HOST
+  sftp> mkdir .ssh
+  sftp> put ~/.ssh/marioschoch_deploy.pub .ssh/authorized_keys
+  sftp> chmod 700 .ssh
+  sftp> chmod 600 .ssh/authorized_keys
+  sftp> exit
+  sftp -i ~/.ssh/marioschoch_deploy -P 22 USERNAME@HOST   # must log in without a password
+  ```
+
+If key login doesn't work on your plan, use the password: the workflow supports both.
+
+## 3. GitHub: create the repository
+
+1. <https://github.com/new>: owner `marioschoch`, name e.g. `portfolio`, **public or private** (both work).
+   Don't add a README, .gitignore or license.
+2. Push the local repository:
 
    ```bash
    cd ~/Desktop/Projekte/Website
@@ -33,149 +114,111 @@ The local folder is already a Git repository with commits on `main`.
    git push -u origin main
    ```
 
-   If asked for a password, use a [personal access token](https://github.com/settings/tokens) or sign in with
-   `gh auth login` (GitHub CLI).
+   The first push starts the "Deploy" workflow. It fails until the secrets below exist; that's expected.
 
-3. Under **Actions** on GitHub you will see the "CI" workflow run (lint + build). A green check means the
-   code is fine.
+## 4. GitHub: add the secrets
 
-## 2. Create the Cloudflare project (connected to GitHub)
+Repository → **Settings → Secrets and variables → Actions → New repository secret**. Secrets are encrypted
+and never shown in logs.
 
-1. Create a free account at <https://dash.cloudflare.com/sign-up> (if you don't have one).
-2. Dashboard → **Workers & Pages** → **Create** → **Import a repository** (on the Workers tab).
-3. **Connect GitHub**, authorise the Cloudflare app (granting access to just the `portfolio` repository is
-   enough) and select the repository.
-4. Configure the build:
+| Secret                      | Value                                                                                                                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SFTP_HOST`                 | Server host name from step 2                                                                                                                            |
+| `SFTP_PORT`                 | `22` (or what kreativmedia tells you)                                                                                                                   |
+| `SFTP_USER`                 | Plesk system user from step 2                                                                                                                           |
+| `SFTP_REMOTE_PATH`          | `/httpdocs` or `/var/www/vhosts/marioschoch.ch/httpdocs` (whatever `pwd` + `ls` showed)                                                                 |
+| `SFTP_PRIVATE_KEY`          | The **whole** content of `~/.ssh/marioschoch_deploy`, including the `-----BEGIN…` / `-----END…` lines. Get it with `pbcopy < ~/.ssh/marioschoch_deploy` |
+| `SFTP_PASSWORD`             | **Only if you don't use a key.** The SFTP password                                                                                                      |
+| `SFTP_KNOWN_HOSTS`          | Output of `ssh-keyscan -p 22 HOST` (paste all lines). Pins the server's identity, so the deploy can't be redirected to another machine                  |
+| `PUBLIC_CF_ANALYTICS_TOKEN` | Optional, see step 6                                                                                                                                    |
 
-   | Setting           | Value                                                        |
-   | ----------------- | ------------------------------------------------------------ |
-   | Project name      | `marioschoch-portfolio`, matching `name` in `wrangler.jsonc` |
-   | Production branch | `main`                                                       |
-   | Build command     | `npm run build`                                              |
-   | Deploy command    | `npx wrangler deploy`                                        |
-   | Root directory    | `/` (leave empty)                                            |
+Check the `ssh-keyscan` output once against the fingerprint in Plesk or from support, or at least run it
+from your home network rather than public Wi-Fi.
 
-5. **Create and deploy.** The first build takes 1–2 minutes. The site is then live at
-   `https://marioschoch-portfolio.<your-subdomain>.workers.dev`.
+## 5. First deploy and checks
 
-From now on **every push to `main` deploys automatically.** Pushes to other branches create preview
-versions you can find under the Worker → _Deployments_ (useful for trying out changes).
+1. GitHub → **Actions → Deploy → Run workflow** (branch `main`), or push any commit.
+2. Watch the log. The "Deploy to httpdocs" step prints something like
+   `upload: 52 (…) · delete: 0`. The final **Smoke test** fetches a few pages over HTTPS and fails the run
+   if one doesn't return 200.
+3. Check in the browser:
+   - [ ] `https://marioschoch.ch` loads with a valid lock icon.
+   - [ ] `http://marioschoch.ch` and `https://www.marioschoch.ch` redirect to `https://marioschoch.ch/`.
+   - [ ] `https://marioschoch.ch/about` redirects to `/about/`; `https://marioschoch.ch/nonexistent` shows
+         the custom 404 page.
+   - [ ] Switch EN/DE, open the command palette (Ctrl/Cmd+K), load the 3D model on the robot project.
+4. Check headers: `curl -sI https://marioschoch.ch/ | grep -iE "strict|content-security|cache"`, or
+   <https://securityheaders.com/?q=marioschoch.ch>.
+5. The old Plesk placeholder page (`index.html`) is overwritten by the first deploy. Other leftover default
+   files in `httpdocs` (e.g. `css/`, `img/`, `favicon.ico` from Plesk's template) aren't deleted
+   automatically, because the deploy only removes files it uploaded itself. Delete them once by hand in
+   Plesk's File Manager. **Keep `.well-known/`.**
 
-If a build fails, open the Worker → **Deployments** → the failed build → **View build log**. The error is
-usually a content field the schema rejects, and the log names the file.
+### When the deploy fails
 
-## 3. Cloudflare Web Analytics (free, cookie-less)
+| Error in the log                                     | Fix                                                                                                                       |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `Missing SFTP_…`                                     | A secret is missing or misspelled (names are case-sensitive).                                                             |
+| `SFTP_REMOTE_PATH must point to the httpdocs folder` | Set the secret to the full path ending in `httpdocs`.                                                                     |
+| `Host denied (verification failed)`                  | `SFTP_KNOWN_HOSTS` doesn't match the server; run `ssh-keyscan` again (the server key may have changed after maintenance). |
+| `All configured authentication methods failed`       | Wrong user/password, or the public key isn't installed on the server.                                                     |
+| `ECONNREFUSED` / timeout                             | Wrong host/port, or SSH isn't enabled for the subscription.                                                               |
+| Smoke test fails with `000`                          | HTTPS isn't set up yet (step 1.2), or DNS doesn't point to the hosting.                                                   |
+| Build fails                                          | A content error (e.g. a missing project field). The log names the file; fix it and push.                                  |
 
-No cookie banner is needed: Web Analytics stores no cookies and no personal data.
+## 6. Analytics (Cloudflare Web Analytics, cookie-less)
 
-1. Dashboard → **Analytics & Logs → Web Analytics** → **Add a site** → enter your domain → choose the
-   **JS snippet** option, and copy the `token` value from the snippet (`{"token": "…"}`).
-2. Worker → **Settings → Build → Variables and secrets** → add
-   `PUBLIC_CF_ANALYTICS_TOKEN` = the token. Save.
-3. Trigger a new deployment (push any commit, or _Deployments → Retry build_).
+This is only the JavaScript snippet: no Cloudflare DNS, no proxy, nothing changes at kreativmedia.
 
-The site only adds the beacon in production builds when the token is set (see `BaseLayout.astro`).
+1. Create a free account at <https://dash.cloudflare.com/sign-up>.
+2. **Analytics & Logs → Web Analytics → Add a site** → hostname `marioschoch.ch`.
+   - Choose the manual **JS snippet** option (not automatic setup).
+   - Copy the `token` value from the snippet (`data-cf-beacon='{"token": "…"}'`).
+3. Add it as the GitHub secret `PUBLIC_CF_ANALYTICS_TOKEN` and run the deploy again.
 
-> Once your domain is on Cloudflare (step 4), Web Analytics can also inject itself automatically.
-> **Use only one of the two methods**, or every visit is counted twice.
+No cookies are set, so no cookie banner is needed. Mention the analytics in a short privacy note if you add
+one. The CSP in `.htaccess` already allows the beacon (`static.cloudflareinsights.com`,
+`cloudflareinsights.com`).
 
-## 4. Connect your domain
+## 7. Rolling back
 
-First, a constraint: **a Worker can only use a custom domain whose DNS is managed by Cloudflare.** There
-are two ways to give Cloudflare your domain, plus a fallback.
+Every commit is a complete version of the site, and the deploy only syncs differences, so a rollback is
+just a deploy of an older commit:
 
-### Option A (recommended): move the nameservers to Cloudflare
+- **Quick:** GitHub → **Actions → Deploy → Run workflow** → in "ref" enter the commit SHA (or tag) of the
+  last good version (find it under _Code → Commits_) → Run. The server then matches that commit.
+  The next push to `main` deploys `main` again.
+- **Permanent:** undo the bad change in Git and push:
 
-The domain stays registered at your registrar (you keep paying there). Only DNS moves to Cloudflare, free.
-This is the standard setup and the only one that supports the root domain (`yourname.ch`) on the free plan.
+  ```bash
+  git revert <bad-commit-sha>
+  git push
+  ```
 
-1. Cloudflare dashboard → **Add a domain** → enter `yourdomain.ch` → **Free** plan.
-2. Cloudflare scans your existing DNS records. **Compare them carefully with the DNS zone at your registrar**
-   (log in at the registrar → DNS / zone editor) before continuing. See "Records you must not break" below.
-   Add anything that is missing by hand.
-3. If **DNSSEC** is enabled at your registrar, **turn it off first** (otherwise the domain stops resolving
-   after the switch). You can re-enable it through Cloudflare later.
-4. Cloudflare shows two nameservers (e.g. `ada.ns.cloudflare.com`, `bob.ns.cloudflare.com`). At your
-   registrar, replace the existing nameservers with these two. For `.ch` domains this is done at the
-   registrar; it can take minutes to a few hours, and Cloudflare e-mails you when the domain is active.
-5. Connect the domain to the Worker: Worker → **Settings → Domains & Routes → Add → Custom domain** →
-   `yourdomain.ch`. Repeat for `www.yourdomain.ch`. Cloudflare creates the DNS records and the HTTPS
-   certificate automatically.
-6. Redirect `www` → root (or the other way round) so there is one canonical address: Cloudflare →
-   your domain → **Rules → Redirect Rules → Create rule** → template "Redirect from WWW to root".
-   (Alternative: only attach the root domain to the Worker and add a proxied `CNAME www → yourdomain.ch`
-   plus the redirect rule.)
-7. Update the domain in the code (it is used for canonical URLs, sitemap, RSS and link previews):
-   - `src/data/site.ts` → `url`
-   - `astro.config.ts` → `site`
-   - `public/robots.txt` → `Sitemap:` line
+- **If files on the server got out of sync** (e.g. manual edits in the File Manager), run the workflow with
+  **"full"** ticked to upload everything again.
 
-   Commit and push.
+## 8. Deploying from your Mac (optional)
 
-8. Re-enable DNSSEC: Cloudflare → your domain → **DNS → Settings → Enable DNSSEC**, then add the DS record
-   it shows at your registrar.
-
-### Option B: keep DNS at the registrar (DNS records only)
-
-Workers custom domains don't work with an external DNS provider. Cloudflare's "partial (CNAME) setup"
-exists, but only on the Business plan (paid), so it isn't an option here. What you can do without moving
-nameservers:
-
-- Use the free `*.workers.dev` address, and at your registrar set up a **URL redirect / forwarding**
-  from `yourdomain.ch` to it. This is easy, but visitors see the workers.dev URL, which looks less
-  professional, and link previews show the wrong domain.
-
-**Recommendation: Option A.** It's free, and your registrar stays the owner of record. Moving nameservers is
-fully reversible: set the old nameservers back at the registrar.
-
-### Records you must not break (e-mail and verification)
-
-Moving nameservers means Cloudflare answers **all** DNS questions for your domain from then on. Any record
-missing in Cloudflare stops working. Check your registrar's zone for these and make sure Cloudflare has
-identical copies **before** step 4:
-
-| Type            | Name                                            | Purpose                                                                                                                                 | Notes                                                  |
-| --------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `MX`            | `@`                                             | Where e-mail for `@yourdomain.ch` is delivered (registrar mailbox, Google Workspace, Proton, or the registrar's free e-mail forwarding) | Copy exactly, including priority. MX can't be proxied. |
-| `TXT`           | `@`                                             | **SPF**, e.g. `v=spf1 include:… ~all`: which servers may send mail as your domain                                                       | Only one SPF record per name.                          |
-| `TXT` / `CNAME` | `*._domainkey`                                  | **DKIM** signing keys                                                                                                                   | Set CNAMEs to **DNS only** (grey cloud).               |
-| `TXT`           | `_dmarc`                                        | **DMARC** policy                                                                                                                        |                                                        |
-| `TXT`           | `@`                                             | Verifications (Google Search Console, etc.)                                                                                             |                                                        |
-| `A` / `CNAME`   | `mail`, `webmail`, `autodiscover`, `autoconfig` | Mail client setup at the registrar                                                                                                      | Set to **DNS only**.                                   |
-
-Rule of thumb: **anything related to e-mail must be "DNS only" (grey cloud)**, never "Proxied" (orange
-cloud). Only the website records are proxied.
-
-**Your current situation:** you use Gmail (`@gmail.com`), so there is probably **no e-mail on the domain yet**,
-and nothing can break. If you later want `mario@yourdomain.ch`, you can add **Cloudflare Email Routing**
-(free) to forward it to Gmail.
-Cloudflare then creates the needed MX/SPF records itself.
-
-If your registrar offers e-mail forwarding and you've activated it, it uses MX records pointing to the
-registrar. Copy them to Cloudflare, or switch to Cloudflare Email Routing.
-
-## 5. Check the live site
-
-- [ ] `https://yourdomain.ch` loads with a valid HTTPS lock; `http://` and `www.` redirect to it.
-- [ ] `https://yourdomain.ch/nonexistent` shows the custom 404 page.
-- [ ] `https://yourdomain.ch/sitemap-index.xml` and `/rss.xml` show your domain (not the placeholder).
-- [ ] Paste a project URL into the [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/) to see
-      (and refresh) the link preview.
-- [ ] Add the domain to [Google Search Console](https://search.google.com/search-console) (DNS TXT
-      verification via Cloudflare) and submit `sitemap-index.xml`.
-- [ ] Run [PageSpeed Insights](https://pagespeed.web.dev/) on the home page.
-
-## Manual deploy (optional)
-
-You can also deploy from your Mac without GitHub:
+The same script works locally, with the secrets as environment variables:
 
 ```bash
-npx wrangler login     # once
-npm run deploy         # build + wrangler deploy
+npm run build
+SFTP_HOST=… SFTP_USER=… SFTP_REMOTE_PATH=/httpdocs \
+SFTP_PRIVATE_KEY="$(cat ~/.ssh/marioschoch_deploy)" SFTP_KNOWN_HOSTS="$(ssh-keyscan -p 22 HOST)" \
+npm run deploy:dry     # shows what would change; use `npm run deploy` to actually upload
 ```
 
-## Costs
+## What's in `public/.htaccess`
 
-All free: GitHub (repo + Actions minutes), Cloudflare Workers free plan (static asset requests are free and
-unlimited), Workers Builds (free build minutes per month), Web Analytics, DNS, Email Routing. Your only cost
-is the domain at your registrar.
+| Section     | What it does                                                                                                                                                                                                                           |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Redirects   | www → `marioschoch.ch`, http → https, `/x/index.html` and `/x.html` → `/x/`, `/about` → `/about/` (always to https, also behind Plesk's nginx proxy)                                                                                   |
+| 404         | `ErrorDocument 404 /404.html` with a real 404 status; no directory listings                                                                                                                                                            |
+| Compression | brotli if the server has it, gzip otherwise                                                                                                                                                                                            |
+| Caching     | `/_astro/*` (file names change on every build): 1 year, immutable. HTML/XML: always revalidated. Images, models, PDFs: 1 week                                                                                                          |
+| Security    | HSTS (1 year, without `includeSubDomains`, so e.g. webmail without HTTPS keeps working), `nosniff`, Referrer-Policy, Permissions-Policy, no framing, and a Content Security Policy                                                     |
+| CSP         | Scripts only from the site itself plus build-time SHA-256 hashes of Astro's inline scripts (filled in by `scripts/csp-hashes.mjs`), plus the Cloudflare Analytics beacon. `'wasm-unsafe-eval'` and `blob:` are needed by the 3D viewer |
+
+If you add a third-party embed later (e.g. a YouTube video), its domain must be added to the CSP in
+`public/.htaccess` (`frame-src https://www.youtube-nocookie.com`, for example), or the browser blocks it.

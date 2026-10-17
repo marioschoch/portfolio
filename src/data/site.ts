@@ -5,8 +5,8 @@
 
 export const site = {
   name: 'Mario Schoch',
-  // TODO: replace with the final domain once registered (used for canonical URLs, sitemap, RSS and OG images).
-  // Keep in sync with `site` in astro.config.ts.
+  // Canonical domain (no www) — used for canonical URLs, sitemap, RSS and OG images.
+  // Keep in sync with `site` in astro.config.ts and the Sitemap line in public/robots.txt.
   url: 'https://marioschoch.ch',
   // One-line positioning, shown under the name on the home page and used as default meta description.
   tagline: {
@@ -29,7 +29,8 @@ export const site = {
   },
   // Drop your CV PDF into public/cv/ with exactly this file name; the CV page detects it at build time.
   cvPdf: '/cv/Mario-Schoch-CV.pdf',
-  // Cloudflare Web Analytics token. Set PUBLIC_CF_ANALYTICS_TOKEN in the Cloudflare build settings;
+  // Cloudflare Web Analytics token (plain JS snippet, works on any host, no cookies, no DNS change).
+  // Provided at build time via the PUBLIC_CF_ANALYTICS_TOKEN GitHub secret (see docs/DEPLOYMENT.md);
   // when empty (e.g. locally) no beacon is included.
   analyticsToken: (import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN as string | undefined) ?? '',
 };

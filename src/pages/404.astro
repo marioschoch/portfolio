@@ -1,7 +1,7 @@
 ---
 /**
- * Custom 404. Cloudflare serves dist/404.html for unknown paths with a real 404 status
- * (`not_found_handling: "404-page"` in wrangler.jsonc). Shown in English with a German line.
+ * Custom 404. Apache serves dist/404.html for unknown paths with a real 404 status
+ * (`ErrorDocument 404 /404.html` in public/.htaccess). Shown in English with a German line.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { useTranslations } from '@/i18n/utils';

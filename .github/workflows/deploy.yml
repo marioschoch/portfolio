@@ -1,0 +1,77 @@
+# Build the site and deploy dist/ to the Plesk web root (httpdocs) over SFTP.
+#
+# Runs on every push to main, or manually (Actions → Deploy → Run workflow), where you can
+# pick an older commit/tag to roll back to, or force a full upload.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions), see docs/DEPLOYMENT.md:
+#   SFTP_HOST, SFTP_PORT, SFTP_USER, SFTP_REMOTE_PATH, SFTP_KNOWN_HOSTS
+#   SFTP_PRIVATE_KEY (recommended) or SFTP_PASSWORD
+# Optional: SFTP_PASSPHRASE (if the key has one), PUBLIC_CF_ANALYTICS_TOKEN
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Commit SHA, tag or branch to deploy (empty = latest main). Use an older SHA to roll back.'
+        required: false
+        default: ''
+      full:
+        description: 'Upload every file, not just the changed ones'
+        type: boolean
+        default: false
+
+# Never run two deploys at the same time; a newer push waits for the running one.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://marioschoch.ch
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+
+      - name: Build (type check + static build + CSP hashes)
+        run: npm run build
+        env:
+          PUBLIC_CF_ANALYTICS_TOKEN: ${{ secrets.PUBLIC_CF_ANALYTICS_TOKEN }}
+
+      - name: Deploy to httpdocs via SFTP
+        run: node scripts/deploy-sftp.mjs ${{ inputs.full && '--full' || '' }}
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SFTP_PRIVATE_KEY: ${{ secrets.SFTP_PRIVATE_KEY }}
+          SFTP_PASSPHRASE: ${{ secrets.SFTP_PASSPHRASE }}
+          SFTP_KNOWN_HOSTS: ${{ secrets.SFTP_KNOWN_HOSTS }}
+          SFTP_REMOTE_PATH: ${{ secrets.SFTP_REMOTE_PATH }}
+
+      - name: Smoke test
+        run: |
+          for path in / /projects/ /cv/ /de/ /rss.xml; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://marioschoch.ch$path")
+            echo "$path → $code"
+            [ "$code" = "200" ] || exit 1
+          done

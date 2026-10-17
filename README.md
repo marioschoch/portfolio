@@ -1,13 +1,15 @@
 # marioschoch.ch — personal portfolio
 
-Static portfolio site built with **Astro 7**, **TypeScript**, **Tailwind CSS 4** and **MDX**, hosted for free on
-**Cloudflare Workers (static assets)** and deployed automatically on every push to `main`.
+Static portfolio site built with **Astro 7**, **TypeScript**, **Tailwind CSS 4** and **MDX**. It is hosted on
+Plesk shared hosting at kreativmedia.ch (Apache, no Node.js on the server) and deployed automatically via
+GitHub Actions and SFTP on every push to `main`.
 
 ```bash
 npm install
 npm run dev        # http://localhost:4321 — live reload
-npm run build      # type check + production build into dist/
-npm run preview    # serve dist/ exactly like Cloudflare does (wrangler, http://localhost:8787)
+npm run build      # type check + production build into dist/ (+ CSP hashes in dist/.htaccess)
+npm run preview    # serve dist/ locally (http://localhost:4321; ignores .htaccess)
+npm run deploy:dry # show what a deploy would upload/delete (needs SFTP_* env vars, see docs)
 npm run lint       # ESLint
 npm run format     # Prettier
 npm run todos      # list every remaining TODO placeholder
@@ -181,20 +183,33 @@ never slows down the page. `public/models/delivery-robot.glb` is a generated **p
 | Colours, fonts, spacing             | `src/styles/global.css` (tokens at the top)           |
 | Navigation entries                  | `src/components/Header.astro`                         |
 | Open Graph images (link previews)   | generated automatically, layout in `src/lib/og.ts`    |
-| Security / cache headers            | `public/_headers`                                     |
+| Redirects, cache & security headers | `public/.htaccess` (Apache)                           |
 
 ## How to deploy
 
-Push to `main`. Cloudflare builds and deploys automatically (about 1 minute), and GitHub Actions runs lint,
-format check and build as a quality gate. First-time setup (GitHub repo, Cloudflare, domain) is described
-step by step in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. Things you still need to provide:
-**[docs/CHECKLIST.md](docs/CHECKLIST.md)**.
+Push to `main`. GitHub Actions (`.github/workflows/deploy.yml`) installs, lints and builds the site, then
+uploads only the changed files to `httpdocs` over SFTP (about 2 minutes). Stale files from earlier deploys
+are removed; nothing else on the server is touched.
+
+- **First-time setup** (SFTP/SSH in Plesk, Let's Encrypt, GitHub Secrets, first deploy):
+  **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**
+- **Check a deploy:** GitHub → Actions → the latest "Deploy" run. It ends with a smoke test against the live
+  site.
+- **Roll back:** Actions → Deploy → _Run workflow_ → enter the SHA of the last good commit in "ref" (or
+  `git revert` the bad commit and push). See DEPLOYMENT.md §7.
+- Things you still need to provide: **[docs/CHECKLIST.md](docs/CHECKLIST.md)**.
 
 ## Implementation notes
 
 - **Fonts:** IBM Plex Sans/Mono are self-hosted from `@fontsource` via Astro's Fonts API with the `local`
   provider (`src/lib/fontsource.ts`). Astro 7.4's `npm` font provider fails on `file://` URLs, which is why
   the variants are listed explicitly. Astro generates size-matched fallback fonts, so there is no layout shift.
+- **Content Security Policy:** Astro inlines small scripts, so `scripts/csp-hashes.mjs` (run by
+  `npm run build`) hashes every inline script and writes the hashes into `dist/.htaccess`. No
+  `'unsafe-inline'` is needed for scripts.
+- **Deploy script** (`scripts/deploy-sftp.mjs`): keeps a `.deploy-manifest.json` (path → SHA-256) on the
+  server to upload only changed files and to delete only files it uploaded itself. It pins the server's host
+  key (`SFTP_KNOWN_HOSTS`) and refuses any target that isn't an `httpdocs` folder.
 - **Page transitions** use native cross-document View Transitions (pure CSS, disabled under
   `prefers-reduced-motion`), not Astro's `<ClientRouter>`. No router JavaScript is needed, and every page
   stays a normal page load.

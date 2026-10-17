@@ -1,15 +1,35 @@
 # What I still need to provide
 
+## Hosting setup (one-time, details in docs/DEPLOYMENT.md)
+
+**Plesk (kreativmedia):**
+
+- [ ] Let's Encrypt certificate for `marioschoch.ch` **including www** (SSL/TLS Certificates)
+- [ ] Hosting settings: preferred domain `marioschoch.ch`, "Permanent SEO-safe 301 redirect from HTTP to HTTPS"
+- [ ] Apache & nginx Settings: untick "Serve static files directly by nginx" (or ask support)
+- [ ] Enable SSH/SFTP access (chrooted). If it's not available, ask kreativmedia support
+- [ ] Test `sftp` login from the Mac, note host, port, user and the path to `httpdocs`
+- [ ] Optional: install the deploy SSH key (Plesk "SSH Keys" or `.ssh/authorized_keys`)
+- [ ] After the first deploy: delete Plesk's leftover default files in `httpdocs` (keep `.well-known/`)
+
+**GitHub:**
+
+- [ ] Create the repository and `git push -u origin main`
+- [ ] Secrets: `SFTP_HOST`, `SFTP_PORT`, `SFTP_USER`, `SFTP_REMOTE_PATH`, `SFTP_KNOWN_HOSTS`, and
+      `SFTP_PRIVATE_KEY` **or** `SFTP_PASSWORD`
+- [ ] Optional: `PUBLIC_CF_ANALYTICS_TOKEN` (Cloudflare Web Analytics site for `marioschoch.ch`, JS snippet)
+- [ ] Run Actions → Deploy → Run workflow, then check the site, the redirects and the 404 page
+
+## Content
+
 Run `npm run todos` to list every placeholder in the code. Each item below says where it goes.
 
-## Decisions
+### Decisions
 
-- [ ] **Domain**: register it, then update `src/data/site.ts → url`, `astro.config.ts → site`,
-      `public/robots.txt`, and connect it (docs/DEPLOYMENT.md, step 4).
 - [ ] **Internship availability**: `site.ts → availableFrom`, e.g. `{ en: 'February 2027', de: 'Februar 2027' }`.
 - [ ] **Public e-mail**: confirm `site.ts → email` (currently your Gmail address).
 
-## Files
+### Files
 
 - [ ] **CV PDF** → `public/cv/Mario-Schoch-CV.pdf` (exact file name)
 - [ ] **Portrait photo** → `src/assets/portrait.jpg` (portrait format, ≥ 800 px wide), then follow the comment in
@@ -22,7 +42,7 @@ Run `npm run todos` to list every placeholder in the code. Each item below says 
 - [ ] **3D model** of the robot (GLB, < 5 MB) → replaces the placeholder `public/models/delivery-robot.glb`
 - [ ] **Report PDF** for the Hinge Fork analysis (optional) → `public/files/`, then `links.report` in its `index.mdx`
 
-## Texts (everything marked TODO)
+### Texts (everything marked TODO)
 
 - [ ] **Projects** (`src/content/projects/*/index.mdx`): role, dates, team size, tools, key figures and the
       problem → approach → result text. **All numbers are invented placeholders.**
@@ -34,7 +54,7 @@ Run `npm run todos` to list every placeholder in the code. Each item below says 
 - [ ] **German translation** of the robot project (`delivery-robot/de.mdx`): review once the English text
       is final. Add `de.mdx` for other projects whenever you like.
 
-## Links
+### Links
 
 - [ ] GitHub repository URLs for each project (currently your profile as a placeholder)
 - [ ] VELOVE website URL (`velove-website/index.mdx → links.website`)

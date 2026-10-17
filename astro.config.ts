@@ -8,7 +8,7 @@ import { fontsourceVariants } from './src/lib/fontsource';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 export default defineConfig({
-  // TODO: set to the final domain (keep in sync with src/data/site.ts).
+  // Canonical domain, no www (keep in sync with src/data/site.ts). Served from the root, so no `base`.
   site: 'https://marioschoch.ch',
   output: 'static',
   trailingSlash: 'always',

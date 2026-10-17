@@ -1,0 +1,125 @@
+# =============================================================================
+# Apache configuration for marioschoch.ch (Plesk shared hosting, kreativmedia).
+#
+# Copied to dist/ by the build. scripts/csp-hashes.mjs then replaces
+# the hash placeholder in the CSP below with the SHA-256 hashes of all inline scripts,
+# so the Content Security Policy can stay strict (no 'unsafe-inline' for scripts).
+#
+# Every block is wrapped in <IfModule>, so a missing module never causes a 500 error.
+# =============================================================================
+
+Options -Indexes -MultiViews
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+
+# Let our own rules add trailing slashes (mod_dir's redirect can fall back to http:// behind
+# Plesk's nginx proxy).
+<IfModule mod_dir.c>
+  DirectorySlash Off
+</IfModule>
+
+# -----------------------------------------------------------------------------
+# Redirects: HTTPS, canonical host (no www), clean URLs, trailing slashes
+# -----------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Scheme for redirect targets: always https, except for local testing on localhost.
+  RewriteRule ^ - [E=CANONICAL_SCHEME:https]
+  RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+  RewriteRule ^ - [E=CANONICAL_SCHEME:http]
+
+  # Never touch ACME / Let's Encrypt challenges and other well-known files.
+  RewriteRule ^\.well-known/ - [L]
+
+  # Hide all other dotfiles (.htaccess, .deploy-manifest.json, …) — done with mod_rewrite rather than
+  # "Require", which some hosts don't allow in .htaccess (that would cause a 500 error).
+  RewriteRule (^|/)\. - [F]
+
+  # 1. www.marioschoch.ch → https://marioschoch.ch (single hop, also fixes http).
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L,NE]
+
+  # 2. http → https. Plesk's nginx proxy may set X-Forwarded-Proto instead of HTTPS.
+  RewriteCond %{ENV:CANONICAL_SCHEME} =https
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L,NE]
+
+  # 3. /x/index.html → /x/  and  /index.html → /
+  RewriteCond %{THE_REQUEST} \s/+((?:[^?\s]*/)?)index\.html[\s?]
+  RewriteRule ^ %{ENV:CANONICAL_SCHEME}://%{HTTP_HOST}/%1 [R=301,L,NE]
+
+  # 4. /x.html → /x/ (only when /x/ exists, so real .html files keep working).
+  RewriteCond %{THE_REQUEST} \s/+([^?\s]+)\.html[\s?]
+  RewriteCond %{DOCUMENT_ROOT}/%1/index.html -f
+  RewriteRule ^ %{ENV:CANONICAL_SCHEME}://%{HTTP_HOST}/%1/ [R=301,L,NE]
+
+  # 5. Directories always end with a slash: /about → /about/ (query string is kept).
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteRule ^ %{ENV:CANONICAL_SCHEME}://%{HTTP_HOST}%{REQUEST_URI}/ [R=301,L,NE]
+</IfModule>
+
+# -----------------------------------------------------------------------------
+# MIME types (older servers may not know these)
+# -----------------------------------------------------------------------------
+<IfModule mod_mime.c>
+  AddType model/gltf-binary .glb
+  AddType font/woff2 .woff2
+  AddType image/avif .avif
+  AddType image/webp .webp
+  AddType application/rss+xml .rss
+  AddCharset utf-8 .html .css .js .xml .json .svg .txt
+</IfModule>
+
+# -----------------------------------------------------------------------------
+# Compression: brotli where available, gzip otherwise
+# -----------------------------------------------------------------------------
+<IfModule mod_filter.c>
+  <IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/plain text/xml application/xml application/rss+xml application/javascript text/javascript application/json image/svg+xml model/gltf-binary
+  </IfModule>
+  <IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml application/rss+xml application/javascript text/javascript application/json image/svg+xml model/gltf-binary
+  </IfModule>
+</IfModule>
+
+# -----------------------------------------------------------------------------
+# Caching
+# -----------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  # Default for static files (images, PDFs, 3D models, favicon): one week.
+  Header set Cache-Control "public, max-age=604800"
+
+  # HTML, feeds, sitemaps, robots: always revalidate, so new deploys show up immediately.
+  <FilesMatch "\.(html|xml|txt|json)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  # Hashed build assets (JS, CSS, fonts, optimised images) never change: one year, immutable.
+  <If "%{REQUEST_URI} =~ m#^/_astro/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+
+  # -----------------------------------------------------------------------------
+  # Security headers
+  # -----------------------------------------------------------------------------
+  # HSTS without includeSubDomains/preload, so subdomains without HTTPS (e.g. webmail) keep working.
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "DENY"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+  Header always unset X-Powered-By
+  Header unset X-Powered-By
+
+  # Content Security Policy
+  # - script-src: own files + hashes of Astro's inline scripts (filled in at build time)
+  #   + Cloudflare Web Analytics beacon.
+  # - style-src needs 'unsafe-inline' (Astro inlines the font CSS and small styles).
+  # - blob: and 'wasm-unsafe-eval' are needed by the 3D viewer (<model-viewer> decodes textures via
+  #   blob URLs and compiles a WebAssembly module). 'wasm-unsafe-eval' allows WebAssembly only, not eval().
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' __CSP_SCRIPT_HASHES__ https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob: https://cloudflareinsights.com; worker-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+</IfModule>

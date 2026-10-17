@@ -1,11 +1,11 @@
-# Quality gate on every push and pull request: lint, format check, type check and build.
-# Deployment itself is done by Cloudflare Workers Builds (see docs/DEPLOYMENT.md).
+# Quality gate for pull requests and branches other than main: lint, format check, type check, build.
+# (Pushes to main are checked and deployed by deploy.yml.)
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+  push:
+    branches-ignore: [main]
 
 jobs:
   check:
