@@ -1,5 +1,5 @@
 /**
- * Deploys dist/ to the web root (httpdocs) over SFTP — used by .github/workflows/deploy.yml.
+ * Deploys dist/ to the web root (httpdocs) over SFTP or FTPS — used by .github/workflows/deploy.yml.
  *
  * How it decides what to do:
  *   - The server keeps a manifest (.deploy-manifest.json: path → SHA-256) of the files that
@@ -12,25 +12,32 @@
  *   - The manifest is written last; an interrupted deploy is simply repeated next time.
  *
  * Configuration (environment variables — in CI they come from GitHub Secrets):
- *   SFTP_HOST, SFTP_PORT (default 22), SFTP_USER
- *   SFTP_PRIVATE_KEY (+ optional SFTP_PASSPHRASE)  or  SFTP_PASSWORD
- *   SFTP_KNOWN_HOSTS   output of `ssh-keyscan -p <port> <host>`; the server key must match
- *   SFTP_REMOTE_PATH   e.g. /httpdocs — must end in "httpdocs" (safety check)
+ *   DEPLOY_PROTOCOL     "ftps" or "sftp" (default: sftp)
+ *   DEPLOY_HOST         server name; for FTPS it must match the TLS certificate
+ *                       (e.g. venus.kreativmedia.ch, not marioschoch.ch)
+ *   DEPLOY_PORT         default 22 (sftp) / 21 (ftps)
+ *   DEPLOY_USER
+ *   DEPLOY_PASSWORD     FTPS: required. SFTP: or use DEPLOY_PRIVATE_KEY (+ DEPLOY_PASSPHRASE)
+ *   DEPLOY_KNOWN_HOSTS  SFTP only: output of `ssh-keyscan -p <port> <host>`; the server key must match
+ *   DEPLOY_REMOTE_PATH  e.g. /httpdocs — must end in "httpdocs" (safety check)
+ *
+ * FTPS uses explicit TLS (AUTH TLS) and always verifies the server certificate; plain,
+ * unencrypted FTP is not supported.
  *
  * Flags:
  *   --dry-run        show what would happen, change nothing
  *   --full           upload every file, ignoring the remote manifest
- *   --local <dir>    deploy into a local folder instead of SFTP (for testing)
+ *   --local <dir>    deploy into a local folder instead of a server (for testing)
  */
 import { createHash } from 'node:crypto';
 import { existsSync, promises as fs } from 'node:fs';
 import { join, posix, relative, sep } from 'node:path';
+import { Readable, Writable } from 'node:stream';
 
 const DIST = 'dist';
 const MANIFEST = '.deploy-manifest.json';
 /** Paths that are never uploaded to or deleted from the server. */
 const PROTECTED = [/^\.well-known(\/|$)/, /^\.deploy-manifest/];
-const UPLOAD_CONCURRENCY = 4;
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
@@ -38,10 +45,16 @@ const full = args.includes('--full');
 const localIdx = args.indexOf('--local');
 const localTarget = localIdx >= 0 ? args[localIdx + 1] : undefined;
 
+const env = process.env;
+const protocol = (env.DEPLOY_PROTOCOL || 'sftp').toLowerCase();
+
 const log = (...m) => console.log('[deploy]', ...m);
 const fail = (msg) => {
   console.error(`[deploy] ERROR: ${msg}`);
   process.exit(1);
+};
+const requireEnv = (...keys) => {
+  for (const key of keys) if (!env[key]) fail(`Missing ${key}.`);
 };
 
 // ---------------------------------------------------------------------------
@@ -72,40 +85,39 @@ async function buildManifest() {
 }
 
 // ---------------------------------------------------------------------------
-// Transports: SFTP (production) and local folder (testing). Same small interface.
+// Transports: SFTP, FTPS and a local folder (testing). Same small interface.
 // ---------------------------------------------------------------------------
 async function sftpTransport(root) {
   const { default: SftpClient } = await import('ssh2-sftp-client');
-  const env = process.env;
-  for (const key of ['SFTP_HOST', 'SFTP_USER', 'SFTP_KNOWN_HOSTS']) {
-    if (!env[key]) fail(`Missing ${key}.`);
+  requireEnv('DEPLOY_HOST', 'DEPLOY_USER', 'DEPLOY_KNOWN_HOSTS');
+  if (!env.DEPLOY_PRIVATE_KEY && !env.DEPLOY_PASSWORD) {
+    fail('Set DEPLOY_PRIVATE_KEY or DEPLOY_PASSWORD.');
   }
-  if (!env.SFTP_PRIVATE_KEY && !env.SFTP_PASSWORD) fail('Set SFTP_PRIVATE_KEY or SFTP_PASSWORD.');
 
-  // Host key pinning: only connect if the server presents a key listed in SFTP_KNOWN_HOSTS.
-  const knownKeys = env.SFTP_KNOWN_HOSTS.split('\n')
+  // Host key pinning: only connect if the server presents a key listed in DEPLOY_KNOWN_HOSTS.
+  const knownKeys = env.DEPLOY_KNOWN_HOSTS.split('\n')
     .map((line) => line.trim().split(/\s+/))
     .filter((parts) => parts.length >= 3 && !parts[0].startsWith('#'))
     .map(([, type, key]) => ({ type, key: Buffer.from(key, 'base64') }));
-  if (!knownKeys.length) fail('SFTP_KNOWN_HOSTS contains no valid key line.');
+  if (!knownKeys.length) fail('DEPLOY_KNOWN_HOSTS contains no valid key line.');
 
   const client = new SftpClient();
   await client.connect({
-    host: env.SFTP_HOST,
-    port: Number(env.SFTP_PORT || 22),
-    username: env.SFTP_USER,
-    ...(env.SFTP_PRIVATE_KEY
-      ? { privateKey: env.SFTP_PRIVATE_KEY, passphrase: env.SFTP_PASSPHRASE || undefined }
-      : { password: env.SFTP_PASSWORD }),
+    host: env.DEPLOY_HOST,
+    port: Number(env.DEPLOY_PORT || 22),
+    username: env.DEPLOY_USER,
+    ...(env.DEPLOY_PRIVATE_KEY
+      ? { privateKey: env.DEPLOY_PRIVATE_KEY, passphrase: env.DEPLOY_PASSPHRASE || undefined }
+      : { password: env.DEPLOY_PASSWORD }),
     algorithms: { serverHostKey: [...new Set(knownKeys.map((k) => k.type))] },
     hostVerifier: (key) => knownKeys.some((k) => k.key.equals(key)),
     readyTimeout: 30000,
   });
   const p = (rel) => posix.join(root, rel);
   return {
+    concurrency: 4,
     read: async (rel) =>
       (await client.exists(p(rel))) ? (await client.get(p(rel))).toString('utf8') : null,
-    exists: async (rel) => Boolean(await client.exists(p(rel))),
     mkdir: (rel) => client.mkdir(p(rel), true),
     put: (local, rel) => client.put(local, p(rel)),
     write: (rel, text) => client.put(Buffer.from(text), p(rel)),
@@ -118,11 +130,63 @@ async function sftpTransport(root) {
   };
 }
 
+async function ftpsTransport(root) {
+  const { Client } = await import('basic-ftp');
+  requireEnv('DEPLOY_HOST', 'DEPLOY_USER', 'DEPLOY_PASSWORD');
+
+  const client = new Client(60000);
+  // Explicit TLS ("AUTH TLS") with certificate and host name verification (Node's defaults).
+  await client.access({
+    host: env.DEPLOY_HOST,
+    port: Number(env.DEPLOY_PORT || 21),
+    user: env.DEPLOY_USER,
+    password: env.DEPLOY_PASSWORD,
+    secure: true,
+    secureOptions: { servername: env.DEPLOY_HOST, rejectUnauthorized: true },
+  });
+  if (!client.ftp.socket.encrypted) fail('FTPS connection is not encrypted — aborting.');
+
+  const p = (rel) => posix.join(root, rel);
+  // 550 = file unavailable (most servers), 551 = some servers' variant of the same.
+  const isMissing = (err) => err?.code === 550 || err?.code === 551;
+  return {
+    // One FTP control connection handles one transfer at a time.
+    concurrency: 1,
+    read: async (rel) => {
+      const chunks = [];
+      const sink = new Writable({
+        write(chunk, _enc, cb) {
+          chunks.push(chunk);
+          cb();
+        },
+      });
+      try {
+        await client.downloadTo(sink, p(rel));
+      } catch (err) {
+        if (isMissing(err)) return null;
+        throw err;
+      }
+      return Buffer.concat(chunks).toString('utf8');
+    },
+    mkdir: async (rel) => {
+      await client.ensureDir(p(rel)); // also changes into the folder; all paths below are absolute
+    },
+    put: (local, rel) => client.uploadFrom(local, p(rel)),
+    write: (rel, text) => client.uploadFrom(Readable.from(Buffer.from(text)), p(rel)),
+    remove: (rel) => client.remove(p(rel), true),
+    rmdirIfEmpty: async (rel) => {
+      const list = await client.list(p(rel)).catch(() => null);
+      if (list && list.length === 0) await client.removeEmptyDir(p(rel));
+    },
+    close: async () => client.close(),
+  };
+}
+
 function localTransport(root) {
   const p = (rel) => join(root, ...rel.split('/'));
   return {
+    concurrency: 4,
     read: async (rel) => (existsSync(p(rel)) ? fs.readFile(p(rel), 'utf8') : null),
-    exists: async (rel) => existsSync(p(rel)),
     mkdir: (rel) => fs.mkdir(p(rel), { recursive: true }),
     put: (local, rel) => fs.copyFile(local, p(rel)),
     write: (rel, text) => fs.writeFile(p(rel), text),
@@ -148,22 +212,30 @@ async function pool(items, limit, fn) {
 
 const isPage = (rel) => /\.(html|xml|txt)$/.test(rel) || rel.endsWith('.htaccess');
 
+async function connect(remoteRoot) {
+  if (localTarget) return localTransport(localTarget);
+  if (protocol === 'sftp') return sftpTransport(remoteRoot);
+  if (protocol === 'ftps') return ftpsTransport(remoteRoot);
+  return fail(`DEPLOY_PROTOCOL must be "sftp" or "ftps" (got "${protocol}").`);
+}
+
 async function main() {
-  const remoteRoot = localTarget ?? process.env.SFTP_REMOTE_PATH ?? '';
+  const remoteRoot = localTarget ?? env.DEPLOY_REMOTE_PATH ?? '';
   if (!localTarget) {
     // Safety: never deploy into anything but a Plesk web root.
     const clean = remoteRoot.replace(/\/+$/, '');
     if (!clean || clean === '/' || posix.basename(clean) !== 'httpdocs') {
-      fail(`SFTP_REMOTE_PATH must point to the httpdocs folder (got "${remoteRoot}").`);
+      fail(`DEPLOY_REMOTE_PATH must point to the httpdocs folder (got "${remoteRoot}").`);
     }
   }
 
   const local = await buildManifest();
-  log(
-    `${Object.keys(local).length} files in dist/ → ${localTarget ? `local:${localTarget}` : remoteRoot}`,
-  );
+  const target = localTarget
+    ? `local:${localTarget}`
+    : `${protocol}://${env.DEPLOY_HOST}${remoteRoot}`;
+  log(`${Object.keys(local).length} files in dist/ → ${target}`);
 
-  const remote = localTarget ? localTransport(localTarget) : await sftpTransport(remoteRoot);
+  const remote = await connect(remoteRoot);
   try {
     const previousRaw = await remote.read(MANIFEST);
     let previous = {};
@@ -201,7 +273,7 @@ async function main() {
     for (const dir of dirs) await remote.mkdir(dir);
     let done = 0;
     for (const batch of [assets, pages]) {
-      await pool(batch, UPLOAD_CONCURRENCY, async (rel) => {
+      await pool(batch, remote.concurrency, async (rel) => {
         await remote.put(join(DIST, ...rel.split('/')), rel);
         if (++done % 25 === 0) log(`  uploaded ${done}/${changed.length}`);
       });
@@ -221,15 +293,11 @@ async function main() {
 
     await remote.write(
       MANIFEST,
-      JSON.stringify(
-        {
-          deployedAt: new Date().toISOString(),
-          commit: process.env.GITHUB_SHA ?? null,
-          files: local,
-        },
-        null,
-        0,
-      ),
+      JSON.stringify({
+        deployedAt: new Date().toISOString(),
+        commit: env.GITHUB_SHA ?? null,
+        files: local,
+      }),
     );
     log(`Done: ${changed.length} uploaded, ${stale.length} deleted.`);
   } finally {

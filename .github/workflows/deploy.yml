@@ -1,12 +1,13 @@
-# Build the site and deploy dist/ to the Plesk web root (httpdocs) over SFTP.
+# Build the site and deploy dist/ to the Plesk web root (httpdocs) over FTPS or SFTP.
 #
 # Runs on every push to main, or manually (Actions → Deploy → Run workflow), where you can
 # pick an older commit/tag to roll back to, or force a full upload.
 #
 # Required repository secrets (Settings → Secrets and variables → Actions), see docs/DEPLOYMENT.md:
-#   SFTP_HOST, SFTP_PORT, SFTP_USER, SFTP_REMOTE_PATH, SFTP_KNOWN_HOSTS
-#   SFTP_PRIVATE_KEY (recommended) or SFTP_PASSWORD
-# Optional: SFTP_PASSPHRASE (if the key has one), PUBLIC_CF_ANALYTICS_TOKEN
+#   DEPLOY_PROTOCOL (ftps | sftp), DEPLOY_HOST, DEPLOY_PORT, DEPLOY_USER, DEPLOY_REMOTE_PATH
+#   FTPS: DEPLOY_PASSWORD
+#   SFTP: DEPLOY_KNOWN_HOSTS + DEPLOY_PRIVATE_KEY (or DEPLOY_PASSWORD), optional DEPLOY_PASSPHRASE
+# Optional: PUBLIC_CF_ANALYTICS_TOKEN
 name: Deploy
 
 on:
@@ -56,17 +57,18 @@ jobs:
         env:
           PUBLIC_CF_ANALYTICS_TOKEN: ${{ secrets.PUBLIC_CF_ANALYTICS_TOKEN }}
 
-      - name: Deploy to httpdocs via SFTP
-        run: node scripts/deploy-sftp.mjs ${{ inputs.full && '--full' || '' }}
+      - name: Deploy to httpdocs
+        run: node scripts/deploy.mjs ${{ inputs.full && '--full' || '' }}
         env:
-          SFTP_HOST: ${{ secrets.SFTP_HOST }}
-          SFTP_PORT: ${{ secrets.SFTP_PORT }}
-          SFTP_USER: ${{ secrets.SFTP_USER }}
-          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
-          SFTP_PRIVATE_KEY: ${{ secrets.SFTP_PRIVATE_KEY }}
-          SFTP_PASSPHRASE: ${{ secrets.SFTP_PASSPHRASE }}
-          SFTP_KNOWN_HOSTS: ${{ secrets.SFTP_KNOWN_HOSTS }}
-          SFTP_REMOTE_PATH: ${{ secrets.SFTP_REMOTE_PATH }}
+          DEPLOY_PROTOCOL: ${{ secrets.DEPLOY_PROTOCOL }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+          DEPLOY_PRIVATE_KEY: ${{ secrets.DEPLOY_PRIVATE_KEY }}
+          DEPLOY_PASSPHRASE: ${{ secrets.DEPLOY_PASSPHRASE }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_REMOTE_PATH: ${{ secrets.DEPLOY_REMOTE_PATH }}
 
       - name: Smoke test
         run: |

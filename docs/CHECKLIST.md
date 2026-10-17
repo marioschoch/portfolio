@@ -7,16 +7,17 @@
 - [ ] Let's Encrypt certificate for `marioschoch.ch` **including www** (SSL/TLS Certificates)
 - [ ] Hosting settings: preferred domain `marioschoch.ch`, "Permanent SEO-safe 301 redirect from HTTP to HTTPS"
 - [ ] Apache & nginx Settings: untick "Serve static files directly by nginx" (or ask support)
-- [ ] Enable SSH/SFTP access (chrooted). If it's not available, ask kreativmedia support
-- [ ] Test `sftp` login from the Mac, note host, port, user and the path to `httpdocs`
-- [ ] Optional: install the deploy SSH key (Plesk "SSH Keys" or `.ssh/authorized_keys`)
+- [ ] Set/note the system user password (Hosting-Einstellungen → Anmeldedaten für Systembenutzer)
+- [ ] Test the login with Cyberduck/FileZilla: FTP over explicit TLS, `venus.kreativmedia.ch`, port 21 —
+      confirm you see the `httpdocs` folder
+- [ ] Optional: ask kreativmedia to open SSH port 22 if you'd rather use SFTP with an SSH key
 - [ ] After the first deploy: delete Plesk's leftover default files in `httpdocs` (keep `.well-known/`)
 
 **GitHub:**
 
 - [ ] Create the repository and `git push -u origin main`
-- [ ] Secrets: `SFTP_HOST`, `SFTP_PORT`, `SFTP_USER`, `SFTP_REMOTE_PATH`, `SFTP_KNOWN_HOSTS`, and
-      `SFTP_PRIVATE_KEY` **or** `SFTP_PASSWORD`
+- [ ] Secrets: `DEPLOY_PROTOCOL`=`ftps`, `DEPLOY_HOST`=`venus.kreativmedia.ch`, `DEPLOY_PORT`=`21`,
+      `DEPLOY_USER`=`marioschoch`, `DEPLOY_PASSWORD`, `DEPLOY_REMOTE_PATH`=`/httpdocs`
 - [ ] Optional: `PUBLIC_CF_ANALYTICS_TOKEN` (Cloudflare Web Analytics site for `marioschoch.ch`, JS snippet)
 - [ ] Run Actions → Deploy → Run workflow, then check the site, the redirects and the 404 page
 

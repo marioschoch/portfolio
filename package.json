@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Personal portfolio of Mario Schoch — static Astro site, deployed via SFTP to Plesk hosting.",
+  "description": "Personal portfolio of Mario Schoch — static Astro site, deployed via FTPS/SFTP to Plesk hosting.",
   "engines": {
     "node": ">=22.22"
   },
@@ -16,8 +16,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "todos": "grep -rn --color=always \"TODO\" src docs README.md || true",
-    "deploy": "node scripts/deploy-sftp.mjs",
-    "deploy:dry": "node scripts/deploy-sftp.mjs --dry-run"
+    "deploy": "node scripts/deploy.mjs",
+    "deploy:dry": "node scripts/deploy.mjs --dry-run"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
@@ -38,6 +38,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "astro-eslint-parser": "^3.2.0",
+    "basic-ftp": "^6.2.3",
     "eslint": "^10.13.0",
     "eslint-plugin-astro": "^3.2.1",
     "globals": "^17.13.0",

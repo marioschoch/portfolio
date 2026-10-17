@@ -2,14 +2,14 @@
 
 Static portfolio site built with **Astro 7**, **TypeScript**, **Tailwind CSS 4** and **MDX**. It is hosted on
 Plesk shared hosting at kreativmedia.ch (Apache, no Node.js on the server) and deployed automatically via
-GitHub Actions and SFTP on every push to `main`.
+GitHub Actions and FTPS on every push to `main`.
 
 ```bash
 npm install
 npm run dev        # http://localhost:4321 — live reload
 npm run build      # type check + production build into dist/ (+ CSP hashes in dist/.htaccess)
 npm run preview    # serve dist/ locally (http://localhost:4321; ignores .htaccess)
-npm run deploy:dry # show what a deploy would upload/delete (needs SFTP_* env vars, see docs)
+npm run deploy:dry # show what a deploy would upload/delete (needs DEPLOY_* env vars, see docs)
 npm run lint       # ESLint
 npm run format     # Prettier
 npm run todos      # list every remaining TODO placeholder
@@ -188,10 +188,10 @@ never slows down the page. `public/models/delivery-robot.glb` is a generated **p
 ## How to deploy
 
 Push to `main`. GitHub Actions (`.github/workflows/deploy.yml`) installs, lints and builds the site, then
-uploads only the changed files to `httpdocs` over SFTP (about 2 minutes). Stale files from earlier deploys
+uploads only the changed files to `httpdocs` over FTPS (or SFTP) (about 2 minutes). Stale files from earlier deploys
 are removed; nothing else on the server is touched.
 
-- **First-time setup** (SFTP/SSH in Plesk, Let's Encrypt, GitHub Secrets, first deploy):
+- **First-time setup** (Plesk login, Let's Encrypt, GitHub Secrets, first deploy):
   **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**
 - **Check a deploy:** GitHub → Actions → the latest "Deploy" run. It ends with a smoke test against the live
   site.
@@ -207,9 +207,11 @@ are removed; nothing else on the server is touched.
 - **Content Security Policy:** Astro inlines small scripts, so `scripts/csp-hashes.mjs` (run by
   `npm run build`) hashes every inline script and writes the hashes into `dist/.htaccess`. No
   `'unsafe-inline'` is needed for scripts.
-- **Deploy script** (`scripts/deploy-sftp.mjs`): keeps a `.deploy-manifest.json` (path → SHA-256) on the
-  server to upload only changed files and to delete only files it uploaded itself. It pins the server's host
-  key (`SFTP_KNOWN_HOSTS`) and refuses any target that isn't an `httpdocs` folder.
+- **Deploy script** (`scripts/deploy.mjs`): FTPS (explicit TLS, certificate always verified) or SFTP
+  (server host key pinned via `DEPLOY_KNOWN_HOSTS`), chosen by `DEPLOY_PROTOCOL`. It keeps a
+  `.deploy-manifest.json` (path → SHA-256) on the server, uploads only changed files, deletes only files it
+  uploaded itself, and refuses any target that isn't an `httpdocs` folder. On kreativmedia, port 22 (SSH)
+  is currently firewalled, so FTPS via `venus.kreativmedia.ch` is used.
 - **Page transitions** use native cross-document View Transitions (pure CSS, disabled under
   `prefers-reduced-motion`), not Astro's `<ClientRouter>`. No router JavaScript is needed, and every page
   stays a normal page load.
