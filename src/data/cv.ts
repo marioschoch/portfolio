@@ -48,7 +48,7 @@ export const cv: Cv = {
       },
       org: 'ETH Zürich, D-MAVT',
       location: 'Zürich',
-      start: '2023-09', // TODO
+      start: '2025-09',
       details: [
         // TODO: focus areas / relevant courses / GPA if you want to show it
         {
@@ -74,35 +74,35 @@ export const cv: Cv = {
 
   experience: [
     {
-      // TODO: replace with real work experience (internships, student jobs, teaching assistant …)
-      title: { en: 'TODO: Position', de: 'TODO: Position' },
-      org: 'TODO: Company',
-      location: 'TODO',
-      start: '2024-07',
-      end: '2024-08',
+      title: { en: 'R&D Intern', de: 'Praktikant Forschung & Entwicklung' },
+      org: 'BMC Switzerland',
+      start: '2025-06',
+      end: '2025-06',
       details: [
-        { en: 'TODO: What you did and what came out of it.', de: 'TODO: Tätigkeit und Ergebnis.' },
+        {
+          en: 'One-month internship in the research & development department.',
+          de: 'Einmonatiges Praktikum in der Abteilung Forschung & Entwicklung.',
+        },
       ],
     },
   ],
 
-  projects: ['delivery-robot', 'bmc-hinge-fork', 'velove-website'],
+  projects: [],
 
   skills: [
-    { category: 'CAD / CAE', items: ['SolidWorks', 'ANSYS Mechanical', 'Siemens NX'] }, // TODO
+    { category: 'CAD', items: ['Onshape', 'Siemens NX'] },
+    { category: { en: 'Programming', de: 'Programmierung' }, items: ['C++', 'Python'] },
     {
-      category: { en: 'Programming', de: 'Programmierung' },
-      items: ['C++', 'Python', 'MATLAB', 'TypeScript'],
-    }, // TODO
-    { category: 'Embedded', items: ['Arduino', 'KiCad', 'Sensors & actuators', 'PID control'] }, // TODO
-    { category: 'Web', items: ['Next.js', 'Astro', 'Tailwind CSS'] },
+      category: 'Embedded',
+      items: ['Arduino', 'ESP32', 'PID control', 'Sensors & actuators'],
+    },
     { category: { en: 'Workshop', de: 'Werkstatt' }, items: ['3D printing', 'Bicycle mechanics'] }, // TODO
   ],
 
   languages: [
     { language: { en: 'German', de: 'Deutsch' }, level: { en: 'Native', de: 'Muttersprache' } }, // TODO
-    { language: { en: 'English', de: 'Englisch' }, level: 'C1' }, // TODO
-    { language: { en: 'French', de: 'Französisch' }, level: 'B1' }, // TODO
+    { language: { en: 'English', de: 'Englisch' }, level: 'C2' },
+    { language: { en: 'French', de: 'Französisch' }, level: 'B2' },
   ],
 
   awards: [

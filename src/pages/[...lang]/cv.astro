@@ -42,7 +42,9 @@ const month = (ym: string) =>
     timeZone: 'UTC',
   }).format(new Date(`${ym}-01T00:00:00Z`));
 const range = (e: { start: string; end?: string | undefined }) =>
-  `${month(e.start)} – ${e.end ? month(e.end) : t('spec.present')}`;
+  e.end === e.start
+    ? month(e.start)
+    : `${month(e.start)} – ${e.end ? month(e.end) : t('spec.present')}`;
 
 const sections: { key: UiKey; entries: CvEntry[] }[] = [
   { key: 'cv.education', entries: cv.education },
@@ -122,25 +124,27 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
       ) : null,
     )}
 
-    <section class="cv-section">
-      <h2 class="cv-heading">{t('cv.projects')}</h2>
-      <ol class="space-y-4 print:space-y-2">
-        {projects.map((p) => (
-          <li class="cv-entry print-break-avoid">
-            <p class="cv-date">{p.entry.data.timeframe.start.getUTCFullYear()}</p>
-            <div>
-              <h3 class="font-semibold text-fg">
-                <a href={localizePath(`/projects/${p.id}/`, lang)} class="hover:text-accent">
-                  {p.title}
-                </a>
-              </h3>
-              <p class="text-sm text-fg-soft">{p.summary}</p>
-              <p class="mt-1 font-mono text-2xs text-muted">{p.entry.data.tools.join(' · ')}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </section>
+    {projects.length > 0 && (
+      <section class="cv-section">
+        <h2 class="cv-heading">{t('cv.projects')}</h2>
+        <ol class="space-y-4 print:space-y-2">
+          {projects.map((p) => (
+            <li class="cv-entry print-break-avoid">
+              <p class="cv-date">{p.entry.data.timeframe.start.getUTCFullYear()}</p>
+              <div>
+                <h3 class="font-semibold text-fg">
+                  <a href={localizePath(`/projects/${p.id}/`, lang)} class="hover:text-accent">
+                    {p.title}
+                  </a>
+                </h3>
+                <p class="text-sm text-fg-soft">{p.summary}</p>
+                <p class="mt-1 font-mono text-2xs text-muted">{p.entry.data.tools.join(' · ')}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
 
     {cv.volunteering.length > 0 && (
       <section class="cv-section">
