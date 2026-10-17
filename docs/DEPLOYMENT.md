@@ -5,7 +5,7 @@ or PHP runs on it. Domain, DNS and e-mail stay at kreativmedia; **nothing in you
 changes.**
 
 ```
-git push (main) ──▶ GitHub Actions: npm ci → lint → build → upload changed files (FTPS) ──▶ /marioschoch.ch/
+git push (main) ──▶ GitHub Actions: npm ci → lint → build → upload changed files (SFTP) ──▶ /marioschoch.ch/
 ```
 
 - `npm run build` produces `dist/`: every page, the RSS feed, sitemap, link-preview images, and an
@@ -16,13 +16,14 @@ git push (main) ──▶ GitHub Actions: npm ci → lint → build → upload c
 
 **Connection type.** The script supports two encrypted transfer methods:
 
-|                       | **FTPS** (FTP over TLS), recommended for now                                        | **SFTP** (over SSH)                                                                                                                               |
-| --------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Status on your server | **Works.** Port 21 with TLS 1.3, valid certificate for `*.kreativmedia.ch` (tested) | SSH is enabled in Plesk (`/bin/bash (chrooted)`), but **port 22 is blocked by kreativmedia's firewall** (tested). Only usable if support opens it |
-| Login                 | Plesk system user + password                                                        | Password or SSH key                                                                                                                               |
-| Host name             | **`venus.kreativmedia.ch`** (must match the certificate)                            | Whatever support tells you                                                                                                                        |
+|                       | **SFTP** (over SSH), **in use**                                                                           | **FTPS** (FTP over TLS), fallback                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Status on your server | **Works on port 2121** (kreativmedia's SSH port; port 22 is firewalled). SSH is enabled in Plesk          | **Works.** Port 21 with TLS 1.3, valid certificate for `*.kreativmedia.ch` (tested) |
+| Login                 | SSH key (no password stored at GitHub)                                                                    | Plesk system user + password                                                        |
+| Host name             | `venus.kreativmedia.ch` (same server as `marioschoch.ch`)                                                 | **`venus.kreativmedia.ch`** (must match the certificate)                            |
+| Server identity       | Pinned via `DEPLOY_KNOWN_HOSTS`; ED25519 fingerprint `SHA256:wroXLPw6o5xZK5BZukvMyOyjyhDSvu0NoXpBp7wIn14` | Checked via the TLS certificate                                                     |
 
-Plain, unencrypted FTP is deliberately not supported. Switching later from FTPS to SFTP only means changing
+Plain, unencrypted FTP is deliberately not supported. Switching between SFTP and FTPS only means changing
 GitHub secrets, not code.
 
 Plan about 30 minutes for the first setup.
@@ -59,9 +60,10 @@ Log in to Plesk (link in your kreativmedia customer centre) → **Websites & Dom
    `80.74.145.103` / `2a00:1128:0:157::54`, server `venus.kreativmedia.ch`). **Leave the mail records
    (MX, SPF/TXT, DKIM, DMARC) untouched.**
 
-## 2. Plesk: login details for the deploy
+## 2. Plesk: login details and SSH key for the deploy
 
-The deploy logs in as the Plesk **system user**. That's the same login FTP uses.
+The deploy logs in as the Plesk **system user**. That's the same login FTP and SSH use. The password is
+only needed once, to install the SSH key (and for the FTPS fallback).
 
 1. _Websites & Domains → marioschoch.ch → Hosting-Einstellungen_ → section **Anmeldedaten für
    Systembenutzer**:
@@ -69,31 +71,36 @@ The deploy logs in as the Plesk **system user**. That's the same login FTP uses.
    - **Passwort:** Plesk never shows the current one. If you don't know it, enter a new **strong** password
      (e.g. from a password manager, 20+ characters), click **Speichern**, and keep it somewhere safe.
      Changing it also changes your FTP/SSH login.
-2. Test the login from your Mac with an encrypted FTP client, e.g. [Cyberduck](https://cyberduck.io)
-   (free) or FileZilla:
-   - Connection type: **FTP-SSL (Explicit AUTH TLS)**, or "FTP over explicit TLS" in FileZilla.
-   - Server: `venus.kreativmedia.ch`, port `21`.
-   - Username `marioschoch`, your password.
+2. Test the login in Terminal (type `yes` at the first-connection question; the fingerprint shown must be
+   `SHA256:wroXLPw6o5xZK5BZukvMyOyjyhDSvu0NoXpBp7wIn14`):
 
-   After connecting you see the folder **`marioschoch.ch`**: that is the web root (Plesk _Dokumentstamm_).
-   Next to it are `logs`, `error_docs` and system folders like `dev`, `etc`, `usr`, `var` (they come with the
-   chrooted SSH setting; the deploy never touches them). The deploy path is therefore
-   **`/marioschoch.ch`**.
+   ```bash
+   sftp -P 2121 marioschoch@marioschoch.ch
+   ```
 
-### Optional, later: SFTP instead of FTPS
+   Enter the password, then `ls` and `bye`. You see the folder **`marioschoch.ch`**: that is the web root
+   (Plesk _Dokumentstamm_). Next to it are `logs`, `error_docs` and system folders like `dev`, `etc`, `usr`,
+   `var` (they come with the chrooted SSH setting; the deploy never touches them). The deploy path is
+   therefore **`/marioschoch.ch`**.
 
-If kreativmedia opens port 22 for you, SFTP lets you log in with an SSH key instead of a password:
+3. Create an SSH key just for deployments and install it on the server. Run the commands one at a time (and
+   without comments: zsh doesn't treat `#` as a comment when pasted):
 
-```bash
-# Test (Terminal):
-sftp -P 22 marioschoch@HOST      # HOST/port as given by support; `pwd` and `ls` show the path to the web root
+   ```bash
+   ssh-keygen -t ed25519 -C "github-deploy marioschoch.ch" -f ~/.ssh/marioschoch_deploy -N ""
+   ssh-copy-id -p 2121 -i ~/.ssh/marioschoch_deploy.pub marioschoch@marioschoch.ch
+   sftp -P 2121 -i ~/.ssh/marioschoch_deploy marioschoch@marioschoch.ch
+   ```
 
-# Create a key just for deployments:
-ssh-keygen -t ed25519 -C "github-deploy marioschoch.ch" -f ~/.ssh/marioschoch_deploy -N ""
-```
+   `ssh-copy-id` asks for the password once and ends with `Number of key(s) added: 1`. The last command must
+   log in **without** asking for a password. If `ssh-copy-id` fails, add the public key
+   (`~/.ssh/marioschoch_deploy.pub`) in Plesk under _SSH Keys_ instead.
 
-Install the public key (`~/.ssh/marioschoch_deploy.pub`) via Plesk → _SSH Keys_ (if available), or upload
-it as `.ssh/authorized_keys` in your web space. Then switch the GitHub secrets as described in step 4.
+   The key comes as a pair: `marioschoch_deploy.pub` (public, now on the server) and `marioschoch_deploy`
+   (private). Whoever has the private key can log in, so it only ever goes into the GitHub secret in step 4.
+
+**FTPS test (only for the fallback):** with [Cyberduck](https://cyberduck.io) or FileZilla, connection type
+**FTP-SSL (Explicit AUTH TLS)**, server `venus.kreativmedia.ch`, port `21`, user `marioschoch`, your password.
 
 ## 3. GitHub: create the repository
 
@@ -114,27 +121,25 @@ it as `.ssh/authorized_keys` in your web space. Then switch the GitHub secrets a
 Repository → **Settings → Secrets and variables → Actions → New repository secret**. Secrets are encrypted
 and never shown in logs.
 
-**For FTPS (what works now):**
+Make sure you're on the **Secrets** tab (not _Variables_) and the names match exactly, including case.
 
-| Secret                      | Value                                |
-| --------------------------- | ------------------------------------ |
-| `DEPLOY_PROTOCOL`           | `ftps`                               |
-| `DEPLOY_HOST`               | `venus.kreativmedia.ch`              |
-| `DEPLOY_PORT`               | `21`                                 |
-| `DEPLOY_USER`               | `marioschoch`                        |
-| `DEPLOY_PASSWORD`           | The system user password from step 2 |
-| `DEPLOY_REMOTE_PATH`        | `/marioschoch.ch`                    |
-| `PUBLIC_CF_ANALYTICS_TOKEN` | Optional, see step 6                 |
+**SFTP (in use):**
 
-**To switch to SFTP later**, change or add:
+| Secret                      | Value                                                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DEPLOY_PROTOCOL`           | `sftp`                                                                                                                                     |
+| `DEPLOY_HOST`               | `venus.kreativmedia.ch`                                                                                                                    |
+| `DEPLOY_PORT`               | `2121`                                                                                                                                     |
+| `DEPLOY_USER`               | `marioschoch`                                                                                                                              |
+| `DEPLOY_REMOTE_PATH`        | `/marioschoch.ch`                                                                                                                          |
+| `DEPLOY_KNOWN_HOSTS`        | Output of `ssh-keyscan -p 2121 venus.kreativmedia.ch` (`… \| pbcopy`), all lines including the `#` ones. Pins the server's identity        |
+| `DEPLOY_PRIVATE_KEY`        | Run `pbcopy < ~/.ssh/marioschoch_deploy` and paste. Must start with `-----BEGIN OPENSSH PRIVATE KEY-----` and end with the `-----END` line |
+| `PUBLIC_CF_ANALYTICS_TOKEN` | Optional, see step 6                                                                                                                       |
 
-| Secret                        | Value                                                                                                                  |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `DEPLOY_PROTOCOL`             | `sftp`                                                                                                                 |
-| `DEPLOY_HOST` / `DEPLOY_PORT` | As given by kreativmedia (port usually `22`)                                                                           |
-| `DEPLOY_REMOTE_PATH`          | What `pwd` + `ls` showed, e.g. `/marioschoch.ch`                                                                       |
-| `DEPLOY_KNOWN_HOSTS`          | Output of `ssh-keyscan -p PORT HOST` (paste all lines). Pins the server's identity                                     |
-| `DEPLOY_PRIVATE_KEY`          | The whole content of `~/.ssh/marioschoch_deploy` (`pbcopy < ~/.ssh/marioschoch_deploy`). Then delete `DEPLOY_PASSWORD` |
+No `DEPLOY_PASSWORD` is needed for SFTP; don't store one.
+
+**To fall back to FTPS**, change or add: `DEPLOY_PROTOCOL` = `ftps`, `DEPLOY_PORT` = `21`, and
+`DEPLOY_PASSWORD` = the system user password from step 2 (`DEPLOY_HOST` stays `venus.kreativmedia.ch`).
 
 ## 5. First deploy and checks
 
@@ -165,7 +170,8 @@ and never shown in logs.
 | `Hostname/IP does not match certificate's altnames`    | `DEPLOY_HOST` must be `venus.kreativmedia.ch`, not `marioschoch.ch`.                        |
 | `certificate has expired` / `unable to verify`         | kreativmedia's FTP certificate has a problem. Contact support; don't switch off encryption. |
 | `Host denied (verification failed)` (SFTP)             | `DEPLOY_KNOWN_HOSTS` doesn't match the server. Run `ssh-keyscan` again.                     |
-| `ECONNREFUSED` / timeout                               | Wrong host/port, or (SFTP) port 22 still blocked.                                           |
+| `All configured authentication methods failed` (SFTP)  | Key not installed on the server (step 2.3), or `DEPLOY_PRIVATE_KEY` pasted incompletely.    |
+| `ECONNREFUSED` / timeout                               | Wrong host/port. SFTP must use port `2121` (port 22 is firewalled).                         |
 | Smoke test fails with `000`                            | HTTPS isn't set up yet (step 1.2).                                                          |
 | Build fails                                            | A content error (e.g. a missing project field). The log names the file; fix it and push.    |
 
@@ -210,9 +216,10 @@ The same script works locally, with the secrets as environment variables:
 
 ```bash
 npm run build
-export DEPLOY_PROTOCOL=ftps DEPLOY_HOST=venus.kreativmedia.ch DEPLOY_PORT=21 \
+export DEPLOY_PROTOCOL=sftp DEPLOY_HOST=venus.kreativmedia.ch DEPLOY_PORT=2121 \
        DEPLOY_USER=marioschoch DEPLOY_REMOTE_PATH=/marioschoch.ch
-read -s DEPLOY_PASSWORD && export DEPLOY_PASSWORD   # type the password (hidden), press Enter
+export DEPLOY_KNOWN_HOSTS="$(ssh-keyscan -p 2121 venus.kreativmedia.ch 2>/dev/null)"
+export DEPLOY_PRIVATE_KEY="$(cat ~/.ssh/marioschoch_deploy)"
 npm run deploy:dry     # shows what would change; use `npm run deploy` to actually upload
 ```
 

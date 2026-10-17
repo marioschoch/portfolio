@@ -4,22 +4,23 @@
 
 **Plesk (kreativmedia):**
 
-- [ ] Let's Encrypt certificate for `marioschoch.ch` **including www** (SSL/TLS Certificates)
-- [ ] Hosting settings: preferred domain `marioschoch.ch`, "Permanent SEO-safe 301 redirect from HTTP to HTTPS"
-- [ ] Apache & nginx Settings: untick "Serve static files directly by nginx" (or ask support)
-- [ ] Set/note the system user password (Hosting-Einstellungen → Anmeldedaten für Systembenutzer)
-- [ ] Test the login with Cyberduck/FileZilla: FTP over explicit TLS, `venus.kreativmedia.ch`, port 21 —
-      confirm you see the `marioschoch.ch` folder (= Plesk Dokumentstamm)
-- [ ] Optional: ask kreativmedia to open SSH port 22 if you'd rather use SFTP with an SSH key
-- [ ] After the first deploy: delete Plesk's leftover default files in `marioschoch.ch/` (keep `.well-known/`)
+- [x] Let's Encrypt certificate for `marioschoch.ch` **including www** (SSL/TLS Certificates)
+- [x] Hosting settings: preferred domain `marioschoch.ch`, "Permanent SEO-safe 301 redirect from HTTP to HTTPS"
+- [x] Apache & nginx Settings: untick "Serve static files directly by nginx" (or ask support)
+- [x] Set/note the system user password (Hosting-Einstellungen → Anmeldedaten für Systembenutzer)
+- [x] Test the SFTP login: `sftp -P 2121 marioschoch@marioschoch.ch` — the `marioschoch.ch` folder is the
+      Plesk Dokumentstamm
+- [x] Deploy SSH key `~/.ssh/marioschoch_deploy` created and installed on the server (`ssh-copy-id -p 2121`)
+- [x] After the first deploy: delete Plesk's leftover default files in `marioschoch.ch/` (keep `.well-known/`)
 
 **GitHub:**
 
-- [ ] Create the repository and `git push -u origin main`
-- [ ] Secrets: `DEPLOY_PROTOCOL`=`ftps`, `DEPLOY_HOST`=`venus.kreativmedia.ch`, `DEPLOY_PORT`=`21`,
-      `DEPLOY_USER`=`marioschoch`, `DEPLOY_PASSWORD`, `DEPLOY_REMOTE_PATH`=`/marioschoch.ch`
+- [x] Create the repository and `git push -u origin main`
+- [x] Secrets: `DEPLOY_PROTOCOL`=`sftp`, `DEPLOY_HOST`=`venus.kreativmedia.ch`, `DEPLOY_PORT`=`2121`,
+      `DEPLOY_USER`=`marioschoch`, `DEPLOY_REMOTE_PATH`=`/marioschoch.ch`, `DEPLOY_KNOWN_HOSTS`,
+      `DEPLOY_PRIVATE_KEY` (no `DEPLOY_PASSWORD`)
 - [ ] Optional: `PUBLIC_CF_ANALYTICS_TOKEN` (Cloudflare Web Analytics site for `marioschoch.ch`, JS snippet)
-- [ ] Run Actions → Deploy → Run workflow, then check the site, the redirects and the 404 page
+- [x] Run Actions → Deploy → Run workflow, then check the site, the redirects and the 404 page
 
 ## Content
 

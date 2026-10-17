@@ -15,7 +15,7 @@
  *   DEPLOY_PROTOCOL     "ftps" or "sftp" (default: sftp)
  *   DEPLOY_HOST         server name; for FTPS it must match the TLS certificate
  *                       (e.g. venus.kreativmedia.ch, not marioschoch.ch)
- *   DEPLOY_PORT         default 22 (sftp) / 21 (ftps)
+ *   DEPLOY_PORT         default 22 (sftp) / 21 (ftps); kreativmedia's SSH port is 2121
  *   DEPLOY_USER
  *   DEPLOY_PASSWORD     FTPS: required. SFTP: or use DEPLOY_PRIVATE_KEY (+ DEPLOY_PASSPHRASE)
  *   DEPLOY_KNOWN_HOSTS  SFTP only: output of `ssh-keyscan -p <port> <host>`; the server key must match

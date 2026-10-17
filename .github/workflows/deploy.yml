@@ -6,7 +6,8 @@
 # Required repository secrets (Settings → Secrets and variables → Actions), see docs/DEPLOYMENT.md:
 #   DEPLOY_PROTOCOL (ftps | sftp), DEPLOY_HOST, DEPLOY_PORT, DEPLOY_USER, DEPLOY_REMOTE_PATH
 #   FTPS: DEPLOY_PASSWORD
-#   SFTP: DEPLOY_KNOWN_HOSTS + DEPLOY_PRIVATE_KEY (or DEPLOY_PASSWORD), optional DEPLOY_PASSPHRASE
+#   SFTP (in use, venus.kreativmedia.ch:2121): DEPLOY_KNOWN_HOSTS + DEPLOY_PRIVATE_KEY (or DEPLOY_PASSWORD),
+#   optional DEPLOY_PASSPHRASE
 # Optional: PUBLIC_CF_ANALYTICS_TOKEN
 name: Deploy
 
