@@ -2,6 +2,8 @@
 /**
  * Snake: a small canvas game. Keyboard (arrows / WASD / Space) on desktop,
  * swipe or on-screen buttons on touch devices. Colours follow the site theme.
+ * The snake is drawn as a roller chain and the food as a turning gear; sounds are
+ * synthesised with the Web Audio API (no audio files) and can be muted.
  * The shared top-10 board is served by public/api/snake-scores.php.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -56,6 +58,31 @@ const pad = [
             0
           </span>
         </p>
+        <button
+          type="button"
+          id="snake-sound"
+          class="btn ml-auto size-10 min-h-10 touch-manipulation p-0"
+          aria-label={t('snake.sound')}
+          aria-pressed="true"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M2.5 7h3l4-3.5v11l-4-3.5h-3z" fill="currentColor"></path>
+            <path
+              class="sound-on"
+              d="M12.5 6.5a3.5 3.5 0 0 1 0 5M14.5 4.5a6.5 6.5 0 0 1 0 9"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+            ></path>
+            <path
+              class="sound-off hidden"
+              d="m12 7 4 4m0-4-4 4"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+        </button>
         <button
           type="button"
           id="snake-pause"
@@ -253,6 +280,83 @@ const pad = [
     },
   };
 
+  // ---------------------------------------------------------------------------
+  // Sound: tiny synthesised effects (a metallic click, a freewheel tick, a thud)
+  // ---------------------------------------------------------------------------
+  const SOUND_KEY = 'snake-sound';
+  const sound = {
+    ctx: null as AudioContext | null,
+    on: true,
+
+    /** Create or wake the audio context; must first run inside a click or key press. */
+    ready() {
+      if (!this.on) return null;
+      try {
+        this.ctx ??= new AudioContext();
+        if (this.ctx.state === 'suspended') void this.ctx.resume();
+      } catch {
+        return null;
+      }
+      return this.ctx;
+    },
+
+    tone(freq: number, dur: number, type: OscillatorType, volume: number, delay = 0) {
+      const ctx = this.ready();
+      if (!ctx) return;
+      const t = ctx.currentTime + delay;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(volume, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + dur);
+    },
+
+    /** A gear clicking into place: two quick metallic blips. */
+    eat() {
+      this.tone(1480, 0.05, 'square', 0.05);
+      this.tone(2220, 0.08, 'triangle', 0.07, 0.045);
+    },
+
+    /** A freewheel pawl ticking over. */
+    turn() {
+      this.tone(3600, 0.015, 'square', 0.012);
+    },
+
+    /** The chain hitting something: a filtered noise burst over a falling sine. */
+    crash() {
+      const ctx = this.ready();
+      if (!ctx) return;
+      const t = ctx.currentTime;
+      const noise = ctx.createBufferSource();
+      const buffer = ctx.createBuffer(1, Math.round(ctx.sampleRate * 0.3), ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++)
+        data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+      noise.buffer = buffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 700;
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.value = 0.18;
+      noise.connect(filter).connect(noiseGain).connect(ctx.destination);
+      noise.start(t);
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.setValueAtTime(150, t);
+      osc.frequency.exponentialRampToValueAtTime(40, t + 0.35);
+      gain.gain.setValueAtTime(0.25, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.4);
+    },
+  };
+
   const root = document.getElementById('snake');
   const board = document.getElementById('snake-board');
   const canvas = document.getElementById('snake-canvas') as HTMLCanvasElement | null;
@@ -269,11 +373,35 @@ const pad = [
     const text = JSON.parse(root.dataset.strings ?? '{}') as Record<string, string>;
     const entry = $('snake-entry') as HTMLFormElement;
     const nameInput = $('snake-name') as HTMLInputElement;
+    const soundBtn = $('snake-sound') as HTMLButtonElement;
+    const syncSound = () => {
+      soundBtn.setAttribute('aria-pressed', String(sound.on));
+      soundBtn.querySelector('.sound-on')?.classList.toggle('hidden', !sound.on);
+      soundBtn.querySelector('.sound-off')?.classList.toggle('hidden', sound.on);
+    };
+    try {
+      sound.on = localStorage.getItem(SOUND_KEY) !== 'off';
+    } catch {
+      /* storage unavailable: sound stays on */
+    }
+    syncSound();
+    soundBtn.addEventListener('click', () => {
+      sound.on = !sound.on;
+      try {
+        localStorage.setItem(SOUND_KEY, sound.on ? 'on' : 'off');
+      } catch {
+        /* ignore */
+      }
+      syncSound();
+      if (sound.on) sound.eat();
+    });
     leaderboard.texts = text;
     leaderboard.load();
 
     let state: State = 'ready';
     let snake: Cell[] = [];
+    /** The snake before the last step, so drawing can glide between cells. */
+    let prev: Cell[] = [];
     let dir: Dir = 'right';
     let queue: Dir[] = [];
     let food: Cell = { x: 0, y: 0 };
@@ -305,6 +433,7 @@ const pad = [
         { x: mid - 2, y: mid },
         { x: mid - 3, y: mid },
       ];
+      prev = snake.map((c) => ({ ...c }));
       dir = 'right';
       queue = [];
       score = 0;
@@ -337,6 +466,7 @@ const pad = [
       if (state === 'running') return;
       reset();
       setState('running');
+      sound.ready();
       void leaderboard.start();
       // On phones, bring score, board and buttons fully into view.
       if (matchMedia('(pointer: coarse)').matches) root.scrollIntoView({ block: 'start' });
@@ -360,6 +490,7 @@ const pad = [
     };
 
     const gameOver = () => {
+      sound.crash();
       if (score > best) {
         best = score;
         bestEl.textContent = String(best);
@@ -404,6 +535,7 @@ const pad = [
     });
 
     const step = () => {
+      const turned = queue.length > 0;
       dir = queue.shift() ?? dir;
       const head = snake[0]!;
       const next = { x: head.x + VEC[dir].x, y: head.y + VEC[dir].y };
@@ -412,8 +544,11 @@ const pad = [
       const body = eats ? snake : snake.slice(0, -1);
       const hitWall = next.x < 0 || next.y < 0 || next.x >= GRID || next.y >= GRID;
       if (hitWall || body.some((c) => c.x === next.x && c.y === next.y)) return gameOver();
+      if (turned) sound.turn();
+      prev = snake.map((c) => ({ ...c }));
       snake.unshift(next);
       if (eats) {
+        sound.eat();
         score++;
         scoreEl.textContent = String(score);
         interval = Math.max(MIN_INTERVAL, interval - 2);
@@ -435,33 +570,101 @@ const pad = [
     new ResizeObserver(resize).observe(board);
     resize();
 
-    const draw = () => {
+    /** A spur gear: `teeth` trapezoid teeth between root radius ri and tip radius ro, with a bore. */
+    const drawGear = (
+      cx: number,
+      cy: number,
+      ro: number,
+      ri: number,
+      teeth: number,
+      angle: number,
+    ) => {
+      const pitch = (Math.PI * 2) / teeth;
+      ctx.beginPath();
+      for (let k = 0; k < teeth; k++) {
+        const a = angle + k * pitch;
+        const at = (r: number, da: number) =>
+          ctx.lineTo(cx + r * Math.cos(a + da * pitch), cy + r * Math.sin(a + da * pitch));
+        at(ri, -0.3);
+        at(ro, -0.17);
+        at(ro, 0.17);
+        at(ri, 0.3);
+        ctx.arc(cx, cy, ri, a + 0.3 * pitch, a + 0.7 * pitch);
+      }
+      ctx.closePath();
+      ctx.moveTo(cx + ro * 0.3, cy);
+      ctx.arc(cx, cy, ro * 0.3, 0, Math.PI * 2, true);
+      ctx.fill('evenodd');
+    };
+
+    const draw = (now: number) => {
       const css = getComputedStyle(document.documentElement);
       const color = (name: string) => css.getPropertyValue(name).trim();
+      const ink = color('--c-fg');
+      const soft = color('--c-muted');
+      const ground = color('--c-surface');
       const cell = size / GRID;
       ctx.clearRect(0, 0, size, size);
 
-      ctx.strokeStyle = color('--c-rule');
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      for (let i = 1; i < GRID; i++) {
-        const p = Math.round(i * cell) + 0.5;
-        ctx.moveTo(p, 0);
-        ctx.lineTo(p, size);
-        ctx.moveTo(0, p);
-        ctx.lineTo(size, p);
+      // Grid paper: a dot at every crossing.
+      ctx.fillStyle = color('--c-rule-strong');
+      const dot = Math.max(1.5, cell * 0.07);
+      for (let y = 1; y < GRID; y++)
+        for (let x = 1; x < GRID; x++)
+          ctx.fillRect(x * cell - dot / 2, y * cell - dot / 2, dot, dot);
+
+      // Food: a gear, turning slowly.
+      ctx.fillStyle = ink;
+      drawGear(
+        (food.x + 0.5) * cell,
+        (food.y + 0.5) * cell,
+        cell * 0.46,
+        cell * 0.33,
+        8,
+        now / 900,
+      );
+
+      // Snake: a roller chain. Each link glides from its previous cell to its current one.
+      const t = state === 'running' ? Math.min(acc / interval, 1) : 1;
+      const pts = snake.map((c, i) => {
+        const from = prev[i] ?? c;
+        return {
+          x: (from.x + (c.x - from.x) * t + 0.5) * cell,
+          y: (from.y + (c.y - from.y) * t + 0.5) * cell,
+        };
+      });
+      // Each link is a waisted plate between two pins: round ends, a narrower middle.
+      // Inner plates (soft) are drawn first and the outer plates (ink) over them, as on a real chain.
+      const plate = (
+        a: { x: number; y: number },
+        b: { x: number; y: number },
+        end: number,
+        waist: number,
+      ) => {
+        ctx.lineWidth = waist;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+        for (const p of [a, b]) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, end, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      };
+      ctx.lineCap = 'butt';
+      for (const parity of [1, 0]) {
+        const outer = parity === 0;
+        ctx.strokeStyle = ctx.fillStyle = outer ? ink : soft;
+        for (let i = parity; i < pts.length - 1; i += 2)
+          plate(pts[i]!, pts[i + 1]!, cell * (outer ? 0.34 : 0.29), cell * (outer ? 0.4 : 0.36));
       }
-      ctx.stroke();
-
-      ctx.fillStyle = color('--c-fg');
-      ctx.beginPath();
-      ctx.arc((food.x + 0.5) * cell, (food.y + 0.5) * cell, cell * 0.32, 0, Math.PI * 2);
-      ctx.fill();
-
-      const gap = Math.max(1, cell * 0.08);
-      snake.forEach((c, i) => {
-        ctx.fillStyle = color(i === 0 ? '--c-fg' : '--c-accent');
-        ctx.fillRect(c.x * cell + gap, c.y * cell + gap, cell - gap * 2, cell - gap * 2);
+      // Pins at every joint; the head's pin is larger so the front of the chain reads.
+      ctx.fillStyle = ground;
+      pts.forEach((p, i) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, cell * (i === 0 ? 0.16 : 0.1), 0, Math.PI * 2);
+        ctx.fill();
       });
     };
 
@@ -474,7 +677,7 @@ const pad = [
           step();
         }
       }
-      draw();
+      draw(now);
       requestAnimationFrame(loop);
     };
 
