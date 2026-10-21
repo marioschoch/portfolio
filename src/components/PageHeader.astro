@@ -1,20 +1,14 @@
 ---
-/** Page header with a faint engineering grid, a mono section label, title and intro. */
+/** Page header: the title set as a monument, with the intro beneath it on the right half. */
 interface Props {
-  /** Small mono label above the title, e.g. "02 / Projects". */
-  label?: string;
   title: string;
   intro?: string;
 }
-const { label, title, intro } = Astro.props;
+const { title, intro } = Astro.props;
 ---
 
-<header class="relative border-b border-rule">
-  <div class="bg-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
-  <div class="relative container-page pt-14 pb-10 sm:pt-20 sm:pb-14">
-    {label && <p class="label mb-4">{label}</p>}
-    <h1 class="max-w-3xl text-3xl leading-tight sm:text-[2.75rem]">{title}</h1>
-    {intro && <p class="mt-5 max-w-text text-lg leading-relaxed text-fg-soft">{intro}</p>}
-    <slot />
-  </div>
+<header class="container-page pt-16 pb-20 sm:pt-24 sm:pb-28" data-reveal>
+  <h1 class="display">{title}</h1>
+  {intro && <p class="mt-10 max-w-[36ch] text-lead md:ml-[50%] md:max-w-[32ch]">{intro}</p>}
+  <slot />
 </header>

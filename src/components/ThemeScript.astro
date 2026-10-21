@@ -8,6 +8,8 @@
 <script is:inline>
   (() => {
     const root = document.documentElement;
+    // Lets CSS hide section parts until they are revealed (never without JavaScript).
+    root.classList.add('js');
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     let stored = null;
     try {

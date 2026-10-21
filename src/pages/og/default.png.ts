@@ -9,8 +9,8 @@ export const GET: APIRoute = async () => {
     title: site.name,
     subtitle: site.tagline.en,
     specs: [
-      ['FOCUS', 'Mechatronics · Embedded'],
-      ['STATUS', 'BSc Mechanical Eng.'],
+      ['Focus', 'Mechatronics · Embedded'],
+      ['Status', 'BSc Mechanical Eng.'],
     ],
   });
   return new Response(new Uint8Array(png), { headers: { 'Content-Type': 'image/png' } });

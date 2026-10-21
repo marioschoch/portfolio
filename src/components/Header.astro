@@ -26,24 +26,26 @@ const nav: { key: UiKey; path: string }[] = [
 const isActive = (path: string) => current.startsWith(path);
 ---
 
-<header class="no-print sticky top-0 z-40 border-b border-rule bg-bg/90 backdrop-blur-sm">
-  <div class="container-page flex h-14 items-center gap-6">
+<header class="no-print sticky top-0 z-40 bg-bg">
+  <div class="container-page flex h-16 items-center gap-6">
     <a
       href={localizePath('/', lang)}
-      class="group flex items-baseline gap-2.5 font-semibold tracking-tight"
+      class="group flex items-baseline gap-3 text-[1.0625rem] font-semibold tracking-tight"
     >
       <span>{site.name}</span>
-      <span class="label hidden transition-colors group-hover:text-fg sm:inline">ETH · D-MAVT</span>
+      <span class="label hidden font-normal transition-colors group-hover:text-fg lg:inline">
+        ETH · D-MAVT
+      </span>
     </a>
 
-    <nav aria-label={t('nav.main')} class="ml-auto hidden md:block">
-      <ul class="flex items-center gap-1 text-sm">
+    <nav aria-label={t('nav.main')} class="ml-auto hidden lg:block">
+      <ul class="flex items-center gap-1">
         {nav.map(({ key, path }) => (
           <li>
             <a
               href={localizePath(path, lang)}
               aria-current={isActive(path) ? 'page' : undefined}
-              class="rounded-sm px-2.5 py-1.5 text-fg-soft transition-colors hover:text-fg aria-[current=page]:text-fg aria-[current=page]:underline aria-[current=page]:decoration-accent aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-[1.15rem]"
+              class="nav-link px-2.5 py-1.5"
             >
               {t(key)}
             </a>
@@ -52,64 +54,64 @@ const isActive = (path: string) => current.startsWith(path);
       </ul>
     </nav>
 
-    <div class="ml-auto flex items-center gap-1 md:ml-0">
+    <div class="-mr-2.5 ml-auto flex items-center gap-1 lg:ml-2">
       <button
         type="button"
         data-palette-open
-        class="flex h-8 items-center gap-2 rounded-sm border border-rule px-2 text-muted transition-colors hover:border-rule-strong hover:text-fg"
+        class="flex h-10 items-center gap-2 px-2 text-muted transition-colors hover:text-fg"
         aria-label={t('palette.open')}
         aria-keyshortcuts="Control+K Meta+K"
       >
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <circle cx="7" cy="7" r="4.75" stroke="currentColor" stroke-width="1.5"></circle>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.75" stroke="currentColor" stroke-width="1.6"></circle>
           <path
             d="m10.5 10.5 3.5 3.5"
             stroke="currentColor"
-            stroke-width="1.5"
+            stroke-width="1.6"
             stroke-linecap="round"
           ></path>
         </svg>
-        <kbd class="hidden font-mono text-2xs sm:inline">⌘K</kbd>
+        <kbd class="hidden font-sans text-small xl:inline">⌘K</kbd>
       </button>
       <LangSwitch lang={lang} />
       <ThemeToggle label={t('theme.toggle')} />
       <button
         type="button"
         id="menu-toggle"
-        class="flex size-8 items-center justify-center rounded-sm text-fg-soft hover:text-fg md:hidden"
+        class="flex size-10 items-center justify-center text-fg lg:hidden"
         aria-expanded="false"
         aria-controls="mobile-nav"
         aria-label={t('nav.menu')}
       >
-        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 18 18" aria-hidden="true">
           <path
             class="menu-icon-open"
             d="M2 5h14M2 9h14M2 13h14"
             stroke="currentColor"
-            stroke-width="1.5"
+            stroke-width="1.6"
           ></path>
           <path
             class="menu-icon-close hidden"
             d="m4 4 10 10M14 4 4 14"
             stroke="currentColor"
-            stroke-width="1.5"
+            stroke-width="1.6"
           ></path>
         </svg>
       </button>
     </div>
   </div>
 
-  <nav id="mobile-nav" aria-label={t('nav.main')} class="hidden border-t border-rule md:hidden">
-    <ul class="container-page py-2">
+  <nav id="mobile-nav" aria-label={t('nav.main')} class="hidden bg-bg lg:hidden">
+    <ul class="container-page pt-2 pb-8">
       {nav.map(({ key, path }) => (
         <li>
           <a
             href={localizePath(path, lang)}
             aria-current={isActive(path) ? 'page' : undefined}
-            class="flex items-center justify-between border-b border-rule py-3 text-fg-soft last:border-0 aria-[current=page]:text-fg"
+            class="flex items-center justify-between py-2 heading text-fg aria-[current=page]:text-muted"
           >
             {t(key)}
-            <span class="label" aria-hidden="true">
+            <span class="text-lead" aria-hidden="true">
               →
             </span>
           </a>
@@ -118,6 +120,17 @@ const isActive = (path: string) => current.startsWith(path);
     </ul>
   </nav>
 </header>
+
+<style>
+  @reference '../styles/global.css';
+  /* Current page: a filled block in the ink. Hover: a step in tone. */
+  .nav-link {
+    @apply relative block text-fg transition-colors hover:bg-surface;
+  }
+  .nav-link[aria-current='page'] {
+    @apply bg-fg text-bg hover:bg-fg;
+  }
+</style>
 
 <script>
   // Mobile menu disclosure.

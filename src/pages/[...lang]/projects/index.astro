@@ -21,19 +21,15 @@ const usedTags = projectTags.filter((tag) => projects.some((p) => p.entry.data.t
 ---
 
 <BaseLayout lang={lang} title={t('projects.title')} description={t('projects.intro')}>
-  <PageHeader
-    label={`${String(projects.length).padStart(2, '0')} / ${t('projects.title')}`}
-    title={t('projects.title')}
-    intro={t('projects.intro')}
-  />
+  <PageHeader title={t('projects.title')} intro={t('projects.intro')} />
 
-  <div class="container-page py-10">
+  <div class="container-page">
     <div
-      class="no-print mb-10 hidden flex-col gap-4 border-b border-rule pb-6 sm:flex-row sm:items-center sm:gap-10"
+      class="no-print mb-16 hidden flex-col gap-6 bg-surface p-5 sm:flex-row sm:items-center sm:gap-10 sm:p-6"
       data-filters
     >
       <fieldset class="flex flex-wrap items-center gap-2">
-        <legend class="label mb-2 w-full sm:float-left sm:mr-2 sm:mb-0 sm:w-auto">
+        <legend class="label mb-2 w-full sm:float-left sm:mr-3 sm:mb-0 sm:w-auto">
           {t('projects.filter.tag')}
         </legend>
         <button
@@ -58,7 +54,7 @@ const usedTags = projectTags.filter((tag) => projects.some((p) => p.entry.data.t
         ))}
       </fieldset>
       <fieldset class="flex flex-wrap items-center gap-2">
-        <legend class="label mb-2 w-full sm:float-left sm:mr-2 sm:mb-0 sm:w-auto">
+        <legend class="label mb-2 w-full sm:float-left sm:mr-3 sm:mb-0 sm:w-auto">
           {t('projects.filter.status')}
         </legend>
         <button
@@ -85,12 +81,12 @@ const usedTags = projectTags.filter((tag) => projects.some((p) => p.entry.data.t
       <p class="label sm:ml-auto" aria-live="polite" data-count></p>
     </div>
 
-    <div class="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-x-8 gap-y-20 md:grid-cols-2">
       {projects.map((project, i) => (
         <ProjectCard project={project} lang={lang} index={i} eager={i === 0} />
       ))}
     </div>
-    <p class="hidden py-16 text-center text-muted" data-empty>
+    <p class="hidden py-16 text-lead" data-empty>
       {t('projects.none')}
     </p>
   </div>
@@ -99,10 +95,10 @@ const usedTags = projectTags.filter((tag) => projects.some((p) => p.entry.data.t
 <style>
   @reference '../../../styles/global.css';
   .filter-btn {
-    @apply rounded-sm border border-rule px-2.5 py-1 font-mono text-xs text-fg-soft transition-colors hover:border-rule-strong hover:text-fg;
+    @apply min-h-10 bg-bg px-3.5 py-1.5 text-small text-fg transition-[background-color,color,transform] duration-150 hover:bg-surface-2 active:scale-95;
   }
   .filter-btn[aria-pressed='true'] {
-    @apply border-fg bg-fg text-bg;
+    @apply bg-fg text-bg;
   }
 </style>
 

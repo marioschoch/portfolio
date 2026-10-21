@@ -4,14 +4,16 @@
  * TODO: rewrite all texts in your own voice and add your photo (see README → Images).
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { Picture } from 'astro:assets';
 import ImagePlaceholder from '@/components/ImagePlaceholder.astro';
+import cyclingImage from '@/assets/home/hero-cycling.jpg';
 import { personJsonLd } from '@/lib/person';
 import { site } from '@/data/site';
 import { langPaths, useTranslations, type Lang } from '@/i18n/utils';
 
 // To add your photo: put it at src/assets/portrait.jpg, then uncomment these two lines
 // and replace <ImagePlaceholder … /> below with:
-//   <Image src={portrait} alt="Portrait of Mario Schoch" widths={[320, 640]} sizes="20rem" class="aspect-[4/5] w-full border border-rule object-cover" loading="eager" />
+//   <Image src={portrait} alt="Portrait of Mario Schoch" widths={[160, 320]} sizes="7rem" class="about-portrait object-cover" loading="eager" />
 // import { Image } from 'astro:assets';
 // import portrait from '@/assets/portrait.jpg';
 
@@ -53,34 +55,83 @@ const copy = {
 <BaseLayout lang={lang} title={t('about.title')} description={copy.intro} jsonLd={personJsonLd}>
   <h1 class="sr-only">{t('about.title')}</h1>
 
-  <div class="container-page grid gap-12 py-12 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-16">
-    <aside class="max-w-72">
-      <ImagePlaceholder label="Portrait" figure="TODO" class="aspect-[4/5]!" />
-      <dl class="mt-4 space-y-2 font-mono text-xs">
-        <div class="flex justify-between gap-4 border-b border-rule pb-2">
-          <dt class="text-muted">{t('contact.location')}</dt>
-          <dd>{site.location}</dd>
-        </div>
-        <div class="flex justify-between gap-4 border-b border-rule pb-2">
-          <dt class="text-muted">ETH</dt>
-          <dd>D-MAVT · BSc</dd>
-        </div>
-        <div class="flex justify-between gap-4 border-b border-rule pb-2">
-          <dt class="text-muted">VELOVE</dt>
-          <dd>{lang === 'de' ? 'Vorstand' : 'Board'}</dd>
-        </div>
-      </dl>
-    </aside>
+  <div class="container-page grid gap-12 pt-16 sm:pt-24 lg:grid-cols-12 lg:gap-8">
+    <dl
+      class="order-last grid grid-cols-3 gap-4 text-small lg:order-none lg:col-span-3 lg:block lg:space-y-5"
+      data-reveal
+    >
+      <div>
+        <dt class="text-muted">{t('contact.location')}</dt>
+        <dd>{site.location}</dd>
+      </div>
+      <div>
+        <dt class="text-muted">ETH</dt>
+        <dd>D-MAVT · BSc</dd>
+      </div>
+      <div>
+        <dt class="text-muted">VELOVE</dt>
+        <dd>{lang === 'de' ? 'Vorstand' : 'Board'}</dd>
+      </div>
+    </dl>
 
-    <div class="prose">
-      {copy.body.map((p) => (
-        <p>{p}</p>
+    <div class="about-text lg:col-span-8 lg:col-start-4" data-reveal>
+      {copy.body.map((p, i) => (
+        <p>
+          {i === 0 && (
+            <ImagePlaceholder label="Portrait" class="about-portrait aspect-auto! p-2!" />
+          )}
+          {p}
+        </p>
       ))}
+    </div>
+  </div>
 
-      <h2>{t('about.beyond')}</h2>
+  <figure class="container-page mt-24 sm:mt-32" data-reveal>
+    <div class="overflow-hidden">
+      <Picture
+        src={cyclingImage}
+        alt={
+          lang === 'de'
+            ? 'Gruppe von Rennvelofahrern in voller Fahrt'
+            : 'A group of road cyclists riding at speed'
+        }
+        widths={[640, 1024, 1600, 2400]}
+        sizes="(min-width: 1536px) 92rem, 100vw"
+        formats={['avif', 'webp']}
+        class="about-photo aspect-[21/9] w-full object-cover"
+      />
+    </div>
+    <figcaption class="mt-3 label">{t('home.photoCredit')} Lars Meier</figcaption>
+  </figure>
+
+  <section
+    class="container-page mt-24 grid gap-8 sm:mt-32 lg:grid-cols-12"
+    aria-labelledby="beyond-heading"
+  >
+    <h2 id="beyond-heading" class="heading lg:col-span-3" data-reveal>
+      {t('about.beyond')}
+    </h2>
+    <div class="about-text lg:col-span-8 lg:col-start-4" data-reveal>
       {copy.beyond.map((p) => (
         <p>{p}</p>
       ))}
     </div>
-  </div>
+  </section>
 </BaseLayout>
+
+<style>
+  @reference '../../styles/global.css';
+  .about-text {
+    @apply max-w-[46rem] space-y-[1.2em] text-lead leading-[1.45];
+  }
+  /* Portrait as a drop capital: three lines tall, the text wraps beside it. */
+  .about-text :global(.about-portrait) {
+    float: left;
+    width: 4.3em;
+    height: 4.3em;
+    margin: 0.3em 0.6em 0 0;
+  }
+  .about-photo {
+    @apply transition-transform duration-[1.6s] ease-out-strong hover:scale-[1.02];
+  }
+</style>

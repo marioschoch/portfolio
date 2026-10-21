@@ -19,24 +19,24 @@ const steps = [t('rss.step1'), t('rss.step2'), t('rss.step3')];
 ---
 
 <BaseLayout lang={lang} title={t('rss.title')} description={t('rss.intro')}>
-  <PageHeader label="RSS" title={t('rss.title')} intro={t('rss.intro')} />
+  <PageHeader title={t('rss.title')} intro={t('rss.intro')} />
 
-  <div class="container-page max-w-3xl! space-y-12 py-12">
-    <section>
-      <h2 class="label mb-3">{t('rss.address')}</h2>
-      <div class="flex flex-col gap-2 sm:flex-row">
+  <div class="container-page space-y-24">
+    <section class="grid gap-6 lg:grid-cols-12" data-reveal>
+      <h2 class="heading lg:col-span-3">{t('rss.address')}</h2>
+      <div class="flex flex-col gap-2 sm:flex-row lg:col-span-8 lg:col-start-4">
         <input
           id="feed-url"
           type="text"
           readonly
           value={feedUrl}
-          class="min-w-0 flex-1 rounded-sm border border-rule-strong bg-surface px-3 py-2 font-mono text-sm text-fg"
+          class="min-h-14 min-w-0 flex-1 bg-surface px-4 py-3 text-lead text-fg"
           aria-label={t('rss.address')}
         />
         <button
           type="button"
           id="feed-copy"
-          class="btn btn-primary justify-center"
+          class="btn btn-primary min-h-14 justify-center px-8"
           data-copied={t('rss.copied')}
         >
           {t('rss.copy')}
@@ -44,29 +44,25 @@ const steps = [t('rss.step1'), t('rss.step2'), t('rss.step3')];
       </div>
     </section>
 
-    <section>
-      <h2 class="label mb-4">{t('rss.how')}</h2>
-      <ol class="space-y-3">
-        {steps.map((step, i) => (
-          <li class="grid grid-cols-[2rem_1fr] text-fg-soft">
-            <span class="font-mono text-sm text-accent">{String(i + 1).padStart(2, '0')}</span>
-            {step}
-          </li>
+    <section class="grid gap-6 lg:grid-cols-12" data-reveal>
+      <h2 class="heading lg:col-span-3">{t('rss.how')}</h2>
+      <ol class="list-decimal space-y-4 pl-7 text-lead marker:font-semibold lg:col-span-8 lg:col-start-4">
+        {steps.map((step) => (
+          <li class="max-w-[48ch] pl-2">{step}</li>
         ))}
       </ol>
     </section>
 
-    <section class="border-t border-rule pt-8">
+    <section class="bg-surface p-6 sm:p-10 lg:ml-[calc(25%+0.5rem)]" data-reveal>
       {updates.length === 0 ? (
-        <p class="text-muted">{t('rss.empty')}</p>
+        <p class="max-w-[60ch]">{t('rss.empty')}</p>
       ) : (
-        <p class="text-fg-soft">
-          <span class="label">{t('rss.count')}</span>
-          <span class="ml-2 font-mono">{updates.length}</span>
+        <p>
+          {t('rss.count')}: <span class="font-semibold tabular-nums">{updates.length}</span>
           <span class="text-muted"> · {formatDate(updates[0]!.data.date, lang)}</span>
         </p>
       )}
-      <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+      <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2">
         <a href={localizePath('/updates/', lang)} class="link">
           {t('nav.updates')} →
         </a>

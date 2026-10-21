@@ -21,9 +21,9 @@ export const GET: APIRoute = async ({ props }) => {
     title: data.title,
     subtitle: shorten(data.summary, 120),
     specs: [
-      ['ROLE', data.role],
-      ['TEAM', data.teamSize === 1 ? 'Individual' : `${data.teamSize} people`],
-      ['TOOLS', data.tools.slice(0, 3).join(' · ')],
+      ['Role', data.role],
+      ['Team', data.teamSize === 1 ? 'Individual' : `${data.teamSize} people`],
+      ['Tools', data.tools.slice(0, 3).join(' · ')],
     ],
   });
   return new Response(new Uint8Array(png), { headers: { 'Content-Type': 'image/png' } });

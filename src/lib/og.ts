@@ -27,21 +27,13 @@ const fonts = [
     weight: 600 as const,
     style: 'normal' as const,
   },
-  {
-    name: 'Plex Mono',
-    data: font('ibm-plex-mono', 400),
-    weight: 400 as const,
-    style: 'normal' as const,
-  },
 ];
 
+/** The site's footer colours: grey type on the oxblood field. */
 const C = {
-  bg: '#fafaf9',
-  fg: '#15171b',
-  muted: '#5d6370',
-  rule: '#d5d7dc',
-  accent: '#1d55c4',
-  grid: '#ececea',
+  bg: '#7d0c14',
+  fg: '#e2e2e2',
+  muted: '#d9b3b6',
 };
 
 type Node = { type: string; props: Record<string, unknown> & { children?: unknown } };
@@ -52,11 +44,11 @@ const h = (type: string, style: Record<string, unknown>, children?: unknown): No
 });
 
 export interface OgInput {
-  /** Small mono label, e.g. "PROJECT · 2025". */
+  /** Small line at the top, e.g. "Project · 2025". */
   kicker: string;
   title: string;
   subtitle?: string;
-  /** Spec-sheet rows in the footer, e.g. [["ROLE", "Firmware lead"], ["TOOLS", "Arduino · C++"]]. */
+  /** Spec-sheet rows in the footer, e.g. [["Role", "Firmware lead"], ["Tools", "Arduino · C++"]]. */
   specs?: [string, string][];
 }
 
@@ -69,8 +61,6 @@ export async function renderOg({ kicker, title, subtitle, specs = [] }: OgInput)
       height: '100%',
       flexDirection: 'column',
       backgroundColor: C.bg,
-      backgroundImage: `linear-gradient(to right, ${C.grid} 1px, transparent 1px), linear-gradient(to bottom, ${C.grid} 1px, transparent 1px)`,
-      backgroundSize: '40px 40px',
       padding: '56px 72px',
       boxSizing: 'border-box',
       fontFamily: 'Plex Sans',
@@ -82,18 +72,10 @@ export async function renderOg({ kicker, title, subtitle, specs = [] }: OgInput)
         {
           width: '100%',
           justifyContent: 'space-between',
-          fontFamily: 'Plex Mono',
-          fontSize: 20,
+          fontSize: 24,
           color: C.muted,
-          letterSpacing: 2,
         },
-        [
-          h('div', { alignItems: 'center', gap: 14 }, [
-            h('div', { width: 12, height: 12, borderRadius: 6, backgroundColor: C.accent }),
-            kicker.toUpperCase(),
-          ]),
-          host,
-        ],
+        [h('div', {}, kicker), h('div', {}, host)],
       ),
       h(
         'div',
@@ -102,10 +84,10 @@ export async function renderOg({ kicker, title, subtitle, specs = [] }: OgInput)
           h(
             'div',
             {
-              fontSize: title.length > 32 ? 60 : 72,
+              fontSize: title.length > 32 ? 72 : 96,
               fontWeight: 600,
-              lineHeight: 1.08,
-              letterSpacing: -1.5,
+              lineHeight: 1,
+              letterSpacing: title.length > 32 ? -2.5 : -4,
             },
             title,
           ),
@@ -118,8 +100,6 @@ export async function renderOg({ kicker, title, subtitle, specs = [] }: OgInput)
         'div',
         {
           width: '100%',
-          borderTop: `2px solid ${C.fg}`,
-          paddingTop: 20,
           justifyContent: 'space-between',
           alignItems: 'flex-end',
         },
@@ -131,11 +111,7 @@ export async function renderOg({ kicker, title, subtitle, specs = [] }: OgInput)
               .slice(0, 3)
               .map(([k, v]) =>
                 h('div', { flexDirection: 'column', gap: 6, maxWidth: 300 }, [
-                  h(
-                    'div',
-                    { fontFamily: 'Plex Mono', fontSize: 16, color: C.muted, letterSpacing: 2 },
-                    k,
-                  ),
+                  h('div', { fontSize: 18, color: C.muted }, k),
                   h('div', { fontSize: 22 }, v),
                 ]),
               ),

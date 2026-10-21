@@ -20,32 +20,29 @@ const rendered = await Promise.all(
 );
 ---
 
-<ol class="relative border-l border-rule">
+<ol class="space-y-16">
   {rendered.map(({ u, Content }) => (
-    <li class="relative pb-10 pl-6 last:pb-0 sm:pl-8" id={u.id}>
-      <span
-        class="absolute top-1.5 -left-[4.5px] size-2 rounded-full border border-accent bg-bg"
-        aria-hidden="true"
-      />
-      <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <time class="label text-fg-soft" datetime={isoDate(u.data.date)}>
-          {formatDate(u.data.date, lang)}
-        </time>
+    <li id={u.id} data-reveal>
+      <p class="flex flex-wrap items-baseline gap-x-3 gap-y-1 label">
+        <time datetime={isoDate(u.data.date)}>{formatDate(u.data.date, lang)}</time>
         {projectTitles && (
           <a
             href={localizePath(`/projects/${u.data.project.id}/`, lang)}
-            class="label hover:text-accent"
+            class="text-fg underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current"
           >
-            ↳ {projectTitles[u.data.project.id]}
+            {projectTitles[u.data.project.id]}
           </a>
         )}
-      </div>
-      <Heading class="mt-1.5 text-base leading-snug text-fg">
-        <a href={`#${u.id}`} class="hover:underline hover:decoration-accent">
+      </p>
+      <Heading class="mt-2 text-lead leading-snug">
+        <a
+          href={`#${u.id}`}
+          class="underline decoration-transparent decoration-1 underline-offset-4 transition-colors hover:decoration-current"
+        >
           {u.data.title}
         </a>
       </Heading>
-      <div class="prose mt-2 text-[0.9375rem]">
+      <div class="prose mt-3">
         <Content />
       </div>
     </li>

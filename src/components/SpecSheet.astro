@@ -27,14 +27,14 @@ const links = (
   .filter((l): l is { href: string; label: string } => Boolean(l.href));
 ---
 
-<dl class="grid grid-cols-2 border-t border-l border-rule text-sm sm:grid-cols-3 lg:grid-cols-6 [&>div]:border-r [&>div]:border-b [&>div]:border-rule [&>div]:p-3.5">
-  <div class="col-span-2 sm:col-span-1 lg:col-span-1">
+<dl class="grid grid-cols-2 gap-x-8 gap-y-8 bg-surface p-6 sm:grid-cols-3 sm:p-8 lg:grid-cols-6">
+  <div class="col-span-2 sm:col-span-1">
     <dt class="label">{t('spec.role')}</dt>
-    <dd class="mt-1.5 text-fg">{project.role}</dd>
+    <dd class="mt-1.5">{project.role}</dd>
   </div>
   <div>
     <dt class="label">{t('spec.timeframe')}</dt>
-    <dd class="mt-1.5 font-mono text-xs text-fg">
+    <dd class="mt-1.5">
       <time datetime={isoDate(data.timeframe.start)}>
         {formatMonth(data.timeframe.start, lang)}
       </time>
@@ -48,7 +48,7 @@ const links = (
   </div>
   <div>
     <dt class="label">{t('spec.team')}</dt>
-    <dd class="mt-1.5 font-mono text-xs text-fg">
+    <dd class="mt-1.5">
       {data.teamSize === 1 ? t('spec.teamSolo') : `${data.teamSize} ${t('spec.teamPeople')}`}
     </dd>
   </div>
@@ -60,13 +60,7 @@ const links = (
   </div>
   <div class="col-span-2">
     <dt class="label">{t('spec.tools')}</dt>
-    <dd class="mt-1.5">
-      <ul class="flex flex-wrap gap-1.5">
-        {data.tools.map((tool) => (
-          <li class="chip text-fg-soft">{tool}</li>
-        ))}
-      </ul>
-    </dd>
+    <dd class="mt-1.5">{data.tools.join(', ')}</dd>
   </div>
   {links.length > 0 && (
     <div class="col-span-2 sm:col-span-3 lg:col-span-6">
@@ -75,7 +69,7 @@ const links = (
         <ul class="flex flex-wrap gap-2">
           {links.map((l) => (
             <li>
-              <a href={l.href} class="btn" rel="noopener">
+              <a href={l.href} class="btn bg-bg" rel="noopener">
                 {l.label}
                 <span aria-hidden="true">↗</span>
               </a>

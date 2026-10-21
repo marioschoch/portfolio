@@ -1,55 +1,70 @@
 @import 'tailwindcss';
 
 /* ==========================================================================
-   Design tokens
+   Design tokens — "the name as a monument", oxblood on grey.
+   Two values carry the page (grey ground, oxblood ink); the same red, as a solid
+   field with grey text, takes the "Now" band and the footer. No lines, no
+   gradients, no shadows at rest: surfaces are told apart by a step in tone.
    Colours are CSS variables so light/dark mode is a single attribute switch
    (`<html data-theme="dark">`, set before first paint in ThemeScript.astro).
-   One restrained accent colour; everything else is neutral.
    ========================================================================== */
 
 :root {
   color-scheme: light;
-  --c-bg: #fafaf9;
-  --c-surface: #ffffff;
-  --c-fg: #15171b;
-  --c-fg-soft: #343840;
-  --c-muted: #5d6370; /* 5.9:1 on --c-bg */
-  --c-rule: #e2e3e6;
-  --c-rule-strong: #c7cad1;
-  --c-accent: #1d55c4; /* technical blue, 6.3:1 on --c-bg */
-  --c-accent-soft: #e8eefb;
-  --c-grid: rgb(21 23 27 / 0.045);
+  --c-bg: #e2e2e2;
+  --c-surface: #d6d6d6;
+  --c-surface-2: #cbcbcb;
+  --c-fg: #7d0c14; /* 8.1:1 on --c-bg */
+  --c-fg-soft: #7d0c14;
+  --c-muted: #6f3d42; /* 6.2:1 on --c-bg, 5.6:1 on --c-surface */
+  --c-accent: #7d0c14;
+  --c-accent-ink: #e2e2e2;
+  --c-accent-soft: #e9c9cb;
+  --c-field: #7d0c14;
+  --c-field-ink: #e2e2e2;
+  --c-field-muted: #d9b3b6; /* 5.2:1 on --c-field */
+  /* Kept for real tables, form fields and the game board, the only places with lines. */
+  --c-rule: #c4c4c4;
+  --c-rule-strong: #a9a9a9;
 }
 
 /* Without JS (no data-theme attribute) the system preference still applies. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --c-bg: #0d0f12;
-    --c-surface: #14171c;
-    --c-fg: #e8eaed;
-    --c-fg-soft: #c9cdd3;
-    --c-muted: #9aa1ac; /* 7.4:1 on --c-bg */
-    --c-rule: #252a31;
-    --c-rule-strong: #363c45;
-    --c-accent: #7ea6ff; /* 8.1:1 on --c-bg */
-    --c-accent-soft: #172240;
-    --c-grid: rgb(232 234 237 / 0.04);
+    --c-bg: #1a1112;
+    --c-surface: #26191b;
+    --c-surface-2: #322123;
+    --c-fg: #eddcdd; /* 14:1 on --c-bg */
+    --c-fg-soft: #eddcdd;
+    --c-muted: #c4a2a5; /* 7.6:1 on --c-bg */
+    --c-accent: #ef8a90; /* 7.4:1 on --c-bg */
+    --c-accent-ink: #1a1112;
+    --c-accent-soft: #4a2226;
+    --c-field: #6e0b12;
+    --c-field-ink: #eddcdd;
+    --c-field-muted: #dcb0b4;
+    --c-rule: #3a2a2c;
+    --c-rule-strong: #4f3a3d;
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --c-bg: #0d0f12;
-  --c-surface: #14171c;
-  --c-fg: #e8eaed;
-  --c-fg-soft: #c9cdd3;
-  --c-muted: #9aa1ac;
-  --c-rule: #252a31;
-  --c-rule-strong: #363c45;
-  --c-accent: #7ea6ff;
-  --c-accent-soft: #172240;
-  --c-grid: rgb(232 234 237 / 0.04);
+  --c-bg: #1a1112;
+  --c-surface: #26191b;
+  --c-surface-2: #322123;
+  --c-fg: #eddcdd;
+  --c-fg-soft: #eddcdd;
+  --c-muted: #c4a2a5;
+  --c-accent: #ef8a90;
+  --c-accent-ink: #1a1112;
+  --c-accent-soft: #4a2226;
+  --c-field: #6e0b12;
+  --c-field-ink: #eddcdd;
+  --c-field-muted: #dcb0b4;
+  --c-rule: #3a2a2c;
+  --c-rule-strong: #4f3a3d;
 }
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
@@ -57,23 +72,42 @@
 @theme inline {
   --color-bg: var(--c-bg);
   --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
   --color-fg: var(--c-fg);
   --color-fg-soft: var(--c-fg-soft);
   --color-muted: var(--c-muted);
   --color-rule: var(--c-rule);
   --color-rule-strong: var(--c-rule-strong);
   --color-accent: var(--c-accent);
+  --color-accent-ink: var(--c-accent-ink);
   --color-accent-soft: var(--c-accent-soft);
+  --color-field: var(--c-field);
+  --color-field-ink: var(--c-field-ink);
+  --color-field-muted: var(--c-field-muted);
 
   --font-sans: var(--font-plex-sans), system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
+/*
+ * Five type steps carry every page:
+ *   small 14 · body 17 · lead 20–24 · heading 28–44 · display (page titles) / monument (the name)
+ */
 @theme {
-  --container-page: 72rem;
-  --container-text: 42rem;
-  --text-2xs: 0.6875rem;
-  --text-2xs--line-height: 1rem;
+  --container-page: 96rem;
+  --container-text: 40rem;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.45;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.6;
+  --text-lead: clamp(1.25rem, 0.9rem + 0.9vw, 1.5rem);
+  --text-lead--line-height: 1.4;
+  --text-heading: clamp(1.625rem, 1rem + 1.6vw, 2.25rem);
+  --text-heading--line-height: 1.05;
+  --text-display: clamp(3.25rem, 1rem + 9vw, 10rem);
+  --text-display--line-height: 0.9;
+
+  --ease-out-strong: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ==========================================================================
@@ -88,26 +122,26 @@
   }
 
   body {
-    @apply bg-bg font-sans text-fg antialiased;
+    @apply bg-bg font-sans text-body text-fg antialiased;
     font-feature-settings: 'kern', 'liga';
   }
 
   ::selection {
-    background: var(--c-accent-soft);
-    color: var(--c-fg);
+    background: var(--c-fg);
+    color: var(--c-bg);
   }
 
   :focus-visible {
-    outline: 2px solid var(--c-accent);
-    outline-offset: 2px;
-    border-radius: 2px;
+    outline: 2px solid var(--c-fg);
+    outline-offset: 3px;
   }
 
   h1,
   h2,
   h3,
   h4 {
-    @apply font-semibold tracking-tight text-balance;
+    @apply font-semibold text-balance;
+    letter-spacing: -0.02em;
   }
 
   a {
@@ -115,19 +149,31 @@
     text-decoration-thickness: 1px;
   }
 
-  hr {
-    @apply border-rule;
+  time {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Small uppercase monospace label: the "spec sheet" look. */
+/* Small secondary text in the text face: dates, meta lines, captions. */
 @utility label {
-  @apply font-mono text-2xs font-medium tracking-[0.08em] text-muted uppercase;
+  @apply text-small text-muted;
 }
 
-/* Accent text link with a thin underline that strengthens on hover. */
+/* Text link in the ink with an underline that thickens on hover. */
 @utility link {
-  @apply text-accent underline decoration-accent/40 hover:decoration-accent;
+  @apply text-fg underline decoration-1 underline-offset-4 transition-[text-decoration-thickness] hover:decoration-2;
+}
+
+/* Page title: the monument at page scale. */
+@utility display {
+  @apply text-display font-semibold;
+  letter-spacing: -0.05em;
+}
+
+/* Section heading. */
+@utility heading {
+  @apply text-heading font-semibold;
+  letter-spacing: -0.03em;
 }
 
 /* ==========================================================================
@@ -135,90 +181,77 @@
    ========================================================================== */
 
 @layer components {
-  /* Page container with a 16 px (mobile) → 32 px gutter. */
+  /* One pair of tight outer margins on every page: 20 px on phones, 32 px from tablets up. */
   .container-page {
-    @apply mx-auto w-full max-w-page px-4 sm:px-8;
+    @apply mx-auto w-full max-w-page px-5 sm:px-8;
   }
 
-  /* Faint engineering grid, fading out towards the bottom. Used only in page headers. */
-  .bg-grid {
-    background-image:
-      linear-gradient(to right, var(--c-grid) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--c-grid) 1px, transparent 1px);
-    background-size: 24px 24px;
-    mask-image: linear-gradient(to bottom, black 40%, transparent);
+  /* Vertical rhythm between sections (clearly larger than any gap inside one). */
+  .section {
+    @apply py-24 sm:py-32 lg:py-40;
   }
 
+  /* Flat, square-cornered buttons. One fill per state, no outlines. */
   .btn {
-    @apply inline-flex items-center gap-2 rounded-sm border border-rule-strong bg-surface px-3.5 py-2 font-mono text-xs font-medium tracking-wide text-fg transition-colors hover:border-fg;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 bg-surface px-5 py-2.5 text-body leading-none font-medium text-fg transition-[background-color,color,transform] duration-150 select-none hover:bg-fg hover:text-bg active:scale-[0.97];
   }
 
   .btn-primary {
-    @apply border-accent bg-accent text-bg hover:border-fg hover:bg-fg;
+    @apply bg-accent text-accent-ink hover:bg-fg hover:text-bg;
   }
 
-  .chip {
-    @apply inline-flex items-center rounded-sm border border-rule px-1.5 py-0.5 font-mono text-2xs text-muted;
-  }
-
-  /* Long-form content (project write-ups, updates, about). */
+  /* Long-form content (project write-ups, updates). */
   .prose {
-    @apply max-w-text text-[1.0625rem] leading-[1.7] text-fg-soft;
+    @apply max-w-text text-body leading-[1.65] text-fg;
   }
   .prose > * + * {
     margin-top: 1.1em;
   }
   .prose h2 {
-    @apply mt-14 mb-4 flex items-baseline gap-3 border-t border-rule pt-6 text-xl text-fg;
+    @apply mt-20 mb-5 heading;
   }
   .prose h3 {
-    @apply mt-8 text-lg text-fg;
+    @apply mt-10 text-lead font-semibold;
   }
   .prose a {
     @apply link;
   }
   .prose strong {
-    @apply font-semibold text-fg;
+    @apply font-semibold;
   }
   .prose ul {
-    @apply list-none pl-0;
-  }
-  .prose ul > li {
-    @apply relative pl-5;
-  }
-  .prose ul > li::before {
-    content: '';
-    @apply absolute top-[0.8em] left-0 h-px w-2.5 bg-muted;
+    @apply list-disc pl-5 marker:text-muted;
   }
   .prose ol {
-    @apply list-decimal pl-5 marker:font-mono marker:text-sm marker:text-muted;
+    @apply list-decimal pl-5 marker:text-muted;
   }
   .prose li + li {
     margin-top: 0.4em;
   }
   .prose code:not(pre code) {
-    @apply rounded-sm bg-accent-soft px-1 py-0.5 font-mono text-[0.85em] text-fg;
+    @apply bg-surface px-1 py-0.5 font-mono text-[0.88em];
   }
   .prose pre {
-    @apply overflow-x-auto rounded-sm border border-rule p-4 font-mono text-sm leading-relaxed;
+    @apply overflow-x-auto bg-surface p-5 font-mono text-small leading-relaxed;
   }
   .prose blockquote {
-    @apply border-l-2 border-accent pl-4 text-fg italic;
+    @apply pl-6 text-lead;
   }
   .prose table {
-    @apply w-full border-collapse font-mono text-sm;
+    @apply w-full border-collapse text-small;
+    font-variant-numeric: tabular-nums;
   }
   .prose th {
-    @apply border-b border-rule-strong py-2 pr-4 text-left label;
+    @apply border-b border-rule-strong py-2 pr-4 text-left font-semibold;
   }
   .prose td {
     @apply border-b border-rule py-2 pr-4 align-top;
   }
   .prose figure {
-    @apply my-8;
+    @apply my-10;
   }
   .prose figcaption {
-    @apply mt-2 font-mono text-xs text-muted;
+    @apply mt-2 label;
   }
 }
 
@@ -230,11 +263,35 @@
 }
 
 /* ==========================================================================
-   Page transitions — native cross-document View Transitions (no JS).
-   Browsers without support simply navigate normally.
+   Motion. Section parts rise into place once as they enter (BaseLayout script);
+   the `js` class is set before paint, so without JavaScript nothing is hidden.
    ========================================================================== */
 
 @media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] > * {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 700ms var(--ease-out-strong),
+      transform 900ms var(--ease-out-strong);
+  }
+  .js [data-reveal].is-in > * {
+    opacity: 1;
+    transform: none;
+  }
+  .js [data-reveal].is-in > :nth-child(2) {
+    transition-delay: 80ms;
+  }
+  .js [data-reveal].is-in > :nth-child(3) {
+    transition-delay: 160ms;
+  }
+  .js [data-reveal].is-in > :nth-child(4) {
+    transition-delay: 240ms;
+  }
+  .js [data-reveal].is-in > :nth-child(n + 5) {
+    transition-delay: 320ms;
+  }
+
   @view-transition {
     navigation: auto;
   }
@@ -250,6 +307,7 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
@@ -269,14 +327,15 @@
     color-scheme: light;
     --c-bg: #fff;
     --c-surface: #fff;
+    --c-surface-2: #fff;
     --c-fg: #000;
     --c-fg-soft: #1a1a1a;
     --c-muted: #555;
     --c-rule: #ccc;
     --c-rule-strong: #999;
-    --c-accent: #1d55c4;
+    --c-accent: #7d0c14;
+    --c-accent-ink: #fff;
     --c-accent-soft: #fff;
-    --c-grid: transparent;
   }
   html {
     font-size: 10pt;
@@ -289,5 +348,9 @@
   }
   .print-break-avoid {
     break-inside: avoid;
+  }
+  .js [data-reveal] > * {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

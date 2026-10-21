@@ -14,10 +14,9 @@ interface Props {
   /** Eager-load the cover (first card above the fold). */
   eager?: boolean;
 }
-const { project, lang, index, headingLevel: Heading = 'h2', eager = false } = Astro.props;
+const { project, lang, headingLevel: Heading = 'h2', eager = false } = Astro.props;
 const t = useTranslations(lang);
 const { data } = project.entry;
-const figNo = String(index + 1).padStart(2, '0');
 ---
 
 <article
@@ -25,42 +24,40 @@ const figNo = String(index + 1).padStart(2, '0');
   data-project-card
   data-tags={data.tags.join(' ')}
   data-status={data.status}
+  data-reveal
 >
-  {data.cover ? (
-    <Image
-      src={data.cover.src}
-      alt={data.cover.alt}
-      widths={[400, 640, 960]}
-      sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 100vw"
-      class="aspect-[16/10] w-full border border-rule object-cover"
-      loading={eager ? 'eager' : 'lazy'}
-      fetchpriority={eager ? 'high' : 'auto'}
-    />
-  ) : (
-    <ImagePlaceholder
-      label={t('project.imagePending')}
-      figure={`${t('project.figure')} ${figNo}`}
-    />
-  )}
-  <div class="mt-4 flex items-center justify-between gap-3">
-    <span class="label">
-      {formatMonth(data.timeframe.start, lang)} –{' '}
-      {data.timeframe.end ? formatMonth(data.timeframe.end, lang) : t('spec.present')}
-    </span>
+  <div class="overflow-hidden">
+    {data.cover ? (
+      <Image
+        src={data.cover.src}
+        alt={data.cover.alt}
+        widths={[480, 720, 960, 1400]}
+        sizes="(min-width: 768px) 46vw, 100vw"
+        class="aspect-[16/10] w-full object-cover transition-transform duration-700 ease-out-strong group-hover:scale-[1.03]"
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : 'auto'}
+      />
+    ) : (
+      <ImagePlaceholder label={t('project.imagePending')} />
+    )}
+  </div>
+  <div class="mt-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+    <Heading class="text-lead leading-snug">
+      <a
+        href={localizePath(`/projects/${project.id}/`, lang)}
+        class="underline decoration-transparent decoration-2 underline-offset-4 transition-colors after:absolute after:inset-0 group-hover:decoration-current"
+      >
+        {project.title}
+      </a>
+    </Heading>
     <StatusBadge status={data.status} lang={lang} />
   </div>
-  <Heading class="mt-2 text-lg leading-snug">
-    <a
-      href={localizePath(`/projects/${project.id}/`, lang)}
-      class="decoration-accent decoration-1 underline-offset-4 after:absolute after:inset-0 group-hover:underline"
-    >
-      {project.title}
-    </a>
-  </Heading>
-  <p class="mt-2 text-sm leading-relaxed text-fg-soft">{project.summary}</p>
-  <ul class="mt-4 flex flex-wrap gap-1.5" aria-label={t('spec.tools')}>
-    {data.tools.slice(0, 5).map((tool) => (
-      <li class="chip">{tool}</li>
-    ))}
-  </ul>
+  <p class="mt-3 max-w-[60ch]">{project.summary}</p>
+  <p class="mt-3 label">
+    {formatMonth(data.timeframe.start, lang)} –{' '}
+    {data.timeframe.end ? formatMonth(data.timeframe.end, lang) : t('spec.present')}
+    <span aria-hidden="true"> · </span>
+    <span class="sr-only">{t('spec.tools')}: </span>
+    {data.tools.slice(0, 5).join(', ')}
+  </p>
 </article>

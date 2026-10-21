@@ -17,3 +17,6 @@ npm-debug.log*
 .DS_Store
 .vscode/*
 !.vscode/extensions.json
+
+# design-review working files (screenshots, reports)
+.taste-skill/

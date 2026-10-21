@@ -17,33 +17,70 @@ const rows = [
 ---
 
 <BaseLayout lang={lang} title={t('contact.title')} description={t('contact.intro')}>
-  <PageHeader label={t('contact.title')} title={t('contact.title')} intro={t('contact.intro')} />
+  <PageHeader title={t('contact.title')} intro={t('contact.intro')} />
 
-  <div class="container-page py-12">
-    <dl class="max-w-2xl border-t border-rule">
-      <div class="grid gap-1 border-b border-rule py-5 sm:grid-cols-[10rem_1fr] sm:items-baseline">
-        <dt class="label">{t('contact.email')}</dt>
-        <dd class="text-lg">
-          <ObfuscatedEmail class="link" />
-          <noscript>
-            <p class="text-sm text-muted">{t('contact.emailFallback')}</p>
-          </noscript>
+  <!-- Each way to reach me is a full-width row, set large; rows alternate two tones. -->
+  <dl class="contact-rows">
+    <div class="contact-row" data-reveal>
+      <dt class="label">{t('contact.email')}</dt>
+      <dd>
+        <ObfuscatedEmail class="contact-link" />
+        <noscript>
+          <p class="mt-2 text-body">{t('contact.emailFallback')}</p>
+        </noscript>
+      </dd>
+    </div>
+    {rows.map((r) => (
+      <div class="contact-row" data-reveal>
+        <dt class="label">{r.label}</dt>
+        <dd>
+          <a href={r.href} class="contact-link" rel="me noopener">
+            {r.text}
+          </a>
         </dd>
       </div>
-      {rows.map((r) => (
-        <div class="grid gap-1 border-b border-rule py-5 sm:grid-cols-[10rem_1fr] sm:items-baseline">
-          <dt class="label">{r.label}</dt>
-          <dd class="text-lg">
-            <a href={r.href} class="link" rel="me noopener">
-              {r.text}
-            </a>
-          </dd>
-        </div>
-      ))}
-      <div class="grid gap-1 border-b border-rule py-5 sm:grid-cols-[10rem_1fr] sm:items-baseline">
-        <dt class="label">{t('contact.location')}</dt>
-        <dd class="text-lg">{site.location}</dd>
-      </div>
-    </dl>
-  </div>
+    ))}
+    <div class="contact-row" data-reveal>
+      <dt class="label">{t('contact.location')}</dt>
+      <dd>{site.location}</dd>
+    </div>
+  </dl>
 </BaseLayout>
+
+<style>
+  @reference '../../styles/global.css';
+  /* Full-bleed bands whose text sits on the page's own margins. */
+  .contact-row {
+    --gutter: 1.25rem;
+    padding: 3.5rem max(var(--gutter), calc((100vw - 96rem) / 2 + var(--gutter))) 1.5rem;
+  }
+  @media (min-width: 40rem) {
+    .contact-row {
+      --gutter: 2rem;
+      padding-top: 5rem;
+      padding-bottom: 2rem;
+    }
+  }
+  @media (min-width: 48rem) {
+    .contact-row {
+      display: grid;
+      grid-template-columns: calc(25% - 0.5rem) 1fr;
+      column-gap: 2rem;
+      align-items: baseline;
+    }
+  }
+  .contact-row:nth-child(odd) {
+    background: var(--c-surface);
+  }
+  .contact-row dd {
+    margin-top: 0.5rem;
+    font-size: clamp(1.5rem, 0.5rem + 4.4vw, 4.5rem);
+    line-height: 1.05;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    overflow-wrap: anywhere;
+  }
+  .contact-link {
+    @apply underline decoration-transparent decoration-2 underline-offset-[0.12em] transition-colors hover:decoration-current;
+  }
+</style>

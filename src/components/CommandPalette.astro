@@ -46,9 +46,9 @@ const items = [
 <dialog
   id="command-palette"
   aria-label={t('palette.title')}
-  class="no-print m-0 mx-auto mt-[12vh] w-[calc(100%-2rem)] max-w-xl rounded-sm border border-rule-strong bg-surface p-0 text-fg shadow-2xl backdrop:bg-black/40 backdrop:backdrop-blur-[2px]"
+  class="no-print m-0 mx-auto mt-[12vh] w-[calc(100%-2.5rem)] max-w-xl bg-surface p-0 text-fg shadow-2xl backdrop:bg-black/50"
 >
-  <div class="flex items-center gap-3 border-b border-rule px-4">
+  <div class="flex items-center gap-3 bg-surface-2 px-4">
     <svg
       width="14"
       height="14"
@@ -75,15 +75,15 @@ const items = [
       placeholder={t('palette.placeholder')}
       autocomplete="off"
       spellcheck="false"
-      class="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted"
+      class="h-14 w-full bg-transparent text-body outline-none placeholder:text-muted"
     />
-    <kbd class="label shrink-0">Esc</kbd>
+    <kbd class="label shrink-0 font-sans">Esc</kbd>
   </div>
   <ul id="palette-results" role="listbox" class="max-h-[50vh] overflow-y-auto py-2"></ul>
-  <p class="hidden px-4 py-6 text-center text-sm text-muted" data-empty>
+  <p class="hidden px-4 py-6 text-center text-muted" data-empty>
     {t('palette.empty')}
   </p>
-  <p class="border-t border-rule px-4 py-2 font-mono text-2xs text-muted">{t('palette.hint')}</p>
+  <p class="bg-surface-2 px-4 py-2.5 label">{t('palette.hint')}</p>
   <script type="application/json" data-palette-items set:html={JSON.stringify(items)} />
 </dialog>
 
@@ -145,11 +145,11 @@ const items = [
         li.setAttribute('role', 'option');
         li.setAttribute('aria-selected', String(i === active));
         li.className =
-          'mx-2 flex cursor-pointer items-baseline justify-between gap-4 rounded-sm px-2 py-2 text-sm aria-selected:bg-accent-soft aria-selected:text-fg';
+          'mx-2 flex cursor-pointer items-baseline justify-between gap-4 px-3 py-2.5 aria-selected:bg-fg aria-selected:text-bg';
         const title = document.createElement('span');
         title.textContent = item.title;
         const hint = document.createElement('span');
-        hint.className = 'truncate font-mono text-2xs text-muted';
+        hint.className = 'truncate text-small opacity-75';
         hint.textContent = item.hint;
         li.append(title, hint);
         li.addEventListener('mousemove', () => {

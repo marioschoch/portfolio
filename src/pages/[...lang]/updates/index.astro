@@ -16,12 +16,8 @@ const years = [...new Set(updates.map((u) => u.data.date.getUTCFullYear()))];
 ---
 
 <BaseLayout lang={lang} title={t('updates.title')} description={t('updates.intro')}>
-  <PageHeader
-    label={`${String(updates.length).padStart(2, '0')} / ${t('updates.title')}`}
-    title={t('updates.title')}
-    intro={t('updates.intro')}
-  >
-    <a href={localizePath('/rss/', lang)} class="btn mt-6">
+  <PageHeader title={t('updates.title')} intro={t('updates.intro')}>
+    <a href={localizePath('/rss/', lang)} class="btn mt-8 md:ml-[50%]">
       <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
         <circle cx="3" cy="13" r="2"></circle>
         <path d="M1 6.5A8.5 8.5 0 0 1 9.5 15H7a6 6 0 0 0-6-6V6.5Zm0-5A13.5 13.5 0 0 1 14.5 15H12A11 11 0 0 0 1 4V1.5Z"></path>
@@ -30,13 +26,13 @@ const years = [...new Set(updates.map((u) => u.data.date.getUTCFullYear()))];
     </a>
   </PageHeader>
 
-  <div class="container-page space-y-14 py-12">
+  <div class="container-page space-y-24">
     {years.map((year) => (
-      <section class="grid gap-6 sm:grid-cols-[6rem_minmax(0,1fr)]" aria-labelledby={`y-${year}`}>
-        <h2 id={`y-${year}`} class="font-mono text-sm text-muted sm:pt-0.5">
+      <section class="grid gap-8 lg:grid-cols-12" aria-labelledby={`y-${year}`}>
+        <h2 id={`y-${year}`} class="heading tabular-nums lg:col-span-3" data-reveal>
           {year}
         </h2>
-        <div class="max-w-text">
+        <div class="max-w-text lg:col-span-8 lg:col-start-4">
           <Timeline
             updates={updates.filter((u) => u.data.date.getUTCFullYear() === year)}
             lang={lang}

@@ -63,36 +63,35 @@ const jsonLd = {
   jsonLd={jsonLd}
 >
   <article>
-    <header class="relative border-b border-rule">
-      <div class="bg-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
-      <div class="relative container-page pt-10 pb-10 sm:pt-14">
-        <nav aria-label="Breadcrumb" class="label mb-8">
-          <a href={localizePath('/projects/', lang)} class="hover:text-fg">
-            ← {t('project.back')}
-          </a>
-        </nav>
-        <ul class="mb-4 flex flex-wrap gap-x-3 gap-y-1" aria-label="Tags">
-          {data.tags.map((tag) => (
-            <li class="label text-accent">#{tag}</li>
-          ))}
-        </ul>
-        <h1 class="max-w-3xl text-3xl leading-tight sm:text-[2.75rem]">{project.title}</h1>
-        <p class="mt-5 max-w-text text-lg leading-relaxed text-fg-soft">{project.summary}</p>
-        <p class="mt-6 flex flex-wrap gap-x-5 gap-y-1 font-mono text-2xs text-muted">
-          <span>
-            {project.minutesRead} {t('project.readingTime')}
-          </span>
-          <span>
-            {t('project.lastUpdated')}{' '}
-            <time datetime={isoDate(project.lastUpdated)}>
-              {formatDate(project.lastUpdated, lang)}
-            </time>
-          </span>
-        </p>
+    <header class="container-page pt-10 pb-16 sm:pt-14 sm:pb-24">
+      <nav aria-label="Breadcrumb" class="mb-12">
+        <a href={localizePath('/projects/', lang)} class="link">
+          ← {t('project.back')}
+        </a>
+      </nav>
+      <div data-reveal>
+        <h1 class="max-w-[18ch] text-[clamp(2.5rem,1rem+5vw,6rem)] leading-[0.98] font-semibold tracking-[-0.045em]">
+          {project.title}
+        </h1>
+        <div class="mt-10 md:ml-[50%]">
+          <p class="max-w-[40ch] text-lead">{project.summary}</p>
+          <p class="mt-5 flex flex-wrap gap-x-5 gap-y-1 label">
+            <span aria-label="Tags">{data.tags.map((tag) => `#${tag}`).join(' ')}</span>
+            <span>
+              {project.minutesRead} {t('project.readingTime')}
+            </span>
+            <span>
+              {t('project.lastUpdated')}{' '}
+              <time datetime={isoDate(project.lastUpdated)}>
+                {formatDate(project.lastUpdated, lang)}
+              </time>
+            </span>
+          </p>
+        </div>
       </div>
     </header>
 
-    <div class="container-page space-y-14 py-10">
+    <div class="container-page space-y-20 sm:space-y-28">
       <SpecSheet project={project} lang={lang} />
 
       {data.cover ? (
@@ -100,35 +99,34 @@ const jsonLd = {
           src={data.cover.src}
           alt={data.cover.alt}
           widths={[640, 960, 1280, 1920]}
-          sizes="(min-width: 1152px) 72rem, 100vw"
-          class="w-full border border-rule"
+          sizes="(min-width: 1536px) 92rem, 100vw"
+          class="w-full"
           loading="eager"
           fetchpriority="high"
         />
       ) : (
-        <ImagePlaceholder
-          label={t('project.imagePending')}
-          figure={`${t('project.figure')} 01`}
-          class="aspect-[3/1]!"
-        />
+        <ImagePlaceholder label={t('project.imagePending')} class="aspect-[21/9]!" />
       )}
 
       <KeyFigures figures={project.keyFigures} lang={lang} />
 
-      <div class="grid gap-14 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16">
-        <div class="prose min-w-0 [&>h2:first-child]:mt-0">
+      <div class="grid gap-20 lg:grid-cols-12 lg:gap-8">
+        <div class="prose min-w-0 lg:col-span-7 lg:col-start-4 [&>h2:first-child]:mt-0">
           <Content />
         </div>
 
-        <aside class="lg:sticky lg:top-24 lg:self-start" aria-labelledby="log-heading">
-          <h2 id="log-heading" class="label mb-5 flex items-center justify-between">
+        <aside
+          class="lg:col-span-3 lg:col-start-1 lg:row-start-1 lg:pr-4"
+          aria-labelledby="log-heading"
+        >
+          <h2 id="log-heading" class="mb-8 heading">
             {t('project.log')}
-            <span>{String(updates.length).padStart(2, '0')}</span>
+            <span class="sr-only">({updates.length})</span>
           </h2>
           {updates.length ? (
             <Timeline updates={updates} lang={lang} />
           ) : (
-            <p class="text-sm text-muted">{t('project.logEmpty')}</p>
+            <p class="text-muted">{t('project.logEmpty')}</p>
           )}
         </aside>
       </div>

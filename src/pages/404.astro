@@ -11,16 +11,15 @@ const de = useTranslations('de');
 ---
 
 <BaseLayout lang="en" title={t('notFound.title')} description={t('notFound.text')} noindex>
-  <section class="relative">
-    <div class="bg-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
-    <div class="relative container-page py-24 sm:py-32">
-      <p class="label mb-4">Error 404</p>
-      <h1 class="text-4xl sm:text-5xl">{t('notFound.title')}</h1>
-      <p class="mt-4 max-w-text text-lg text-fg-soft">{t('notFound.text')}</p>
-      <p class="mt-1 max-w-text text-fg-soft" lang="de-CH">
+  <section class="container-page pt-16 sm:pt-24" data-reveal>
+    <h1 class="display">{t('notFound.title')}</h1>
+    <div class="mt-10 md:ml-[50%]" data-reveal>
+      <p class="max-w-[36ch] text-lead">{t('notFound.text')}</p>
+      <p class="mt-2 max-w-[44ch]" lang="de-CH">
         {de('notFound.text')}
       </p>
-      <div class="mt-8 flex flex-wrap gap-2">
+      <p class="mt-2 label">Error 404</p>
+      <div class="mt-10 flex flex-wrap gap-2">
         <a href="/" class="btn btn-primary">
           {t('notFound.back')}
         </a>

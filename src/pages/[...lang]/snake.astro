@@ -29,31 +29,32 @@ const pad = [
 ---
 
 <BaseLayout lang={lang} title={t('snake.title')} description={t('snake.intro')}>
-  <PageHeader label={t('nav.snake')} title={t('snake.title')} intro={t('snake.intro')} />
+  <PageHeader title={t('snake.title')} intro={t('snake.intro')} />
 
-  <div class="container-page py-6 sm:py-10">
+  <div class="container-page">
     <div
       id="snake"
       class="mx-auto w-full max-w-md select-none"
+      data-reveal
       data-strings={JSON.stringify(strings)}
     >
-      <div class="mb-3 flex items-center justify-between font-mono text-sm">
+      <div class="mb-4 flex items-center justify-between gap-4">
         <p>
           <span class="label">{t('snake.score')}</span>
-          <span id="snake-score" class="ml-2 text-fg tabular-nums">
+          <span id="snake-score" class="ml-2 text-lead font-semibold tabular-nums">
             0
           </span>
         </p>
         <p>
           <span class="label">{t('snake.best')}</span>
-          <span id="snake-best" class="ml-2 text-fg tabular-nums">
+          <span id="snake-best" class="ml-2 text-lead font-semibold tabular-nums">
             0
           </span>
         </p>
         <button
           type="button"
           id="snake-pause"
-          class="touch-manipulation rounded-sm border border-rule px-2.5 py-1 text-xs text-fg-soft transition-colors hover:border-rule-strong hover:text-fg disabled:opacity-40"
+          class="btn min-h-10 touch-manipulation px-4 py-1.5 text-small disabled:pointer-events-none disabled:opacity-50"
           disabled
         >
           {t('snake.pause')}
@@ -62,7 +63,7 @@ const pad = [
 
       <div
         id="snake-board"
-        class="relative aspect-square w-full touch-none overflow-hidden rounded-sm border border-rule-strong bg-surface"
+        class="relative aspect-square w-full touch-none overflow-hidden bg-surface"
       >
         <canvas
           id="snake-canvas"
@@ -72,16 +73,12 @@ const pad = [
         ></canvas>
         <div
           id="snake-overlay"
-          class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-bg/75 backdrop-blur-[2px]"
+          class="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-surface/90"
         >
-          <p id="snake-message" class="text-center text-xl font-semibold" aria-live="polite">
+          <p id="snake-message" class="text-center heading" aria-live="polite">
             Snake
           </p>
-          <button
-            type="button"
-            id="snake-action"
-            class="touch-manipulation rounded-sm bg-accent px-5 py-2 font-medium text-bg transition-opacity hover:opacity-90"
-          >
+          <button type="button" id="snake-action" class="btn btn-primary touch-manipulation px-8">
             {t('snake.start')}
           </button>
         </div>
@@ -97,7 +94,7 @@ const pad = [
             data-dir={b.dir}
             aria-label={b.label}
             style={`grid-area: ${b.dir}`}
-            class={`flex aspect-square touch-manipulation items-center justify-center rounded-sm border border-rule-strong bg-surface text-fg-soft active:bg-accent-soft active:text-accent`}
+            class={`flex aspect-square touch-manipulation items-center justify-center bg-surface text-fg transition-transform active:scale-95 active:bg-fg active:text-bg`}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
               <path d={b.d} fill="currentColor"></path>
@@ -106,7 +103,7 @@ const pad = [
         ))}
       </div>
 
-      <p class="mt-6 text-center text-sm text-muted">{t('snake.help')}</p>
+      <p class="mt-6 text-center text-small text-muted">{t('snake.help')}</p>
     </div>
   </div>
 </BaseLayout>

@@ -1,8 +1,11 @@
 ---
-/** Home: intro + status, quick links, Now, featured projects, latest updates. */
-import { Picture } from 'astro:assets';
+/**
+ * Home: the name as a monument, rolling past over a square crop of the hero photo; then Now,
+ * featured projects (big names with a fixed preview) and latest updates.
+ */
+import { Image, Picture } from 'astro:assets';
+import ImagePlaceholder from '@/components/ImagePlaceholder.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import ProjectCard from '@/components/ProjectCard.astro';
 import ObfuscatedEmail from '@/components/ObfuscatedEmail.astro';
 import { getFeaturedProjects, getProjects, getUpdates, updateTeaser } from '@/lib/content';
 import { personJsonLd } from '@/lib/person';
@@ -35,141 +38,374 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
   description={site.tagline[lang]}
   jsonLd={personJsonLd}
 >
-  <!-- Intro -->
-  <section class="relative isolate overflow-hidden border-b border-rule">
-    <!-- Background photo: theme-coloured fades keep the text readable in light and dark mode -->
-    <div
-      class="absolute inset-x-0 top-0 -z-10 h-72 sm:h-96 lg:inset-0 lg:h-auto"
-      aria-hidden="true"
-    >
-      <Picture
-        src={heroImage}
-        alt=""
-        layout="full-width"
-        formats={['avif', 'webp']}
-        loading="eager"
-        fetchpriority="high"
-        class="size-full object-cover object-[60%_center]"
-      />
-      <!-- Phones: photo as a band on top, fading into the page; desktop: full background, faded on the text side -->
-      <div class="absolute inset-0 bg-linear-to-b from-transparent via-bg/30 to-bg lg:hidden"></div>
-      <div class="absolute inset-0 hidden bg-linear-to-r from-bg from-25% via-bg/75 via-50% to-bg/5 lg:block"></div>
-      <div class="absolute inset-x-0 bottom-0 hidden h-24 bg-linear-to-t from-bg to-transparent lg:block"></div>
+  <!-- Intro: the name rolls past like a group of riders; letters turn light as they cross the photo -->
+  <section class="hero flex min-h-[calc(100svh-4rem)] flex-col">
+    <div class="hero-stage">
+      <figure class="hero-photo">
+        <Picture
+          src={heroImage}
+          alt={
+            lang === 'de'
+              ? 'Gruppe von Rennvelofahrern in voller Fahrt'
+              : 'A group of road cyclists riding at speed'
+          }
+          widths={[600, 900, 1300, 1800]}
+          sizes="(min-width: 640px) 52vw, 112vw"
+          formats={['avif', 'webp']}
+          loading="eager"
+          fetchpriority="high"
+          class="size-full object-cover object-[62%_50%]"
+        />
+      </figure>
+      <!--
+        The moving line is set twice: in the paper colour, clipped to the photo, and in the ink
+        (the h1) with the photo's square cut out of it, so the two never overlap.
+      -->
+      <div class="hero-line hero-line--light" aria-hidden="true">
+        <span class="hero-track">
+          {[0, 1, 2, 3].map(() => (
+            <span class="hero-word">
+              {site.name}
+              <span class="hero-dot" />
+            </span>
+          ))}
+        </span>
+      </div>
+      <h1 class="hero-line hero-line--ink">
+        <span class="hero-track">
+          {[0, 1, 2, 3].map((i) => (
+            <span class="hero-word" aria-hidden={i > 0 ? 'true' : undefined}>
+              {site.name}
+              <span class="hero-dot" aria-hidden="true" />
+            </span>
+          ))}
+        </span>
+      </h1>
     </div>
-    <div class="relative container-page grid gap-12 pt-52 pb-14 sm:pt-72 sm:pb-20 lg:min-h-[36rem] lg:pt-24 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
-      <div>
-        <p class="label mb-6 flex items-center gap-2">
-          <span class="size-1.5 rounded-full bg-accent" aria-hidden="true"></span>
-          {site.status[lang]}
+
+    <div class="container-page mt-12 text-center sm:mt-16" data-reveal>
+      <p class="mx-auto max-w-[24ch] text-heading leading-tight font-medium tracking-[-0.02em]">
+        {site.tagline[lang]}
+      </p>
+      <p class="mt-4">{site.status[lang]}</p>
+      {site.availableFrom && (
+        <p class="mt-2">
+          {t('home.openTo')} {site.availableFrom[lang]}
         </p>
-        <h1 class="text-4xl leading-[1.05] sm:text-6xl">{site.name}</h1>
-        <p class="mt-6 max-w-2xl text-lg leading-relaxed text-fg-soft sm:text-xl">
-          {site.tagline[lang]}
-        </p>
-        {site.availableFrom && (
-          <p class="mt-4 font-mono text-sm text-fg">
-            → {t('home.openTo')} {site.availableFrom[lang]}
-          </p>
-        )}
-        <ul class="mt-8 flex flex-wrap gap-2">
+      )}
+    </div>
+
+    <div class="container-page mt-auto flex flex-col-reverse gap-6 pt-14 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
+      <p class="label">
+        {site.location}
+        <span aria-hidden="true"> · </span>
+        {t('home.photoCredit')} Lars Meier
+      </p>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <ul class="flex flex-wrap gap-x-5 gap-y-2">
           <li>
-            <a href={localizePath('/cv/', lang)} class="btn btn-primary">
-              {t('nav.cv')}
-            </a>
-          </li>
-          <li>
-            <a href={site.links.github} class="btn" rel="me noopener">
+            <a href={site.links.github} class="link" rel="me noopener">
               GitHub ↗
             </a>
           </li>
           <li>
-            <a href={site.links.linkedin} class="btn" rel="me noopener">
+            <a href={site.links.linkedin} class="link" rel="me noopener">
               LinkedIn ↗
             </a>
           </li>
           <li>
-            <ObfuscatedEmail class="btn" label={t('contact.email')} />
+            <ObfuscatedEmail class="link" label={t('contact.email')} />
           </li>
         </ul>
-      </div>
-
-      <!-- Now -->
-      <aside
-        class="border border-rule bg-surface/85 p-5 backdrop-blur-sm"
-        aria-labelledby="now-heading"
-      >
-        <div class="mb-4 flex items-baseline justify-between">
-          <h2 id="now-heading" class="label text-fg">
-            {t('home.now')}
-          </h2>
-          <p class="label">
-            {t('home.nowUpdated')}{' '}
-            <time datetime={isoDate(nowDate)}>{formatDate(nowDate, lang)}</time>
-          </p>
-        </div>
-        <ul class="space-y-3 text-sm leading-relaxed text-fg-soft">
-          {now.items.map((item) => (
-            <li class="relative pl-4 before:absolute before:top-[0.7em] before:left-0 before:h-px before:w-2 before:bg-accent">
-              {tx(item, lang)}
-            </li>
-          ))}
-        </ul>
-      </aside>
-    </div>
-    <p class="label absolute right-4 bottom-3 text-2xs opacity-70 sm:right-6">
-      {t('home.photoCredit')} Lars Meier
-    </p>
-  </section>
-
-  <!-- Featured projects -->
-  <section class="container-page py-16" aria-labelledby="featured-heading">
-    <div class="mb-8 flex items-baseline justify-between gap-4">
-      <h2 id="featured-heading" class="text-2xl">
-        {t('home.featured')}
-      </h2>
-      <a href={localizePath('/projects/', lang)} class="label hover:text-fg">
-        {t('home.allProjects')} →
-      </a>
-    </div>
-    <div class="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-      {featured.map((p, i) => (
-        <ProjectCard project={p} lang={lang} index={i} headingLevel="h3" eager={i === 0} />
-      ))}
-    </div>
-  </section>
-
-  <!-- Latest updates -->
-  <section class="border-t border-rule" aria-labelledby="latest-heading">
-    <div class="container-page py-16">
-      <div class="mb-8 flex items-baseline justify-between gap-4">
-        <h2 id="latest-heading" class="text-2xl">
-          {t('home.latest')}
-        </h2>
-        <a href={localizePath('/updates/', lang)} class="label hover:text-fg">
-          {t('home.allUpdates')} →
+        <a href={localizePath('/cv/', lang)} class="btn btn-primary w-full sm:w-auto">
+          {t('nav.cv')} →
         </a>
       </div>
-      <ol class="divide-y divide-rule border-y border-rule">
-        {latest.map((u) => (
-          <li class="group relative grid gap-1 py-5 sm:grid-cols-[9rem_14rem_minmax(0,1fr)] sm:gap-6">
-            <time class="label pt-0.5 text-fg-soft" datetime={isoDate(u.data.date)}>
-              {formatDate(u.data.date, lang)}
-            </time>
-            <p class="label pt-0.5">{projectTitles[u.data.project.id]}</p>
-            <div>
-              <h3 class="font-medium">
-                <a
-                  href={localizePath(`/projects/${u.data.project.id}/`, lang) + `#${u.id}`}
-                  class="after:absolute after:inset-0 group-hover:text-accent"
-                >
-                  {u.data.title}
-                </a>
-              </h3>
-              <p class="mt-1 text-sm text-fg-soft">{updateTeaser(u, 160)}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
     </div>
   </section>
+
+  <!-- Now: a band one tone darker than the page -->
+  <section class="bg-surface" aria-labelledby="now-heading" data-flush>
+    <div class="container-page grid gap-10 py-24 sm:py-32 md:grid-cols-12" data-reveal>
+      <div class="md:col-span-5">
+        <h2 id="now-heading" class="display">
+          {t('home.now')}
+        </h2>
+        <p class="mt-4 label">
+          {t('home.nowUpdated')}{' '}
+          <time datetime={isoDate(nowDate)}>{formatDate(nowDate, lang)}</time>
+        </p>
+      </div>
+      <ul class="space-y-6 md:col-span-7 md:self-end">
+        {now.items.map((item) => (
+          <li class="max-w-[36ch] text-lead leading-[1.25] tracking-[-0.01em] md:text-heading md:leading-[1.2]">
+            {tx(item, lang)}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Featured projects: the names are the index, a fixed frame shows the active one -->
+  {featured.length > 0 && (
+    <section class="container-page section" aria-labelledby="featured-heading" data-work>
+      <div class="mb-12 flex items-baseline justify-between gap-4" data-reveal>
+        <h2 id="featured-heading" class="heading">
+          {t('home.featured')}
+        </h2>
+        <a href={localizePath('/projects/', lang)} class="link">
+          {t('home.allProjects')} →
+        </a>
+      </div>
+      <div class="grid gap-10 lg:grid-cols-12">
+        <ol class="space-y-14 lg:col-span-8 lg:space-y-0">
+          {featured.map((p, i) => (
+            <li data-reveal>
+              <div class="mb-5 lg:hidden">
+                {p.entry.data.cover ? (
+                  <Image
+                    src={p.entry.data.cover.src}
+                    alt={p.entry.data.cover.alt}
+                    widths={[480, 720, 960]}
+                    sizes="100vw"
+                    class="aspect-[16/10] w-full object-cover"
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                  />
+                ) : (
+                  <ImagePlaceholder label={t('project.imagePending')} />
+                )}
+              </div>
+              <a
+                href={localizePath(`/projects/${p.id}/`, lang)}
+                class="work-row group block py-2.5"
+                data-work-row={i}
+                aria-current={i === 0 ? 'true' : undefined}
+              >
+                <span class="block text-[clamp(2.25rem,1rem+4vw,4.5rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-balance">
+                  {p.title}
+                </span>
+                <span class="mt-2 block label">
+                  {p.entry.data.tags.join(', ')} · {p.entry.data.timeframe.start.getUTCFullYear()}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <div class="hidden lg:col-span-4 lg:block">
+          <div class="sticky top-[15vh] aspect-[4/5] bg-surface">
+            {featured.map((p, i) =>
+              p.entry.data.cover ? (
+                <Image
+                  src={p.entry.data.cover.src}
+                  alt=""
+                  widths={[480, 720]}
+                  sizes="30vw"
+                  class="work-frame absolute inset-0 size-full object-cover"
+                  data-work-frame={i}
+                  data-active={i === 0 ? 'true' : undefined}
+                />
+              ) : (
+                <ImagePlaceholder
+                  label={t('project.imagePending')}
+                  class="work-frame absolute! inset-0 aspect-auto! size-full"
+                  data-work-frame={i}
+                  data-active={i === 0 ? 'true' : undefined}
+                />
+              ),
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Latest updates: a statement heading with the list pushed to the right -->
+  {latest.length > 0 && (
+    <section class="container-page section" aria-labelledby="latest-heading">
+      <div class="grid gap-12 lg:grid-cols-12">
+        <div class="flex flex-col justify-between gap-6 lg:col-span-4" data-reveal>
+          <h2 id="latest-heading" class="heading">
+            {t('home.latest')}
+          </h2>
+          <a href={localizePath('/updates/', lang)} class="link self-start">
+            {t('home.allUpdates')} →
+          </a>
+        </div>
+        <ol class="space-y-10 lg:col-span-8 lg:col-start-5">
+          {latest.map((u) => (
+            <li
+              class="group relative grid gap-1 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8"
+              data-reveal
+            >
+              <p class="label">
+                <time datetime={isoDate(u.data.date)}>{formatDate(u.data.date, lang)}</time>
+                <span class="block">{projectTitles[u.data.project.id]}</span>
+              </p>
+              <div>
+                <h3 class="text-lead leading-snug font-semibold">
+                  <a
+                    href={localizePath(`/projects/${u.data.project.id}/`, lang) + `#${u.id}`}
+                    class="underline decoration-transparent decoration-2 underline-offset-4 transition-colors after:absolute after:inset-0 group-hover:decoration-current"
+                  >
+                    {u.data.title}
+                  </a>
+                </h3>
+                <p class="mt-2 max-w-[60ch]">{updateTeaser(u, 160)}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
 </BaseLayout>
+
+<style>
+  @reference '../../styles/global.css';
+
+  .hero-stage {
+    --s: clamp(13rem, 21vw, 21rem);
+    --fs: clamp(7.5rem, 15vw, 14.5rem);
+    --pad: clamp(2.5rem, 7vh, 5rem);
+    position: relative;
+    height: calc(var(--s) + 2 * var(--pad));
+    overflow: hidden;
+  }
+  @media (max-width: 639px) {
+    .hero-stage {
+      --s: 46vw;
+      --fs: 34vw;
+      --pad: 13vw;
+    }
+  }
+
+  .hero-photo {
+    position: absolute;
+    pointer-events: none;
+    top: var(--pad);
+    left: calc(50% - var(--s) / 2);
+    width: var(--s);
+    height: var(--s);
+    overflow: hidden;
+    background: var(--c-surface);
+  }
+  .hero-photo :global(img) {
+    animation: hero-drift 24s ease-in-out infinite alternate;
+  }
+
+  .hero-line {
+    /* Edges of the photo inside the line's box. */
+    --l: calc(50% - var(--s) / 2);
+    --r: calc(50% + var(--s) / 2);
+    --t: calc(var(--fs) * 0.53 - var(--s) / 2);
+    --b: calc(var(--fs) * 0.53 + var(--s) / 2);
+    display: block;
+    position: absolute;
+    inset-inline: 0;
+    top: calc(var(--pad) + var(--s) / 2 - var(--fs) * 0.53);
+    height: var(--fs);
+    font-size: var(--fs);
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    white-space: nowrap;
+    color: var(--c-fg);
+    text-wrap: nowrap;
+  }
+  .hero-line--ink {
+    clip-path: polygon(
+      evenodd,
+      0 -50%,
+      100% -50%,
+      100% 150%,
+      0 150%,
+      0 -50%,
+      var(--l) var(--t),
+      var(--l) var(--b),
+      var(--r) var(--b),
+      var(--r) var(--t),
+      var(--l) var(--t)
+    );
+  }
+  .hero-line--light {
+    pointer-events: none;
+    color: var(--c-bg);
+    clip-path: polygon(var(--l) var(--t), var(--r) var(--t), var(--r) var(--b), var(--l) var(--b));
+  }
+
+  .hero-track {
+    display: inline-flex;
+    animation: hero-roll 70s linear infinite;
+  }
+  .hero-word {
+    display: inline-flex;
+    align-items: center;
+    padding-inline-end: 0.3em;
+  }
+  .hero-dot {
+    display: inline-block;
+    width: 0.24em;
+    height: 0.24em;
+    margin-inline-start: 0.3em;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  @keyframes hero-roll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes hero-drift {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.08) translateX(-2%);
+    }
+  }
+
+  /* Reduced motion: the line stops with the name centred across the photo. */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-track {
+      animation: none;
+      transform: translateX(calc(50vw - 37.5%));
+    }
+  }
+
+  /* Project index: the active row is in the ink, the others in the muted ink. */
+  .work-row {
+    @apply transition-colors duration-200 lg:text-muted;
+  }
+  .work-row[aria-current='true'] {
+    @apply lg:text-fg;
+  }
+  .work-frame {
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+  }
+  .work-frame[data-active='true'] {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  // Project index: pointing at or focusing a name shows its picture in the fixed frame.
+  for (const work of document.querySelectorAll<HTMLElement>('[data-work]')) {
+    const rows = [...work.querySelectorAll<HTMLElement>('[data-work-row]')];
+    const frames = [...work.querySelectorAll<HTMLElement>('[data-work-frame]')];
+    const activate = (i: number) => {
+      rows.forEach((r, j) =>
+        j === i ? r.setAttribute('aria-current', 'true') : r.removeAttribute('aria-current'),
+      );
+      frames.forEach((f, j) => (j === i ? (f.dataset.active = 'true') : delete f.dataset.active));
+    };
+    rows.forEach((row, i) => {
+      row.addEventListener('pointerenter', () => activate(i));
+      row.addEventListener('focus', () => activate(i));
+    });
+  }
+</script>

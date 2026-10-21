@@ -26,11 +26,10 @@ const posterSrc = poster ? (await getImage({ src: poster, width: 1200, format: '
   data-alt={alt}
   data-poster={posterSrc}
 >
-  <h2 id="model-heading" class="label mb-4">
+  <h2 id="model-heading" class="mb-8 heading">
     {t('project.model')}
   </h2>
-  <div class="relative aspect-[16/10] overflow-hidden border border-rule bg-surface" data-stage>
-    <div class="bg-grid absolute inset-0 [mask-image:none]" aria-hidden="true"></div>
+  <div class="relative aspect-[16/10] overflow-hidden bg-surface" data-stage>
     {posterSrc && <img src={posterSrc} alt="" class="absolute inset-0 size-full object-contain" />}
     <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4 text-center">
       <button type="button" class="btn btn-primary" data-load>
@@ -44,10 +43,10 @@ const posterSrc = poster ? (await getImage({ src: poster, width: 1200, format: '
         </svg>
         {t('project.modelLoad')}
       </button>
-      <p class="font-mono text-2xs text-muted">GLB · {alt}</p>
+      <p class="label">GLB · {alt}</p>
     </div>
   </div>
-  <p class="mt-2 font-mono text-2xs text-muted">{t('project.modelHint')}</p>
+  <p class="mt-3 label">{t('project.modelHint')}</p>
 </section>
 
 <script>
