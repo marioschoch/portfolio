@@ -176,6 +176,7 @@ const pad = [
 
   const GRID = 20;
   const START_INTERVAL = 140; // ms per step
+  const RESTART_DELAY = 800; // ms after a crash before game keys can restart
   const MIN_INTERVAL = 70;
   const BEST_KEY = 'snake-best';
   const VEC: Record<Dir, Cell> = {
@@ -410,6 +411,8 @@ const pad = [
     let acc = 0;
     let last = 0;
     let best = 0;
+    /** When the last game ended, so late key presses don't restart it at once. */
+    let overAt = 0;
     try {
       best = Number(localStorage.getItem(BEST_KEY)) || 0;
     } catch {
@@ -477,9 +480,19 @@ const pad = [
       else if (state === 'paused') setState('running');
     };
 
+    /**
+     * Whether game input (arrows, swipes, space) may start a new round. After a
+     * crash it waits a moment, and never while the highscore form is open, so a
+     * late key press can't throw away a leaderboard entry.
+     */
+    const canRestart = () =>
+      state !== 'over' ||
+      (entry.classList.contains('hidden') && performance.now() - overAt > RESTART_DELAY);
+
     /** Queue a turn; ignores reversals and repeats so fast inputs never kill the snake. */
     const turn = (d: Dir) => {
       if (state === 'ready' || state === 'over') {
+        if (!canRestart()) return;
         start();
         if (d === OPPOSITE[dir]) return;
       } else if (state === 'paused') {
@@ -490,6 +503,7 @@ const pad = [
     };
 
     const gameOver = () => {
+      overAt = performance.now();
       sound.crash();
       if (score > best) {
         best = score;
@@ -693,7 +707,7 @@ const pad = [
       } else if (e.key === ' ' && target.tagName !== 'BUTTON') {
         e.preventDefault();
         if (state === 'running' || state === 'paused') togglePause();
-        else start();
+        else if (canRestart()) start();
       }
     });
 
