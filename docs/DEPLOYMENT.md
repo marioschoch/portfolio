@@ -229,6 +229,21 @@ deploy. Deploys from GitHub always start from a clean build, so this doesn't aff
 out of the iCloud-synced Desktop (e.g. to `~/Projekte/Website`) avoids the problem entirely and also keeps
 iCloud from syncing the large `node_modules` folder.
 
+## 9. Snake leaderboard (the only PHP)
+
+The shared top-10 board on `/snake/` is served by `public/api/snake-scores.php`, so **PHP must be
+enabled for the domain** in Plesk (Websites & Domains → PHP; any version from 7.4 works). The deploy's
+smoke test fails if the API does not answer with JSON.
+
+Scores are stored in `private/snake/` next to the web root (Plesk's non-public `private` folder). If
+that folder is not writable, the script falls back to `api/.snake-data/` inside the web root (blocked
+by the dotfile rule in `.htaccess`). Deploys never touch either folder.
+
+- **Remove an entry or reset the board:** edit or delete `scores.json` there (via SFTP or the Plesk
+  file manager).
+- `secret.key` signs the start tokens; `recent.json` holds the rate limit (hashed IPs, kept for two
+  hours).
+
 ## What's in `public/.htaccess`
 
 | Section      | What it does                                                                                                                                                                                                                           |

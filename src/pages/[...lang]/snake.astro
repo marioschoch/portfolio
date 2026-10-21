@@ -2,6 +2,7 @@
 /**
  * Snake: a small canvas game. Keyboard (arrows / WASD / Space) on desktop,
  * swipe or on-screen buttons on touch devices. Colours follow the site theme.
+ * The shared top-10 board is served by public/api/snake-scores.php.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeader from '@/components/PageHeader.astro';
@@ -18,6 +19,10 @@ const strings = {
   paused: t('snake.paused'),
   gameOver: t('snake.gameOver'),
   score: t('snake.score'),
+  boardEmpty: t('snake.boardEmpty'),
+  boardError: t('snake.boardError'),
+  saved: t('snake.saved'),
+  saveError: t('snake.saveError'),
 };
 
 const pad = [
@@ -31,10 +36,10 @@ const pad = [
 <BaseLayout lang={lang} title={t('snake.title')} description={t('snake.intro')}>
   <PageHeader title={t('snake.title')} intro={t('snake.intro')} />
 
-  <div class="container-page">
+  <div class="container-page grid gap-20 lg:grid-cols-12 lg:gap-8">
     <div
       id="snake"
-      class="mx-auto w-full max-w-md select-none"
+      class="w-full max-w-md select-none lg:col-span-6 lg:max-w-lg"
       data-reveal
       data-strings={JSON.stringify(strings)}
     >
@@ -78,6 +83,25 @@ const pad = [
           <p id="snake-message" class="text-center heading" aria-live="polite">
             Snake
           </p>
+          <form id="snake-entry" class="hidden w-full max-w-xs px-5" autocomplete="off">
+            <label for="snake-name" class="block text-center">
+              {t('snake.newHigh')}
+            </label>
+            <div class="mt-3 flex gap-2">
+              <input
+                id="snake-name"
+                name="name"
+                type="text"
+                maxlength="12"
+                required
+                placeholder={t('snake.name')}
+                class="min-h-11 min-w-0 flex-1 bg-bg px-3 text-body text-fg placeholder:text-muted"
+              />
+              <button type="submit" class="btn btn-primary min-h-11 px-4">
+                {t('snake.save')}
+              </button>
+            </div>
+          </form>
           <button type="button" id="snake-action" class="btn btn-primary touch-manipulation px-8">
             {t('snake.start')}
           </button>
@@ -103,8 +127,18 @@ const pad = [
         ))}
       </div>
 
-      <p class="mt-6 text-center text-small text-muted">{t('snake.help')}</p>
+      <p class="mt-6 text-small text-muted">{t('snake.help')}</p>
     </div>
+
+    <section class="lg:col-span-5 lg:col-start-8" aria-labelledby="board-heading" data-reveal>
+      <h2 id="board-heading" class="heading">
+        {t('snake.board')}
+      </h2>
+      <ol id="snake-scores" class="mt-8 hidden list-decimal space-y-1 pl-8 marker:text-muted"></ol>
+      <p id="snake-board-status" class="mt-8 text-muted" aria-live="polite">
+        {t('snake.boardLoading')}
+      </p>
+    </section>
   </div>
 </BaseLayout>
 
@@ -135,6 +169,90 @@ const pad = [
     d: 'right',
   };
 
+  // ---------------------------------------------------------------------------
+  // Shared leaderboard
+  // ---------------------------------------------------------------------------
+  type Entry = { name: string; score: number; date: string };
+  const API = '/api/snake-scores.php';
+  const NAME_KEY = 'snake-name';
+
+  const api = async (body?: object) => {
+    const res = await fetch(API, {
+      method: body ? 'POST' : 'GET',
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  };
+
+  const leaderboard = {
+    list: document.getElementById('snake-scores') as HTMLOListElement | null,
+    status: document.getElementById('snake-board-status'),
+    scores: null as Entry[] | null,
+    token: null as string | null,
+    texts: {} as Record<string, string>,
+
+    render(highlight?: number | null) {
+      if (!this.list || !this.status || !this.scores) return;
+      this.list.replaceChildren(
+        ...this.scores.map((entry, i) => {
+          const li = document.createElement('li');
+          li.className = 'pl-2 py-1.5 aria-[current=true]:font-semibold';
+          if (highlight === i + 1) li.setAttribute('aria-current', 'true');
+          const row = document.createElement('span');
+          row.className = 'flex items-baseline justify-between gap-4';
+          const name = document.createElement('span');
+          name.className = 'truncate text-lead';
+          name.textContent = entry.name;
+          const score = document.createElement('span');
+          score.className = 'text-lead tabular-nums';
+          score.textContent = String(entry.score);
+          row.append(name, score);
+          li.append(row);
+          return li;
+        }),
+      );
+      this.list.classList.toggle('hidden', this.scores.length === 0);
+      this.status.textContent = this.scores.length ? '' : (this.texts.boardEmpty ?? '');
+    },
+
+    async load() {
+      try {
+        this.scores = ((await api()) as { scores: Entry[] }).scores;
+        this.render();
+      } catch {
+        if (this.status) this.status.textContent = this.texts.boardError ?? '';
+      }
+    },
+
+    /** A signed start time, so the server can tell a played game from a typed-in score. */
+    async start() {
+      this.token = null;
+      try {
+        this.token = ((await api({ action: 'start' })) as { token: string }).token;
+      } catch {
+        /* no token: this game simply can't be submitted */
+      }
+    },
+
+    qualifies(score: number) {
+      if (!this.scores || !this.token || score < 1) return false;
+      return this.scores.length < 10 || score > this.scores[this.scores.length - 1]!.score;
+    },
+
+    async submit(name: string, score: number) {
+      const result = (await api({ action: 'submit', token: this.token, name, score })) as {
+        scores: Entry[];
+        rank: number | null;
+      };
+      this.token = null;
+      this.scores = result.scores;
+      this.render(result.rank);
+      return result.rank;
+    },
+  };
+
   const root = document.getElementById('snake');
   const board = document.getElementById('snake-board');
   const canvas = document.getElementById('snake-canvas') as HTMLCanvasElement | null;
@@ -149,6 +267,10 @@ const pad = [
     const action = $('snake-action') as HTMLButtonElement;
     const pauseBtn = $('snake-pause') as HTMLButtonElement;
     const text = JSON.parse(root.dataset.strings ?? '{}') as Record<string, string>;
+    const entry = $('snake-entry') as HTMLFormElement;
+    const nameInput = $('snake-name') as HTMLInputElement;
+    leaderboard.texts = text;
+    leaderboard.load();
 
     let state: State = 'ready';
     let snake: Cell[] = [];
@@ -195,6 +317,7 @@ const pad = [
     const setState = (next: State) => {
       state = next;
       overlay.style.display = next === 'running' ? 'none' : '';
+      if (next !== 'over') entry.classList.add('hidden');
       pauseBtn.disabled = next !== 'running' && next !== 'paused';
       if (next === 'paused') {
         message.textContent = text.paused ?? 'Paused';
@@ -214,6 +337,7 @@ const pad = [
       if (state === 'running') return;
       reset();
       setState('running');
+      void leaderboard.start();
       // On phones, bring score, board and buttons fully into view.
       if (matchMedia('(pointer: coarse)').matches) root.scrollIntoView({ block: 'start' });
     };
@@ -246,7 +370,38 @@ const pad = [
         }
       }
       setState('over');
+      if (leaderboard.qualifies(score)) {
+        try {
+          nameInput.value = localStorage.getItem(NAME_KEY) ?? '';
+        } catch {
+          /* storage unavailable */
+        }
+        entry.classList.remove('hidden');
+        nameInput.focus({ preventScroll: true });
+      }
     };
+
+    entry.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      if (!name) return;
+      const button = entry.querySelector('button')!;
+      button.disabled = true;
+      try {
+        localStorage.setItem(NAME_KEY, name);
+      } catch {
+        /* storage unavailable */
+      }
+      try {
+        const rank = await leaderboard.submit(name, score);
+        message.textContent = rank ? `${text.saved} ${rank}` : (text.saveError ?? '');
+      } catch {
+        message.textContent = text.saveError ?? '';
+      }
+      button.disabled = false;
+      entry.classList.add('hidden');
+      action.focus();
+    });
 
     const step = () => {
       dir = queue.shift() ?? dir;

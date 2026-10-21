@@ -53,6 +53,9 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
+      - name: PHP syntax check (Snake leaderboard API)
+        run: php -l public/api/snake-scores.php
+
       - name: Build (type check + static build + CSP hashes)
         run: npm run build
         env:
@@ -78,3 +81,6 @@ jobs:
             echo "$path → $code"
             [ "$code" = "200" ] || exit 1
           done
+          # The leaderboard API must run PHP and answer with JSON.
+          curl -sf https://marioschoch.ch/api/snake-scores.php | grep -q '"scores"' \
+            || { echo "Snake leaderboard API is not answering with JSON"; exit 1; }
