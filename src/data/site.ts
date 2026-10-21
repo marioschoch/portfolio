@@ -32,5 +32,7 @@ export const site = {
   // Cloudflare Web Analytics token (plain JS snippet, works on any host, no cookies, no DNS change).
   // Provided at build time via the PUBLIC_CF_ANALYTICS_TOKEN GitHub secret (see docs/DEPLOYMENT.md);
   // when empty (e.g. locally) no beacon is included.
-  analyticsToken: (import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN as string | undefined) ?? '',
+  // Extract the 32-hex token so a pasted snippet or stray whitespace in the secret still works.
+  analyticsToken:
+    ((import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN as string | undefined) ?? '').match(/[0-9a-f]{32}/i)?.[0] ?? '',
 };
