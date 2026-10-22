@@ -239,10 +239,18 @@ Scores are stored in `private/snake/` next to the web root (Plesk's non-public `
 that folder is not writable, the script falls back to `api/.snake-data/` inside the web root (blocked
 by the dotfile rule in `.htaccess`). Deploys never touch either folder.
 
-- **Remove an entry or reset the board:** edit or delete `scores.json` there (via SFTP or the Plesk
-  file manager).
-- `secret.key` signs the start tokens; `recent.json` holds the rate limit (hashed IPs, kept for two
-  hours).
+The board has one row per player: their best score and how many games (tries) they have played.
+A player is a random ID kept in the browser, so names are unique: the first browser to use a name
+owns it, and another browser or phone counts as a new player.
+
+- **Remove a player or reset the board:** delete their entry from `players.json` there, or the whole
+  file (via SFTP or the Plesk file manager). Each entry is keyed by a hash of the player's ID and holds
+  `name`, `best`, `tries`, `date` (of the best score) and `at`.
+- `scores.json` is the earlier one-row-per-game board. On the first request after the update it is
+  merged into `players.json` by name (tries = number of rows); those rows go to the first browser that
+  claims the name. After that the file is no longer used and can be deleted.
+- `secret.key` signs the start tokens and hashes the player IDs; `recent.json` holds used tokens and the
+  name-change rate limit (hashed IPs, kept for two hours).
 
 ## What's in `public/.htaccess`
 

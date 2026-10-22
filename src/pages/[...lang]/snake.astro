@@ -23,7 +23,13 @@ const strings = {
   score: t('snake.score'),
   boardEmpty: t('snake.boardEmpty'),
   boardError: t('snake.boardError'),
-  saved: t('snake.saved'),
+  nameFirst: t('snake.nameFirst'),
+  nameChange: t('snake.nameChange'),
+  nameTaken: t('snake.nameTaken'),
+  nameError: t('snake.nameError'),
+  rank: t('snake.rank'),
+  try: t('snake.try'),
+  tries: t('snake.tries'),
   saveError: t('snake.saveError'),
 };
 
@@ -111,8 +117,13 @@ const pad = [
             Snake
           </p>
           <form id="snake-entry" class="hidden w-full max-w-xs px-5" autocomplete="off">
-            <label for="snake-name" class="block text-center">
-              {t('snake.newHigh')}
+            <label
+              id="snake-name-label"
+              for="snake-name"
+              class="block text-center"
+              aria-live="polite"
+            >
+              {t('snake.nameFirst')}
             </label>
             <div class="mt-3 flex gap-2">
               <input
@@ -128,6 +139,13 @@ const pad = [
                 {t('snake.save')}
               </button>
             </div>
+            <button
+              type="button"
+              id="snake-name-cancel"
+              class="mt-3 w-full text-small text-muted underline hover:text-fg"
+            >
+              {t('snake.cancel')}
+            </button>
           </form>
           <button type="button" id="snake-action" class="btn btn-primary touch-manipulation px-8">
             {t('snake.start')}
@@ -154,6 +172,13 @@ const pad = [
         ))}
       </div>
 
+      <p id="snake-player" class="mt-6 hidden text-small">
+        {t('snake.playingAs')} <strong id="snake-player-name" class="font-semibold"></strong>
+        {' · '}
+        <button type="button" id="snake-rename" class="text-muted underline hover:text-fg">
+          {t('snake.change')}
+        </button>
+      </p>
       <p class="mt-6 text-small text-muted">{t('snake.help')}</p>
     </div>
 
@@ -200,9 +225,32 @@ const pad = [
   // ---------------------------------------------------------------------------
   // Shared leaderboard
   // ---------------------------------------------------------------------------
-  type Entry = { name: string; score: number; date: string };
+  type Entry = { name: string; score: number; tries: number; date: string };
+  type Result = { name: string; scores: Entry[]; rank: number | null };
   const API = '/api/snake-scores.php';
-  const NAME_KEY = 'snake-name';
+  /** A random ID that makes this browser the owner of its name on the board. */
+  const PLAYER_KEY = 'snake-player';
+  /** The name, once the player has chosen it. */
+  const PLAYER_NAME_KEY = 'snake-player-name';
+  /** A name typed on the earlier board, offered as the first suggestion. */
+  const OLD_NAME_KEY = 'snake-name';
+
+  const storage = {
+    get(key: string) {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null; // storage unavailable (private mode)
+      }
+    },
+    set(key: string, value: string) {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        /* ignore */
+      }
+    },
+  };
 
   const api = async (body?: object) => {
     const res = await fetch(API, {
@@ -210,9 +258,11 @@ const pad = [
       headers: body ? { 'Content-Type': 'application/json' } : undefined,
       body: body ? JSON.stringify(body) : undefined,
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw Object.assign(new Error(`HTTP ${res.status}`), { status: res.status });
     return res.json();
   };
+  /** The server answers 409 when a name belongs to another player. */
+  const isTaken = (e: unknown) => (e as { status?: number }).status === 409;
 
   const leaderboard = {
     list: document.getElementById('snake-scores') as HTMLOListElement | null,
@@ -220,23 +270,46 @@ const pad = [
     scores: null as Entry[] | null,
     token: null as string | null,
     texts: {} as Record<string, string>,
+    player: '',
+    name: '',
 
-    render(highlight?: number | null) {
+    /** Load this browser's player ID (creating one) and saved name. */
+    init() {
+      this.player = storage.get(PLAYER_KEY) ?? '';
+      if (!/^[0-9a-f]{32}$/.test(this.player)) {
+        this.player = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) =>
+          b.toString(16).padStart(2, '0'),
+        ).join('');
+        storage.set(PLAYER_KEY, this.player);
+      }
+      this.name = storage.get(PLAYER_NAME_KEY) ?? '';
+    },
+
+    setName(name: string) {
+      this.name = name;
+      storage.set(PLAYER_NAME_KEY, name);
+    },
+
+    render() {
       if (!this.list || !this.status || !this.scores) return;
+      const me = this.name.toLowerCase();
       this.list.replaceChildren(
-        ...this.scores.map((entry, i) => {
+        ...this.scores.map((entry) => {
           const li = document.createElement('li');
           li.className = 'pl-2 py-1.5 aria-[current=true]:font-semibold';
-          if (highlight === i + 1) li.setAttribute('aria-current', 'true');
+          if (me && entry.name.toLowerCase() === me) li.setAttribute('aria-current', 'true');
           const row = document.createElement('span');
-          row.className = 'flex items-baseline justify-between gap-4';
+          row.className = 'flex items-baseline gap-4';
           const name = document.createElement('span');
-          name.className = 'truncate text-lead';
+          name.className = 'min-w-0 flex-1 truncate text-lead';
           name.textContent = entry.name;
+          const tries = document.createElement('span');
+          tries.className = 'shrink-0 text-small font-normal text-muted tabular-nums';
+          tries.textContent = `${entry.tries} ${(entry.tries === 1 ? this.texts.try : this.texts.tries) ?? ''}`;
           const score = document.createElement('span');
-          score.className = 'text-lead tabular-nums';
+          score.className = 'min-w-[3ch] shrink-0 text-right text-lead tabular-nums';
           score.textContent = String(entry.score);
-          row.append(name, score);
+          row.append(name, tries, score);
           li.append(row);
           return li;
         }),
@@ -264,19 +337,27 @@ const pad = [
       }
     },
 
-    qualifies(score: number) {
-      if (!this.scores || !this.token || score < 1) return false;
-      return this.scores.length < 10 || score > this.scores[this.scores.length - 1]!.score;
+    /** Claim a name (or change it); throws with status 409 if another player has it. */
+    async rename(name: string) {
+      const result = (await api({ action: 'name', player: this.player, name })) as Result;
+      this.setName(result.name);
+      this.scores = result.scores;
+      this.render();
     },
 
-    async submit(name: string, score: number) {
-      const result = (await api({ action: 'submit', token: this.token, name, score })) as {
-        scores: Entry[];
-        rank: number | null;
-      };
+    /**
+     * Send a finished game. Every game counts as a try, also with 0 points. Throws with status
+     * 409 if the server doesn't know this player yet and the name is taken; the token stays
+     * valid then, so the same game can be sent again under another name.
+     */
+    async submit(score: number, name?: string) {
+      const { player, token } = this;
+      name ??= this.name;
+      const result = (await api({ action: 'submit', token, player, name, score })) as Result;
       this.token = null;
+      this.setName(result.name);
       this.scores = result.scores;
-      this.render(result.rank);
+      this.render();
       return result.rank;
     },
   };
@@ -374,6 +455,15 @@ const pad = [
     const text = JSON.parse(root.dataset.strings ?? '{}') as Record<string, string>;
     const entry = $('snake-entry') as HTMLFormElement;
     const nameInput = $('snake-name') as HTMLInputElement;
+    const nameLabel = $('snake-name-label');
+    const nameSave = entry.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const nameCancel = $('snake-name-cancel');
+    const playerLine = $('snake-player');
+    const playerName = $('snake-player-name');
+    const syncPlayer = () => {
+      playerLine.classList.toggle('hidden', !leaderboard.name);
+      playerName.textContent = leaderboard.name;
+    };
     const soundBtn = $('snake-sound') as HTMLButtonElement;
     const syncSound = () => {
       soundBtn.setAttribute('aria-pressed', String(sound.on));
@@ -397,6 +487,8 @@ const pad = [
       if (sound.on) sound.eat();
     });
     leaderboard.texts = text;
+    leaderboard.init();
+    syncPlayer();
     leaderboard.load();
 
     let state: State = 'ready';
@@ -449,7 +541,8 @@ const pad = [
     const setState = (next: State) => {
       state = next;
       overlay.style.display = next === 'running' ? 'none' : '';
-      if (next !== 'over') entry.classList.add('hidden');
+      entry.classList.add('hidden');
+      action.classList.remove('hidden');
       pauseBtn.disabled = next !== 'running' && next !== 'paused';
       if (next === 'paused') {
         message.textContent = text.paused ?? 'Paused';
@@ -464,9 +557,34 @@ const pad = [
       if (next === 'running') last = performance.now();
     };
 
+    /** What the name form is for: the first name, a change, or a name the server refused. */
+    let nameMode: 'first' | 'change' | 'taken' = 'first';
+    /** A finished game waiting for a free name before it can be sent. */
+    let pending: number | null = null;
+    const nameOpen = () => !entry.classList.contains('hidden');
+
+    const openName = (mode: typeof nameMode) => {
+      nameMode = mode;
+      const label = { first: text.nameFirst, change: text.nameChange, taken: text.nameTaken };
+      nameLabel.textContent = label[mode] ?? '';
+      nameInput.value = leaderboard.name || (storage.get(OLD_NAME_KEY) ?? '');
+      nameCancel.classList.toggle('hidden', mode !== 'change');
+      action.classList.add('hidden');
+      entry.classList.remove('hidden');
+      nameInput.focus({ preventScroll: true });
+      nameInput.select();
+    };
+
+    const closeName = () => {
+      entry.classList.add('hidden');
+      action.classList.remove('hidden');
+      action.focus({ preventScroll: true });
+    };
+
     const start = () => {
       if (state === 'paused') return setState('running');
       if (state === 'running') return;
+      if (!leaderboard.name) return openName('first');
       reset();
       setState('running');
       sound.ready();
@@ -482,15 +600,15 @@ const pad = [
 
     /**
      * Whether game input (arrows, swipes, space) may start a new round. After a
-     * crash it waits a moment, and never while the highscore form is open, so a
-     * late key press can't throw away a leaderboard entry.
+     * crash it waits a moment, and never while the name form is open, so a
+     * late key press can't throw away the name being typed.
      */
     const canRestart = () =>
-      state !== 'over' ||
-      (entry.classList.contains('hidden') && performance.now() - overAt > RESTART_DELAY);
+      !nameOpen() && (state !== 'over' || performance.now() - overAt > RESTART_DELAY);
 
     /** Queue a turn; ignores reversals and repeats so fast inputs never kill the snake. */
     const turn = (d: Dir) => {
+      if (nameOpen()) return;
       if (state === 'ready' || state === 'over') {
         if (!canRestart()) return;
         start();
@@ -515,14 +633,25 @@ const pad = [
         }
       }
       setState('over');
-      if (leaderboard.qualifies(score)) {
-        try {
-          nameInput.value = localStorage.getItem(NAME_KEY) ?? '';
-        } catch {
-          /* storage unavailable */
+      if (leaderboard.token) void send(score);
+    };
+
+    /** Send a finished game; on the board, the overlay then shows the player's place. */
+    const send = async (points: number, name?: string) => {
+      try {
+        const rank = await leaderboard.submit(points, name);
+        pending = null;
+        syncPlayer();
+        if (rank && state === 'over')
+          message.textContent = `${text.gameOver ?? 'Game over'} · ${text.rank} ${rank}`;
+      } catch (e) {
+        if (state !== 'over') return;
+        if (isTaken(e)) {
+          pending = points;
+          openName('taken');
+        } else {
+          message.textContent = text.saveError ?? '';
         }
-        entry.classList.remove('hidden');
-        nameInput.focus({ preventScroll: true });
       }
     };
 
@@ -530,22 +659,37 @@ const pad = [
       e.preventDefault();
       const name = nameInput.value.trim();
       if (!name) return;
-      const button = entry.querySelector('button')!;
-      button.disabled = true;
-      try {
-        localStorage.setItem(NAME_KEY, name);
-      } catch {
-        /* storage unavailable */
+      nameSave.disabled = true;
+      if (nameMode === 'taken') {
+        // Send the waiting game under the new name; that registers it.
+        closeName();
+        if (pending !== null) await send(pending, name);
+      } else {
+        try {
+          await leaderboard.rename(name);
+          syncPlayer();
+          closeName();
+        } catch (err) {
+          if (isTaken(err) || nameMode === 'change') {
+            nameLabel.textContent = (isTaken(err) ? text.nameTaken : text.nameError) ?? '';
+            nameInput.select();
+          } else {
+            // Server unreachable: keep the name here; the first game sent registers it.
+            leaderboard.setName(name);
+            syncPlayer();
+            closeName();
+          }
+        }
       }
-      try {
-        const rank = await leaderboard.submit(name, score);
-        message.textContent = rank ? `${text.saved} ${rank}` : (text.saveError ?? '');
-      } catch {
-        message.textContent = text.saveError ?? '';
-      }
-      button.disabled = false;
-      entry.classList.add('hidden');
-      action.focus();
+      nameSave.disabled = false;
+    });
+    nameCancel.addEventListener('click', closeName);
+    entry.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && nameMode === 'change') closeName();
+    });
+    $('snake-rename').addEventListener('click', () => {
+      if (state === 'running') setState('paused');
+      openName('change');
     });
 
     const step = () => {
