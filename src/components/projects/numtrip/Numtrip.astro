@@ -1,0 +1,369 @@
+---
+/**
+ * NumTrip on its project page: the game in a simulated terminal, and the source code.
+ * The game is a faithful TypeScript port (numtrip.ts) of the original Python program; the
+ * code section shows the original file, unchanged, and the port in a second, labelled tab.
+ * Without JavaScript both files are shown one after the other and the terminal stays empty.
+ */
+import { Code } from 'astro:components';
+import { useTranslations, type Lang } from '@/i18n/utils';
+import original from './original/NumTripFinal.py?raw';
+import port from './numtrip.ts?raw';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const repo = 'https://github.com/marioschoch/EF-Info/tree/main/NumTrip';
+const themes = { light: 'github-light', dark: 'github-dark' } as const;
+
+const strings = {
+  run: t('numtrip.run'),
+  again: t('numtrip.again'),
+  cell: t('numtrip.cell'),
+  inputLabel: t('numtrip.inputLabel'),
+};
+
+const files = [
+  {
+    id: 'original',
+    tab: t('numtrip.tabOriginal'),
+    note: t('numtrip.originalNote'),
+    code: original,
+    lang: 'python',
+  },
+  { id: 'port', tab: t('numtrip.tabPort'), note: t('numtrip.portNote'), code: port, lang: 'ts' },
+] as const;
+---
+
+<section aria-labelledby="play-heading" class="grid gap-12 lg:grid-cols-12 lg:gap-8">
+  <div class="min-w-0 lg:col-span-7">
+    <h2 id="play-heading" class="mb-8 heading">
+      {t('numtrip.play')}
+    </h2>
+    <div id="numtrip" class="@container" data-strings={JSON.stringify(strings)}>
+      <div class="flex items-center justify-between gap-4 bg-surface-2 py-2 pr-2 pl-4">
+        <span class="font-mono text-small text-muted">NumTripFinal.py</span>
+        <button
+          type="button"
+          class="btn min-h-10 touch-manipulation bg-bg px-4 py-1.5 text-small"
+          data-restart
+        >
+          {t('numtrip.restart')}
+        </button>
+      </div>
+      <div
+        class="terminal overflow-y-auto overscroll-contain bg-surface font-mono text-fg"
+        role="log"
+        aria-label={t('numtrip.terminal')}
+        tabindex="-1"
+        data-terminal
+      >
+        <div>$ python3 NumTripFinal.py</div>
+        <button type="button" class="btn btn-primary mt-4 font-sans" data-run>
+          {t('numtrip.run')}
+        </button>
+      </div>
+      <p class="sr-only" aria-live="polite" data-announce></p>
+    </div>
+  </div>
+
+  <aside class="lg:col-span-4 lg:col-start-9 lg:pt-[calc(var(--text-heading)*1.05+2rem)]">
+    <h3 class="text-lead font-semibold">{t('numtrip.howTo')}</h3>
+    <ol class="mt-4 list-decimal space-y-2 pl-5 marker:text-muted">
+      <li>{t('numtrip.rule1')}</li>
+      <li>{t('numtrip.rule2')}</li>
+      <li>{t('numtrip.rule3')}</li>
+      <li>{t('numtrip.rule4')}</li>
+    </ol>
+    <p class="mt-6">{t('numtrip.input')}</p>
+    <p class="mt-4 text-small text-muted">{t('numtrip.quirk')}</p>
+    <p class="mt-4 text-small text-muted">{t('numtrip.port')}</p>
+  </aside>
+</section>
+
+<section aria-labelledby="code-heading" data-code>
+  <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+    <h2 id="code-heading" class="heading">
+      {t('numtrip.code')}
+    </h2>
+    <a href={repo} class="btn" rel="noopener">
+      {t('numtrip.github')}
+      <span aria-hidden="true">↗</span>
+    </a>
+  </div>
+  <div class="mb-4 hidden flex-wrap gap-2" role="tablist" aria-label={t('numtrip.tabs')} data-tabs>
+    {files.map((file, i) => (
+      <button
+        type="button"
+        role="tab"
+        id={`tab-${file.id}`}
+        aria-controls={`panel-${file.id}`}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        tabindex={i === 0 ? 0 : -1}
+        class="tab min-h-10 touch-manipulation px-3.5 py-1.5 text-small"
+      >
+        {file.tab}
+      </button>
+    ))}
+  </div>
+  <div class="space-y-12">
+    {files.map((file) => (
+      <div id={`panel-${file.id}`} role="tabpanel" aria-labelledby={`tab-${file.id}`}>
+        <p class="mb-3 label">{file.note}</p>
+        <Code code={file.code} lang={file.lang} themes={themes} />
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  @reference '../../../styles/global.css';
+
+  /* 42 characters (the widest board line) always fit: the font shrinks with the panel. */
+  .terminal {
+    font-size: clamp(9px, calc((100cqi - 2.5rem) / 25.6), 15px);
+    line-height: 1.4;
+    height: 27lh;
+    padding: 0.75rem 1.25rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  /* Empty output lines keep their height. */
+  .terminal > :global(div:empty) {
+    min-height: 1lh;
+  }
+
+  .terminal :global([data-cell]) {
+    @apply relative cursor-pointer touch-manipulation text-fg;
+    font: inherit;
+    white-space: pre;
+  }
+  /* The tap target covers the whole cell: the number line plus the empty line above and below. */
+  .terminal :global([data-cell])::after {
+    content: '';
+    position: absolute;
+    inset: -1lh 0;
+  }
+  .terminal :global([data-cell]:not(:disabled):hover)::after,
+  .terminal :global([data-cell]:focus-visible)::after {
+    @apply bg-fg/10;
+  }
+  .terminal :global([data-cell]:disabled) {
+    @apply cursor-text;
+  }
+  .terminal :global(input) {
+    @apply min-w-0 flex-1 bg-transparent p-0 text-fg outline-none;
+    font: inherit;
+    caret-color: var(--c-fg);
+  }
+
+  .tab {
+    @apply bg-surface text-fg transition-[background-color,color,transform] duration-150 hover:bg-surface-2 active:scale-95;
+  }
+  .tab[aria-selected='true'] {
+    @apply bg-fg text-bg;
+  }
+
+  [data-code] :global(.astro-code) {
+    @apply max-h-[40rem] p-5 font-mono text-small leading-relaxed;
+  }
+  /* Line numbers, so the write-up can refer to them. */
+  [data-code] :global(.astro-code code) {
+    counter-reset: line;
+  }
+  [data-code] :global(.astro-code .line)::before {
+    counter-increment: line;
+    content: counter(line);
+    display: inline-block;
+    width: 3ch;
+    margin-right: 2ch;
+    text-align: right;
+    opacity: 0.45;
+    user-select: none;
+  }
+</style>
+
+<script>
+  import { numtrip } from './numtrip';
+
+  const root = document.getElementById('numtrip');
+  const terminal = root?.querySelector<HTMLElement>('[data-terminal]');
+  const announce = root?.querySelector<HTMLElement>('[data-announce]');
+
+  if (root && terminal && announce) {
+    const strings = JSON.parse(root.dataset.strings ?? '{}') as Record<string, string>;
+    /** The number line of a board row, e.g. "   3  |   4  |  16  |   1  |   2  |   2  |". */
+    const BOARD_ROW = /^ {3}([1-5]) {2}(?:\|.{6}){5}\|$/;
+    const BOARD_HEADER = '          1      2      3      4      5';
+    // Focusing the prompt would open the on-screen keyboard on phones; there, cells are tapped.
+    const finePointer = window.matchMedia('(pointer: fine)');
+
+    /** Bumped on every run, so output from an abandoned game is ignored. */
+    let run = 0;
+    /** The open prompt: its input field and the function that hands the line to the game. */
+    let prompt: { field: HTMLInputElement; submit: () => void } | null = null;
+    let partial = '';
+
+    const scroll = () => (terminal.scrollTop = terminal.scrollHeight);
+    const freezeCells = () => {
+      for (const cell of terminal.querySelectorAll<HTMLButtonElement>('[data-cell]')) {
+        cell.disabled = true;
+        cell.tabIndex = -1;
+      }
+    };
+
+    /** One finished output line; the number lines of a board get a button per cell. */
+    const writeLine = (text: string) => {
+      const line = document.createElement('div');
+      const row = BOARD_ROW.exec(text);
+      if (row) {
+        line.append(text.slice(0, 6));
+        for (let col = 1; col <= 5; col++) {
+          const value = text.slice(7 * col, 7 * col + 6);
+          const cell = document.createElement('button');
+          cell.type = 'button';
+          cell.dataset.cell = `${row[1]}${col}`;
+          cell.textContent = value;
+          cell.setAttribute(
+            'aria-label',
+            (strings.cell ?? '')
+              .replace('{row}', row[1]!)
+              .replace('{col}', String(col))
+              .replace('{value}', value.trim()),
+          );
+          line.append('|', cell);
+        }
+        line.append('|');
+      } else {
+        if (text === BOARD_HEADER) freezeCells(); // a new board: the old one is history
+        line.textContent = text;
+        // Messages (not board drawing) are read out to screen readers.
+        if (/[A-Za-zÄÖÜäöü]/.test(text)) announce.textContent = text;
+      }
+      terminal.append(line);
+    };
+
+    const print =
+      (id: number) =>
+      (text = '', end = '\n') => {
+        if (id !== run) return;
+        partial += text + end;
+        const lines = partial.split('\n');
+        partial = lines.pop() ?? '';
+        lines.forEach(writeLine);
+        scroll();
+      };
+
+    const input = (id: number) => (promptText: string) =>
+      new Promise<string>((resolve) => {
+        if (id !== run) return;
+        const line = document.createElement('form');
+        line.className = 'flex';
+        line.autocomplete = 'off';
+        const field = document.createElement('input');
+        field.type = 'text';
+        field.enterKeyHint = 'enter';
+        field.spellcheck = false;
+        field.autocapitalize = 'off';
+        field.setAttribute('aria-label', `${promptText} (${strings.inputLabel})`);
+        line.append(partial + promptText, field);
+        partial = '';
+        terminal.append(line);
+        const submit = () => {
+          if (prompt?.field !== field) return;
+          prompt = null;
+          const value = field.value;
+          // Like a terminal: the typed line stays behind as plain text.
+          line.replaceWith(
+            Object.assign(document.createElement('div'), {
+              textContent: `${promptText}${value}`,
+            }),
+          );
+          resolve(value);
+        };
+        line.addEventListener('submit', (e) => {
+          e.preventDefault();
+          submit();
+        });
+        prompt = { field, submit };
+        scroll();
+        if (finePointer.matches) field.focus({ preventScroll: true });
+      });
+
+    const runButton = (label: string) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn btn-primary mt-4 font-sans';
+      button.textContent = label;
+      button.addEventListener('click', start);
+      return button;
+    };
+
+    const start = async () => {
+      const id = ++run;
+      prompt = null;
+      partial = '';
+      terminal.replaceChildren();
+      writeLine('$ python3 NumTripFinal.py');
+      await numtrip({ print: print(id), input: input(id) }).play();
+      if (id !== run) return;
+      freezeCells();
+      writeLine('');
+      writeLine('$');
+      const again = runButton(strings.again ?? '');
+      terminal.append(again);
+      scroll();
+      if (finePointer.matches) again.focus({ preventScroll: true });
+    };
+
+    terminal.querySelector('[data-run]')?.addEventListener('click', start);
+    root.querySelector('[data-restart]')?.addEventListener('click', start);
+
+    // A tapped cell is typed into the prompt and entered, exactly as if typed by hand.
+    terminal.addEventListener('click', (e) => {
+      const cell = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-cell]');
+      if (!cell || cell.disabled || !prompt) return;
+      prompt.field.value = cell.dataset.cell ?? '';
+      prompt.submit();
+    });
+    // Clicking the empty terminal puts the cursor back into the prompt.
+    terminal.addEventListener('click', (e) => {
+      if (e.target === terminal && prompt && finePointer.matches) {
+        prompt.field.focus({ preventScroll: true });
+      }
+    });
+  }
+
+  // Code tabs: without JavaScript both files are simply shown one after the other.
+  const tablist = document.querySelector<HTMLElement>('[data-tabs]');
+  if (tablist) {
+    const tabs = [...tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const select = (tab: HTMLButtonElement, focus = false) => {
+      for (const other of tabs) {
+        const selected = other === tab;
+        other.setAttribute('aria-selected', String(selected));
+        other.tabIndex = selected ? 0 : -1;
+        const panel = document.getElementById(other.getAttribute('aria-controls') ?? '');
+        if (panel) panel.hidden = !selected;
+      }
+      if (focus) tab.focus();
+    };
+    tablist.classList.remove('hidden');
+    tablist.classList.add('flex');
+    select(tabs[0]!);
+    tablist.addEventListener('click', (e) => {
+      const tab = (e.target as HTMLElement).closest<HTMLButtonElement>('[role="tab"]');
+      if (tab) select(tab);
+    });
+    tablist.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (!step) return;
+      const current = tabs.findIndex((tab) => tab.tabIndex === 0);
+      select(tabs[(current + step + tabs.length) % tabs.length]!, true);
+    });
+  }
+</script>

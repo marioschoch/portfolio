@@ -12,7 +12,15 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 /** Allowed project tags — extend this list to add a new filter. */
-export const projectTags = ['mechatronics', 'embedded', 'cad', 'analysis', 'web', 'bikes'] as const;
+export const projectTags = [
+  'mechatronics',
+  'embedded',
+  'cad',
+  'analysis',
+  'web',
+  'software',
+  'bikes',
+] as const;
 export const projectStatuses = ['in-progress', 'completed'] as const;
 
 /** Folder name = slug, e.g. `projects/delivery-robot/index.mdx` → `delivery-robot`. */

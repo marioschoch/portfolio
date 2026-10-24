@@ -132,6 +132,34 @@ const en = {
   'snake.try': 'try',
   'snake.tries': 'tries',
   'snake.saveError': 'Your score could not be saved.',
+  'numtrip.play': 'Play',
+  'numtrip.run': 'Run',
+  'numtrip.again': 'Run again',
+  'numtrip.restart': 'Restart',
+  'numtrip.terminal': 'NumTrip, running in a simulated terminal',
+  'numtrip.inputLabel': 'Row and column, e.g. 13',
+  'numtrip.cell': 'Row {row}, column {col}: {value}',
+  'numtrip.howTo': 'How to play',
+  'numtrip.rule1':
+    'Pick a number that touches at least one equal number (above, below, left or right).',
+  'numtrip.rule2':
+    'The whole connected group of that number disappears, and the number you picked doubles in its place.',
+  'numtrip.rule3': 'Numbers fall down, and the gaps at the top fill with new 1s, 2s and 4s.',
+  'numtrip.rule4': 'Reach 256 to win. When no two equal numbers touch any more, the game is lost.',
+  'numtrip.input': 'Tap or click a number, or type its row and column (e.g. 13) and press Enter.',
+  'numtrip.quirk':
+    'Like the original, the game speaks German, and although the prompt asks for the column first, the first digit picks the row.',
+  'numtrip.port':
+    'The original is a Python terminal program. It runs here as a line-by-line TypeScript port, so it works on this static site without a Python runtime: same rules, same messages, same quirks. Only the terminal is simulated, and the Restart button is new.',
+  'numtrip.code': 'Code',
+  'numtrip.github': 'View on GitHub',
+  'numtrip.tabs': 'Source files',
+  'numtrip.tabOriginal': 'Original · Python',
+  'numtrip.tabPort': 'Browser port · TypeScript',
+  'numtrip.originalNote':
+    'NumTripFinal.py, the original high-school version (2022–23), unchanged. The comments are in German.',
+  'numtrip.portNote':
+    'numtrip.ts, the browser port that runs the game above. Written later for this website, not part of the original project.',
   'fallback.notice': 'This page is not yet available in German — showing the English version.',
   'footer.rss': 'RSS',
   'rss.title': 'RSS feed',
@@ -284,6 +312,37 @@ const de: Partial<Record<UiKey, string>> = {
   'snake.try': 'Versuch',
   'snake.tries': 'Versuche',
   'snake.saveError': 'Dein Ergebnis konnte nicht gespeichert werden.',
+  'numtrip.play': 'Spielen',
+  'numtrip.run': 'Starten',
+  'numtrip.again': 'Nochmals starten',
+  'numtrip.restart': 'Neu starten',
+  'numtrip.terminal': 'NumTrip in einem simulierten Terminal',
+  'numtrip.inputLabel': 'Zeile und Spalte, z. B. 13',
+  'numtrip.cell': 'Zeile {row}, Spalte {col}: {value}',
+  'numtrip.howTo': 'Spielregeln',
+  'numtrip.rule1':
+    'Wähle eine Zahl, die mindestens eine gleiche Zahl berührt (oben, unten, links oder rechts).',
+  'numtrip.rule2':
+    'Die ganze zusammenhängende Gruppe dieser Zahl verschwindet, und die gewählte Zahl verdoppelt sich an ihrer Stelle.',
+  'numtrip.rule3':
+    'Die Zahlen fallen nach unten, oben entstehende Lücken füllen sich mit neuen 1, 2 und 4.',
+  'numtrip.rule4':
+    'Mit 256 hast du gewonnen. Berühren sich keine zwei gleichen Zahlen mehr, ist das Spiel verloren.',
+  'numtrip.input':
+    'Tippe oder klicke auf eine Zahl, oder gib Zeile und Spalte ein (z. B. 13) und drücke Enter.',
+  'numtrip.quirk':
+    'Wie im Original fragt das Spiel zuerst nach der Spalte, die erste Ziffer wählt aber die Zeile.',
+  'numtrip.port':
+    'Das Original ist ein Python-Programm fürs Terminal. Hier läuft es als zeilengetreue TypeScript-Portierung, damit es ohne Python-Laufzeit auf dieser statischen Website funktioniert: gleiche Regeln, gleiche Meldungen, gleiche Eigenheiten. Nur das Terminal ist nachgebildet, und der Knopf „Neu starten“ ist neu.',
+  'numtrip.code': 'Code',
+  'numtrip.github': 'Auf GitHub ansehen',
+  'numtrip.tabs': 'Quelldateien',
+  'numtrip.tabOriginal': 'Original · Python',
+  'numtrip.tabPort': 'Browser-Portierung · TypeScript',
+  'numtrip.originalNote':
+    'NumTripFinal.py, die ursprüngliche Version aus dem Gymnasium (2022–23), unverändert.',
+  'numtrip.portNote':
+    'numtrip.ts, die Browser-Portierung, die das Spiel oben ausführt. Später für diese Website geschrieben, nicht Teil des ursprünglichen Projekts.',
   'fallback.notice':
     'Diese Seite ist noch nicht auf Deutsch verfügbar — angezeigt wird die englische Version.',
   'footer.rss': 'RSS',
