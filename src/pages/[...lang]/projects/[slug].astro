@@ -2,7 +2,8 @@
 /**
  * Project detail page: spec sheet, key figures, write-up (problem → approach → result),
  * gallery, optional 3D model and the project log. Projects with an interactive showcase (a game,
- * a demo) register it in `showcases` below; it takes the place of the cover placeholder.
+ * a demo) register it in `showcases` below; on the page it takes the place of the cover image,
+ * which then only serves as the thumbnail on project cards.
  * German pages use de.mdx when present, otherwise the English text with a notice.
  */
 import { render } from 'astro:content';
@@ -99,7 +100,9 @@ const jsonLd = {
     <div class="container-page space-y-20 sm:space-y-28">
       <SpecSheet project={project} lang={lang} />
 
-      {data.cover ? (
+      {Showcase ? (
+        <Showcase lang={lang} />
+      ) : data.cover ? (
         <Image
           src={data.cover.src}
           alt={data.cover.alt}
@@ -110,10 +113,8 @@ const jsonLd = {
           fetchpriority="high"
         />
       ) : (
-        !Showcase && <ImagePlaceholder label={t('project.imagePending')} class="aspect-[21/9]!" />
+        <ImagePlaceholder label={t('project.imagePending')} class="aspect-[21/9]!" />
       )}
-
-      {Showcase && <Showcase lang={lang} />}
 
       <KeyFigures figures={project.keyFigures} lang={lang} />
 
