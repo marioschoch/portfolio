@@ -67,6 +67,9 @@ ErrorDocument 404 /404.html
 # -----------------------------------------------------------------------------
 <IfModule mod_mime.c>
   AddType model/gltf-binary .glb
+  # pdf.js worker (PDF reader): module workers are refused unless served as JavaScript.
+  AddType text/javascript .mjs
+  AddType application/pdf .pdf
   AddType font/woff2 .woff2
   AddType image/avif .avif
   AddType image/webp .webp

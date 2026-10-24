@@ -1,0 +1,26 @@
+---
+/**
+ * The Matura thesis on its project page: the paper itself, readable in the browser and
+ * downloadable. The PDF is the original German document, with the names of other people and
+ * the two photos showing people removed, and images reduced to 150 dpi for the web.
+ * first-page.png is page 1 of that PDF, shown until the reader has loaded.
+ */
+import PdfViewer from '@/components/PdfViewer.astro';
+import { type Lang } from '@/i18n/utils';
+import firstPage from './first-page.png';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+---
+
+<PdfViewer
+  src="/projects/maturarbeit/von-muskelkraft-zu-strom.pdf"
+  fileName="Mario-Schoch-Maturarbeit-Von-Muskelkraft-zu-Strom.pdf"
+  title="Von Muskelkraft zu Strom"
+  pages={38}
+  poster={firstPage}
+  docLanguage={lang === 'de' ? 'Deutsch' : 'In German'}
+  lang={lang}
+/>

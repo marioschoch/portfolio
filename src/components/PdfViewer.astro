@@ -1,0 +1,391 @@
+---
+/**
+ * PDF reader built on pdf.js, for documents in public/ (no server needed).
+ * Until the reader comes near the viewport only a static image of the first page is shown;
+ * then pdf.js (legacy build, so older iPhones work too) and the document are loaded and pages
+ * are drawn on a canvas, one at a time: ‹ ›, page number, swipe, ←/→, zoom and full screen.
+ * "Open in new tab" and "Download" are plain links, so they also work without JavaScript and
+ * on phones without element full screen (iPhone), where the tab opens the system PDF viewer.
+ */
+import { statSync } from 'node:fs';
+import { join } from 'node:path';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { useTranslations, type Lang } from '@/i18n/utils';
+
+interface Props {
+  /** Path of the PDF in public/, e.g. /projects/x/report.pdf */
+  src: string;
+  /** File name suggested for the download. */
+  fileName: string;
+  title: string;
+  pages: number;
+  /** Image of the first page, shown until the reader is loaded. */
+  poster: ImageMetadata;
+  /** Language of the document itself, e.g. "German". */
+  docLanguage?: string;
+  lang: Lang;
+}
+const { src, fileName, title, pages, poster, docLanguage, lang } = Astro.props;
+const t = useTranslations(lang);
+
+// File size read at build time, so the label always matches the deployed file.
+const bytes = statSync(join(process.cwd(), 'public', src)).size;
+const size = `${new Intl.NumberFormat(lang, { maximumFractionDigits: 1 }).format(bytes / 1e6)} MB`;
+const meta = [docLanguage, `${pages} ${t('pdf.pages')}`, `PDF ${size}`].filter(Boolean).join(' · ');
+
+const strings = {
+  loading: t('pdf.loading'),
+  error: t('pdf.error'),
+  fullscreen: t('pdf.fullscreen'),
+  exitFullscreen: t('pdf.exitFullscreen'),
+  pageLabel: `${title}, ${t('pdf.page')}`,
+};
+---
+
+<section
+  aria-labelledby="pdf-heading"
+  data-pdf-viewer
+  data-src={src}
+  data-strings={JSON.stringify(strings)}
+>
+  <div class="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
+    <div>
+      <h2 id="pdf-heading" class="heading">
+        {t('pdf.heading')}
+      </h2>
+      <p class="mt-3 label">{meta}</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href={src} download={fileName} class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path
+            d="M8 1.5v9m0 0-3.5-3.5M8 10.5l3.5-3.5M2 14.5h12"
+            stroke="currentColor"
+            stroke-width="1.5"
+          ></path>
+        </svg>
+        {t('pdf.download')}
+      </a>
+      <a href={src} target="_blank" rel="noopener" class="btn">
+        {t('pdf.open')}
+        <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <div
+    class="flex flex-col bg-surface [&:fullscreen]:h-dvh"
+    data-frame
+    role="region"
+    aria-label={`${t('pdf.viewer')}: ${title}`}
+  >
+    <div
+      class="flex flex-wrap items-center justify-between gap-2 bg-surface-2 p-2 text-small"
+      data-toolbar
+    >
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          class="btn min-h-10 touch-manipulation bg-bg px-3 py-1.5 text-small"
+          data-prev
+          aria-label={t('pdf.prev')}
+          disabled
+        >
+          ‹
+        </button>
+        <label class="flex items-center gap-1.5 px-1 tabular-nums">
+          <span class="sr-only">{t('pdf.page')}</span>
+          <input
+            type="number"
+            inputmode="numeric"
+            min="1"
+            max={pages}
+            value="1"
+            class="h-10 w-14 bg-bg px-2 text-center tabular-nums"
+            data-page
+            disabled
+          />
+          <span class="text-muted">/ {pages}</span>
+        </label>
+        <button
+          type="button"
+          class="btn min-h-10 touch-manipulation bg-bg px-3 py-1.5 text-small"
+          data-next
+          aria-label={t('pdf.next')}
+          disabled
+        >
+          ›
+        </button>
+      </div>
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          class="btn min-h-10 touch-manipulation bg-bg px-3 py-1.5 text-small"
+          data-zoom-out
+          aria-label={t('pdf.zoomOut')}
+          disabled
+        >
+          −
+        </button>
+        <button
+          type="button"
+          class="btn min-h-10 min-w-16 touch-manipulation bg-bg px-2 py-1.5 text-small tabular-nums"
+          data-fit
+          aria-label={t('pdf.fit')}
+          title={t('pdf.fit')}
+          disabled
+        >
+          100%
+        </button>
+        <button
+          type="button"
+          class="btn min-h-10 touch-manipulation bg-bg px-3 py-1.5 text-small"
+          data-zoom-in
+          aria-label={t('pdf.zoomIn')}
+          disabled
+        >
+          +
+        </button>
+        <button
+          type="button"
+          class="btn min-h-10 touch-manipulation bg-bg px-3 py-1.5 text-small"
+          data-fullscreen
+          aria-label={t('pdf.fullscreen')}
+          title={t('pdf.fullscreen')}
+          hidden
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path
+              d="M1.5 5.5v-4h4m5 0h4v4m0 5v4h-4m-5 0h-4v-4"
+              stroke="currentColor"
+              stroke-width="1.5"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="relative min-h-0 flex-1 overflow-auto overscroll-contain p-3 sm:p-6"
+      data-stage
+      tabindex="0"
+    >
+      <div class="mx-auto w-fit max-w-full" data-sheet>
+        <Image
+          src={poster}
+          alt={`${title}, ${t('pdf.page')} 1`}
+          widths={[480, 720, 900]}
+          sizes="(min-width: 960px) 900px, 100vw"
+          class="block h-auto w-[56.25rem] max-w-full bg-white shadow-sm"
+          data-poster
+        />
+      </div>
+      <p class="mt-3 text-center label" data-status aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<script>
+  /** Widest a page is drawn at "fit"; a full-width A4 page on a large screen would be too big. */
+  const MAX_FIT_WIDTH = 900;
+  /** iOS Safari refuses canvases larger than about 16.7 million pixels. */
+  const MAX_CANVAS_PIXELS = 16_000_000;
+  const ZOOM_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+
+  let pdfjs: Promise<typeof import('pdfjs-dist/legacy/build/pdf.mjs')> | undefined;
+  const loadPdfJs = () =>
+    (pdfjs ??= Promise.all([
+      import('pdfjs-dist/legacy/build/pdf.mjs'),
+      import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'),
+    ]).then(([lib, worker]) => {
+      lib.GlobalWorkerOptions.workerSrc = worker.default;
+      return lib;
+    }));
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-pdf-viewer]')) {
+    const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const strings = JSON.parse(root.dataset.strings ?? '{}') as Record<string, string>;
+    const frame = $('[data-frame]');
+    const stage = $('[data-stage]');
+    const sheet = $('[data-sheet]');
+    const status = $('[data-status]');
+    const pageInput = $<HTMLInputElement>('[data-page]');
+    const prev = $<HTMLButtonElement>('[data-prev]');
+    const next = $<HTMLButtonElement>('[data-next]');
+    const zoomIn = $<HTMLButtonElement>('[data-zoom-in]');
+    const zoomOut = $<HTMLButtonElement>('[data-zoom-out]');
+    const fit = $<HTMLButtonElement>('[data-fit]');
+    const fullscreen = $<HTMLButtonElement>('[data-fullscreen]');
+
+    let doc: import('pdfjs-dist/legacy/build/pdf.mjs').PDFDocumentProxy | undefined;
+    let page = 1;
+    /** Zoom relative to "fit"; 1 = page fits the reader. */
+    let zoom = 1;
+    let task: import('pdfjs-dist/legacy/build/pdf.mjs').RenderTask | undefined;
+
+    const isFullscreen = () =>
+      (document.fullscreenElement ??
+        (document as { webkitFullscreenElement?: Element }).webkitFullscreenElement) === frame;
+
+    const render = async () => {
+      if (!doc) return;
+      const pdfPage = await doc.getPage(page);
+      const base = pdfPage.getViewport({ scale: 1 });
+      const style = getComputedStyle(stage);
+      const availW =
+        stage.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      const availH =
+        stage.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      // Fit to width (capped); in full screen the whole page fits the screen.
+      let fitScale = Math.min(availW, MAX_FIT_WIDTH) / base.width;
+      if (isFullscreen()) fitScale = Math.min(availW / base.width, availH / base.height);
+      const scale = fitScale * zoom;
+      const viewport = pdfPage.getViewport({ scale });
+      let ratio = window.devicePixelRatio || 1;
+      ratio = Math.min(ratio, Math.sqrt(MAX_CANVAS_PIXELS / (viewport.width * viewport.height)));
+
+      const drawn = document.createElement('canvas');
+      drawn.width = Math.floor(viewport.width * ratio);
+      drawn.height = Math.floor(viewport.height * ratio);
+      drawn.style.width = `${Math.floor(viewport.width)}px`;
+      drawn.style.height = `${Math.floor(viewport.height)}px`;
+      drawn.className = 'block bg-white shadow-sm';
+      drawn.setAttribute('role', 'img');
+      drawn.setAttribute('aria-label', `${strings.pageLabel} ${page}`);
+
+      task?.cancel();
+      task = pdfPage.render({
+        canvas: drawn,
+        viewport,
+        transform: ratio !== 1 ? [ratio, 0, 0, ratio, 0, 0] : undefined,
+      });
+      try {
+        await task.promise;
+      } catch (e) {
+        if ((e as Error).name === 'RenderingCancelledException') return;
+        throw e;
+      }
+      // Swap only when drawn, so the old page stays visible meanwhile (no flicker).
+      sheet.replaceChildren(drawn);
+      // Zoomed in, the page may grow wider than the reader, which then scrolls sideways.
+      sheet.classList.toggle('max-w-full', zoom <= 1);
+      fit.textContent = `${Math.round(zoom * 100)}%`;
+      pageInput.value = String(page);
+      prev.disabled = page <= 1;
+      next.disabled = page >= doc.numPages;
+      zoomOut.disabled = zoom <= ZOOM_STEPS[0]!;
+      zoomIn.disabled = zoom >= ZOOM_STEPS.at(-1)!;
+    };
+
+    const go = (n: number) => {
+      if (!doc) return;
+      const target = Math.min(Math.max(1, Math.round(n) || 1), doc.numPages);
+      if (target === page) return void (pageInput.value = String(page));
+      page = target;
+      stage.scrollTo({ top: 0, left: 0 });
+      void render();
+    };
+    const setZoom = (z: number) => {
+      zoom = z;
+      void render();
+    };
+
+    let started = false;
+    const start = async () => {
+      if (started) return;
+      started = true;
+      status.textContent = strings.loading ?? '';
+      try {
+        const lib = await loadPdfJs();
+        doc = await lib.getDocument({ url: root.dataset.src! }).promise;
+        await render();
+        status.textContent = '';
+        for (const el of [pageInput, zoomIn, zoomOut, fit]) el.disabled = false;
+      } catch (e) {
+        console.error(e);
+        status.textContent = strings.error ?? '';
+        started = false;
+      }
+    };
+
+    // Load when the reader is about to scroll into view, or right away when it is touched.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          observer.disconnect();
+          void start();
+        }
+      },
+      { rootMargin: '200px 0px' },
+    );
+    observer.observe(root);
+    frame.addEventListener('pointerdown', () => void start(), { once: true });
+
+    prev.addEventListener('click', () => go(page - 1));
+    next.addEventListener('click', () => go(page + 1));
+    pageInput.addEventListener('change', () => go(pageInput.valueAsNumber));
+    zoomIn.addEventListener('click', () =>
+      setZoom(ZOOM_STEPS.find((s) => s > zoom + 1e-6) ?? zoom),
+    );
+    zoomOut.addEventListener('click', () =>
+      setZoom([...ZOOM_STEPS].reverse().find((s) => s < zoom - 1e-6) ?? zoom),
+    );
+    fit.addEventListener('click', () => setZoom(1));
+
+    stage.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' && stage.scrollWidth <= stage.clientWidth) go(page - 1);
+      if (e.key === 'ArrowRight' && stage.scrollWidth <= stage.clientWidth) go(page + 1);
+    });
+
+    // Swipe between pages, only while the page is not zoomed wider than the reader.
+    let startX = 0;
+    let startY = 0;
+    stage.addEventListener(
+      'touchstart',
+      (e) => {
+        startX = e.touches[0]?.clientX ?? 0;
+        startY = e.touches[0]?.clientY ?? 0;
+      },
+      { passive: true },
+    );
+    stage.addEventListener('touchend', (e) => {
+      if (e.touches.length || stage.scrollWidth > stage.clientWidth + 1) return;
+      const dx = (e.changedTouches[0]?.clientX ?? 0) - startX;
+      const dy = (e.changedTouches[0]?.clientY ?? 0) - startY;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(page + (dx < 0 ? 1 : -1));
+    });
+
+    // Element full screen; not available on iPhone, where "Open in new tab" covers it.
+    const el = frame as HTMLElement & { webkitRequestFullscreen?: () => void };
+    const doc_ = document as Document & {
+      webkitExitFullscreen?: () => void;
+      webkitFullscreenEnabled?: boolean;
+    };
+    if (document.fullscreenEnabled || doc_.webkitFullscreenEnabled) {
+      fullscreen.hidden = false;
+      fullscreen.addEventListener('click', () => {
+        void start();
+        if (isFullscreen()) void (document.exitFullscreen?.() ?? doc_.webkitExitFullscreen?.());
+        else void (el.requestFullscreen?.() ?? el.webkitRequestFullscreen?.());
+      });
+      const onChange = () => {
+        const label = isFullscreen() ? strings.exitFullscreen : strings.fullscreen;
+        fullscreen.setAttribute('aria-label', label ?? '');
+        fullscreen.title = label ?? '';
+        zoom = 1;
+        void render();
+      };
+      document.addEventListener('fullscreenchange', onChange);
+      document.addEventListener('webkitfullscreenchange', onChange);
+    }
+
+    // Re-fit when the reader changes width (rotation, window resize), not on height changes.
+    let lastWidth = stage.clientWidth;
+    new ResizeObserver(() => {
+      if (Math.abs(stage.clientWidth - lastWidth) < 2) return;
+      lastWidth = stage.clientWidth;
+      void render();
+    }).observe(stage);
+  }
+</script>

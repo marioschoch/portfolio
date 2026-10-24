@@ -1,0 +1,97 @@
+---
+# How to edit this page:
+# 1. "Overview" below is a DRAFT summary of the thesis. Check it against the PDF, change what you
+#    like, and delete the "Draft" note once you are happy with it. The same goes for the title,
+#    summary, role, tools and key figures in this header, which were drafted from the thesis too.
+# 2. Your own text starts at "Why I chose this topic". Replace every [TODO] with your words.
+# `npm run todos` lists every place that still says TODO.
+title: 'Matura thesis: From muscle power to electricity'
+summary: My Matura thesis. I fitted a rowing ergometer with a generator to turn training effort into electricity, tested it five times and calculated whether it could power my rowing club.
+role: 'Concept, build, testing and report'
+timeframe:
+  # From the work log in the thesis (first entry 25.02.2023) and the date of the final PDF.
+  start: 2023-02-25
+  end: 2023-09-28
+teamSize: 1
+tools: [Soldering, 3D-printed parts, Woodworking, Power meter]
+tags: [mechatronics, analysis]
+status: completed
+# Card thumbnail: the finished box from the title page. (The project page shows the PDF reader instead.)
+cover:
+  src: ./cover.jpg
+  alt: The finished generator box, a black wooden case with a lightning bolt on four wooden legs
+links:
+  report: /projects/maturarbeit/von-muskelkraft-zu-strom.pdf
+keyFigures:
+  - value: '399'
+    unit: CHF
+    label: total cost of the parts
+  - value: '≈5'
+    unit: W
+    label: best continuous output (generator rated at 300 W)
+  - value: '5'
+    label: test runs, July to September 2023
+  - value: '≈1/20'
+    label: of the rowing club's yearly electricity, in theory
+---
+
+> **Draft, to be reviewed.** This overview was written from the thesis and has not been checked yet. [TODO: review, then delete this note]
+
+## Overview
+
+### Question
+
+The thesis, written in German at Gymnasium Biel-Seeland (Matura 2024), asks two questions:
+
+1. How can a rowing ergometer be modified so that the energy put into training is turned into electricity?
+2. Could the ergometer training at Seeclub Biel, the rowing club where I train, cover the club's electricity use?
+
+### Approach
+
+A Concept2 ergometer (model D/E) drives a three-phase permanent-magnet generator from a small wind turbine (rated 300 W at 600 rpm). The generator is coupled to the ergometer's flywheel with a 3D-printed connector. A three-phase rectifier turns its AC output into 24 V DC, which passes through a power meter (V, A, W) into an inverter from 24 V DC to 230 V / 50 Hz AC. All parts sit in a self-built wooden box whose height puts the generator in line with the flywheel axle. The parts cost CHF 399, just under the CHF 400 budget.
+
+![Hand-drawn schema: flywheel, connector, generator, rectifier, power meter, inverter and a phone on a charging cable](./schema.png)
+
+_The installation as drawn in the thesis (Fig. 1)._
+
+![The open box mounted next to the ergometer's flywheel, with the generator, wiring and inverter inside](./installation.jpg)
+
+_The finished installation, with the box open (Fig. 2)._
+
+Five test runs between July and September 2023 each tackled the problem found in the one before:
+
+- **Test 1:** With a phone charger as the load, the inverter kept switching off and beeping for too low or too high voltage. The voltage rose and fell with the rowing intensity. The power meter mostly showed 0 W, sometimes about 5 W.
+- **Test 2:** With a kettle as a larger load, the inverter ran and the voltage was steady, but the output stayed at about 5 W.
+- **Test 3:** A second connector with a notch and a wooden counterpart was meant to stop the coupling from slipping. The counterpart did not hold, so the connector was strapped to the flywheel with cable ties, which worked. The solder joints stayed cold after five minutes of rowing, which ruled them out as a source of loss.
+- **Test 4:** The voltage held at about 14 V, but the power stayed at 0 W, with peaks of 3 W at most.
+- **Test 5:** After the last clamped connection was replaced by solder joints, the inverter beeped again and the output peaked at 10 W.
+
+![The 3D-printed connector strapped to the blue flywheel with cable ties](./coupling.jpg)
+
+_The connector fixed to the flywheel with cable ties (Fig. 17)._
+
+### Results
+
+At its best the installation delivered about **5 W continuously**, far below the generator's 300 W rating, and only supplied the connected device with small amounts of power from time to time. Charging a phone did not work.
+
+For the second question, the thesis assumes a fully working installation with 100 % efficiency. Based on how often the club's racing and recreational rowers train on the ergometers, it estimates **413.4 kWh per year**, about 1/20 of the club's 8,461 kWh consumption in 2022. Covering all of it would take all eight ergometers being rowed 14.5 hours a day, every day of the year. At about 32 Rp./kWh that saves CHF 132 a year, while eight installations would cost CHF 3,192, a payback time of about 24 years. One ergometer's output would, however, roughly be enough to run a fridge, a PC or a TV.
+
+### Conclusion
+
+The installation was built as planned, but it did not deliver the expected power, and the investment would not pay off for the club. The thesis names several likely reasons: components that may not have been the right choice, a budget of CHF 400 and missing expert knowledge to track down the problems. Next time it would plan more time for choosing the components, get an electrician's or another expert's opinion early on, and set a clearer goal (charging a phone, feeding the grid or running a device in real time).
+
+## Why I chose this topic
+
+[TODO: Why did you choose this topic? For example rowing, the energy crisis in 2022, wanting to build something yourself.]
+
+## What was difficult
+
+[TODO: What was the hardest part? For example finding the power loss, choosing the components, time or budget.]
+
+## What I learned
+
+[TODO: What did you learn, technically and about working on a long project?]
+
+## What I'd do differently today
+
+[TODO: Looking back now, as an engineering student, what would you do differently?]

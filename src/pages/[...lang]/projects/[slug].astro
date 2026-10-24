@@ -2,7 +2,7 @@
 /**
  * Project detail page: spec sheet, key figures, write-up (problem → approach → result),
  * gallery, optional 3D model and the project log. Projects with an interactive showcase (a game,
- * a demo) register it in `showcases` below; on the page it takes the place of the cover image,
+ * a demo, a PDF reader) register it in `showcases` below; on the page it takes the place of the cover image,
  * which then only serves as the thumbnail on project cards.
  * German pages use de.mdx when present, otherwise the English text with a notice.
  */
@@ -16,6 +16,7 @@ import ModelViewer from '@/components/ModelViewer.astro';
 import Timeline from '@/components/Timeline.astro';
 import ImagePlaceholder from '@/components/ImagePlaceholder.astro';
 import Numtrip from '@/components/projects/numtrip/Numtrip.astro';
+import Maturarbeit from '@/components/projects/maturarbeit/Maturarbeit.astro';
 import { getCollection } from 'astro:content';
 import { getProjectUpdates, localizeProject } from '@/lib/content';
 import { site } from '@/data/site';
@@ -41,7 +42,7 @@ const { data } = entry;
 const { Content } = await render(project.translation ?? entry);
 const updates = await getProjectUpdates(entry.id);
 /** Interactive sections per project slug, shown between the spec sheet and the write-up. */
-const showcases: Record<string, typeof Numtrip> = { numtrip: Numtrip };
+const showcases: Record<string, typeof Numtrip> = { numtrip: Numtrip, maturarbeit: Maturarbeit };
 const Showcase = showcases[entry.id];
 
 const jsonLd = {
