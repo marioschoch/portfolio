@@ -1,7 +1,7 @@
 ---
 title: NumTrip
 summary: A number-merging puzzle for the terminal, written in Python in high school. Join equal neighbours, double them, and try to reach 256. Playable right here in the browser.
-role: '[TODO] e.g. Design and programming'
+role: 'Design and programming'
 timeframe:
   # From the git history of EF-Info/NumTrip: first commit Sept 2022, last Feb 2023.
   start: 2022-09-16
@@ -25,36 +25,22 @@ keyFigures:
     label: tile to win
 ---
 
-{/* ✏️ This is your write-up: plain Markdown. Edit the text below freely. */}
-
-{/* The game and the code viewer are added by the page itself, so nothing here can break them. */}
-
-{/* Replace every [TODO] and delete these comment lines when you're done; `npm run todos` lists what's left. */}
-
-{/* Material from back then: your blog post EF-Info/blog/2022-01-20-NumTrip-Final.md (in German). */}
-
 ## What NumTrip is
 
-[TODO] A few sentences on the game in your own words: what you do, what the goal is,
-and what makes it fun (or frustrating).
+NumTrip is a number combination game in which the goal is to get to the number 256. You achieve this by clicking on same numbers that are next to each other. By doing so, the number doubles and the "number cloud" disappears. When there are no more options or you reached 256, the game ends.
 
 ## Why I built it
 
-[TODO] When and where this came about (school, class, year), what the assignment was,
-and why you picked this game.
+This game was an assignment in the supplementary subject "Informatics" in high school. The game was pre-defined and the guidelines were set. The goal was to learn basic algorithms, learn python and look at programming strategies.
 
 ## How it works
 
-{/* Ideas: the top-down design, the flood fill in removeNumbers(), the gravity in runterfallen(), checking the input. */}
-
-{/* The code viewer has line numbers you can refer to. */}
-
-[TODO] How you approached it and the parts that were hardest to get right.
+The game uses the floodfill() algorithm to fill the board with random numbers in the beginning and each time a number-cloud is clicked. Also implemented is a gravity() algorithm that makes sure the free spaces after combination get filled by the numbers above.
 
 ## What I learned
 
-[TODO] What this first real programming project taught you.
+Programming this game I learnt the fundamentals of python programming. I learned how to plan a project top-down. How to implement different algorithms and how to go about debugging something that does not work. At the same time, github was brought closer and I learnt that documenting the process is as important as the coding itself.
 
 ## What I'd do differently today
 
-[TODO] Looking back at the code now: what you would change, and why.
+Looking back at the code a few years later, there is probably a lot I would change in the structure, variables and documentation process. What is also important to note is that at that time, AI was not an option yet and everything was done by hand. This makes this first project even more special looking back.

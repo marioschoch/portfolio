@@ -1,21 +1,17 @@
 ---
 /**
  * About page. Texts live in this file per language (short enough to keep inline).
- * TODO: rewrite all texts in your own voice and add your photo (see README → Images).
+ * TODO: rewrite all texts in your own voice.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Picture } from 'astro:assets';
-import ImagePlaceholder from '@/components/ImagePlaceholder.astro';
 import cyclingImage from '@/assets/home/hero-cycling.jpg';
 import { personJsonLd } from '@/lib/person';
 import { site } from '@/data/site';
 import { langPaths, useTranslations, type Lang } from '@/i18n/utils';
 
-// To add your photo: put it at src/assets/portrait.jpg, then uncomment these two lines
-// and replace <ImagePlaceholder … /> below with:
-//   <Image src={portrait} alt="Portrait of Mario Schoch" widths={[160, 320]} sizes="7rem" class="about-portrait object-cover" loading="eager" />
-// import { Image } from 'astro:assets';
-// import portrait from '@/assets/portrait.jpg';
+import { Image } from 'astro:assets';
+import portrait from '@/assets/portrait.jpg';
 
 export const getStaticPaths = langPaths;
 const { lang } = Astro.props as { lang: Lang };
@@ -78,7 +74,14 @@ const copy = {
       {copy.body.map((p, i) => (
         <p>
           {i === 0 && (
-            <ImagePlaceholder label="Portrait" class="about-portrait aspect-auto! p-2!" />
+            <Image
+              src={portrait}
+              alt="Portrait of Mario Schoch"
+              widths={[160, 320]}
+              sizes="7rem"
+              class="about-portrait object-cover object-[50%_20%]"
+              loading="eager"
+            />
           )}
           {p}
         </p>
