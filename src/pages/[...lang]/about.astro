@@ -77,8 +77,8 @@ const copy = {
             <Image
               src={portrait}
               alt="Portrait of Mario Schoch"
-              widths={[160, 320]}
-              sizes="7rem"
+              widths={[200, 400]}
+              sizes="11rem"
               class="about-portrait object-cover object-[50%_20%]"
               loading="eager"
             />
@@ -127,11 +127,11 @@ const copy = {
   .about-text {
     @apply max-w-[46rem] space-y-[1.2em] text-lead leading-[1.45];
   }
-  /* Portrait as a drop capital: three lines tall, the text wraps beside it. */
+  /* Portrait as a drop capital: five lines tall, the text wraps beside it. */
   .about-text :global(.about-portrait) {
     float: left;
-    width: 4.3em;
-    height: 4.3em;
+    width: 7em;
+    height: 7em;
     margin: 0.3em 0.6em 0 0;
   }
   .about-photo {
