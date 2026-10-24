@@ -193,7 +193,15 @@
 
   /* Flat, square-cornered buttons. One fill per state, no outlines. */
   .btn {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 bg-surface px-5 py-2.5 text-body leading-none font-medium text-fg transition-[background-color,color,transform] duration-150 select-none hover:bg-fg hover:text-bg active:scale-[0.97];
+    @apply inline-flex min-h-11 items-center justify-center gap-2 bg-surface px-5 py-2.5 text-body leading-none font-medium text-fg transition-[background-color,color,transform] duration-150 select-none hover:text-bg active:scale-[0.97];
+  }
+  /* Important, so a background utility on a button (e.g. `btn bg-bg`) can't cancel the hover
+     background while the hover text colour still applies, which made the label invisible. */
+  .btn:hover:not(:disabled) {
+    @apply bg-fg!;
+  }
+  .btn:disabled {
+    @apply cursor-default opacity-50 hover:text-fg;
   }
 
   .btn-primary {
