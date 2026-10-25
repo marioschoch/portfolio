@@ -59,7 +59,8 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
       </figure>
       <!--
         The moving line is set twice: in the paper colour, clipped to the photo, and in the ink
-        (the h1) with the photo's square cut out of it, so the two never overlap.
+        with the photo's square cut out of it, so the two never overlap. Both are decorative; the
+        h1 holds the name once, visually hidden.
       -->
       <div class="hero-line hero-line--light" aria-hidden="true">
         <span class="hero-track">
@@ -71,16 +72,17 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
           ))}
         </span>
       </div>
-      <h1 class="hero-line hero-line--ink">
+      <h1 class="sr-only">{site.name}</h1>
+      <div class="hero-line hero-line--ink" aria-hidden="true">
         <span class="hero-track">
-          {[0, 1, 2, 3].map((i) => (
-            <span class="hero-word" aria-hidden={i > 0 ? 'true' : undefined}>
+          {[0, 1, 2, 3].map(() => (
+            <span class="hero-word">
               {site.name}
-              <span class="hero-dot" aria-hidden="true" />
+              <span class="hero-dot" />
             </span>
           ))}
         </span>
-      </h1>
+      </div>
     </div>
 
     <div class="container-page mt-12 text-center sm:mt-16" data-reveal>
