@@ -1,3 +1,9 @@
+/*
+ * Astro's responsive image styles (`height: auto` …) live in the `astro.images` layer. Declaring it
+ * first gives it the lowest priority, so utilities like `size-full` always win, whatever order the
+ * build puts the stylesheets in.
+ */
+@layer astro.images;
 @import 'tailwindcss';
 
 /* ==========================================================================
