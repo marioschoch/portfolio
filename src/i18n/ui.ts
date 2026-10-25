@@ -1,6 +1,6 @@
 /**
- * UI strings for every language. English is the source of truth: a key missing
- * in another language falls back to English automatically (see `useTranslations`).
+ * UI strings for every language. English defines the keys; every other language must
+ * translate all of them, so a missing key fails `astro check` instead of showing English.
  */
 
 export const languages = { en: 'English', de: 'Deutsch' } as const;
@@ -34,6 +34,7 @@ const en = {
   'home.allUpdates': 'All updates',
   'home.now': 'Now',
   'home.photoCredit': 'Photo:',
+  'home.photoAlt': 'A group of road cyclists riding at speed',
   'home.nowUpdated': 'As of',
   'projects.title': 'Projects',
   'projects.intro':
@@ -45,6 +46,13 @@ const en = {
   'projects.shown': 'shown',
   'status.in-progress': 'In progress',
   'status.completed': 'Completed',
+  'tag.mechatronics': 'mechatronics',
+  'tag.embedded': 'embedded',
+  'tag.cad': 'cad',
+  'tag.analysis': 'analysis',
+  'tag.web': 'web',
+  'tag.software': 'software',
+  'tag.bikes': 'bikes',
   'spec.role': 'Role',
   'spec.timeframe': 'Timeframe',
   'spec.team': 'Team',
@@ -54,6 +62,10 @@ const en = {
   'spec.status': 'Status',
   'spec.links': 'Links',
   'spec.present': 'present',
+  'og.project': 'Project',
+  'og.focus': 'Focus',
+  'og.focusValue': 'Mechatronics · Embedded',
+  'og.statusValue': 'BSc Mechanical Eng.',
   'project.readingTime': 'min read',
   'project.lastUpdated': 'Last updated',
   'project.gallery': 'Gallery',
@@ -66,6 +78,8 @@ const en = {
   'project.figure': 'Fig.',
   'project.imagePending': 'Image pending',
   'project.keyFigures': 'Key figures',
+  'project.breadcrumb': 'Breadcrumb',
+  'project.tags': 'Tags',
   'lightbox.close': 'Close',
   'lightbox.prev': 'Previous image',
   'lightbox.next': 'Next image',
@@ -165,6 +179,7 @@ const en = {
   'pdf.download': 'Download PDF',
   'pdf.open': 'Open in new tab',
   'pdf.pages': 'pages',
+  'pdf.inGerman': 'In German',
   'pdf.page': 'Page',
   'pdf.prev': 'Previous page',
   'pdf.next': 'Next page',
@@ -200,7 +215,7 @@ const en = {
 
 export type UiKey = keyof typeof en;
 
-const de: Partial<Record<UiKey, string>> = {
+const de: Record<UiKey, string> = {
   'nav.home': 'Start',
   'nav.projects': 'Projekte',
   'nav.updates': 'Updates',
@@ -227,6 +242,7 @@ const de: Partial<Record<UiKey, string>> = {
   'home.allUpdates': 'Alle Updates',
   'home.now': 'Aktuell',
   'home.photoCredit': 'Foto:',
+  'home.photoAlt': 'Gruppe von Rennvelofahrern in voller Fahrt',
   'home.nowUpdated': 'Stand',
   'projects.title': 'Projekte',
   'projects.intro':
@@ -238,6 +254,13 @@ const de: Partial<Record<UiKey, string>> = {
   'projects.shown': 'angezeigt',
   'status.in-progress': 'In Arbeit',
   'status.completed': 'Abgeschlossen',
+  'tag.mechatronics': 'mechatronik',
+  'tag.embedded': 'embedded',
+  'tag.cad': 'cad',
+  'tag.analysis': 'analyse',
+  'tag.web': 'web',
+  'tag.software': 'software',
+  'tag.bikes': 'velo',
   'spec.role': 'Rolle',
   'spec.timeframe': 'Zeitraum',
   'spec.team': 'Team',
@@ -247,6 +270,10 @@ const de: Partial<Record<UiKey, string>> = {
   'spec.status': 'Status',
   'spec.links': 'Links',
   'spec.present': 'heute',
+  'og.project': 'Projekt',
+  'og.focus': 'Schwerpunkt',
+  'og.focusValue': 'Mechatronik · Embedded',
+  'og.statusValue': 'BSc Maschinenbau',
   'project.readingTime': 'Min. Lesezeit',
   'project.lastUpdated': 'Zuletzt aktualisiert',
   'project.gallery': 'Galerie',
@@ -259,6 +286,8 @@ const de: Partial<Record<UiKey, string>> = {
   'project.figure': 'Abb.',
   'project.imagePending': 'Bild folgt',
   'project.keyFigures': 'Kennzahlen',
+  'project.breadcrumb': 'Brotkrümelnavigation',
+  'project.tags': 'Schlagwörter',
   'lightbox.close': 'Schliessen',
   'lightbox.prev': 'Vorheriges Bild',
   'lightbox.next': 'Nächstes Bild',
@@ -363,6 +392,7 @@ const de: Partial<Record<UiKey, string>> = {
   'pdf.download': 'PDF herunterladen',
   'pdf.open': 'In neuem Tab öffnen',
   'pdf.pages': 'Seiten',
+  'pdf.inGerman': 'Deutsch',
   'pdf.page': 'Seite',
   'pdf.prev': 'Vorherige Seite',
   'pdf.next': 'Nächste Seite',
@@ -398,4 +428,4 @@ const de: Partial<Record<UiKey, string>> = {
   'notFound.back': 'Zur Startseite',
 };
 
-export const ui: Record<Lang, Partial<Record<UiKey, string>>> & { en: typeof en } = { en, de };
+export const ui: Record<Lang, Record<UiKey, string>> = { en, de };

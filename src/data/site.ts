@@ -19,7 +19,7 @@ export const site = {
   },
   // TODO: earliest internship start, e.g. { en: 'February 2027', de: 'Februar 2027' } — null hides the line.
   availableFrom: null as { en: string; de: string } | null,
-  location: 'Zürich, Switzerland',
+  location: { en: 'Zürich, Switzerland', de: 'Zürich, Schweiz' },
   // E-mail split into parts so it never appears in plain text in the HTML (see ObfuscatedEmail.astro).
   // TODO: confirm this is the address you want to publish.
   email: { user: 'marioschoch05', domain: 'gmail.com' },
@@ -34,5 +34,7 @@ export const site = {
   // when empty (e.g. locally) no beacon is included.
   // Extract the 32-hex token so a pasted snippet or stray whitespace in the secret still works.
   analyticsToken:
-    ((import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN as string | undefined) ?? '').match(/[0-9a-f]{32}/i)?.[0] ?? '',
+    ((import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN as string | undefined) ?? '').match(
+      /[0-9a-f]{32}/i,
+    )?.[0] ?? '',
 };

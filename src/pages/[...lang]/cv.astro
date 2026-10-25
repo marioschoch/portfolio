@@ -61,7 +61,7 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
           {tx(cv.headline, lang)}
         </p>
         <ul class="mt-6 flex flex-wrap gap-x-6 gap-y-2 print:mt-2 print:text-[9pt]">
-          <li>{site.location}</li>
+          <li>{tx(site.location, lang)}</li>
           <li>
             <ObfuscatedEmail class="link" />
           </li>
@@ -138,7 +138,7 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
                   </a>
                 </h3>
                 <p>{p.summary}</p>
-                <p class="mt-1 label">{p.entry.data.tools.join(' · ')}</p>
+                <p class="mt-1 label">{p.tools.join(' · ')}</p>
               </div>
             </li>
           ))}

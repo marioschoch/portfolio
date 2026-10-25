@@ -10,7 +10,7 @@
  */
 import type { Lang } from '@/i18n/utils';
 
-export type Text = string | { en: string; de?: string };
+export type Text = string | { en: string; de: string };
 
 export interface CvEntry {
   title: Text;
@@ -125,9 +125,9 @@ export const cv: Cv = {
   ],
 };
 
-/** Resolve a `Text` for a language, falling back to English. */
+/** Resolve a `Text` for a language (a plain string is the same in every language). */
 export function tx(text: Text | undefined, lang: Lang): string {
   if (text === undefined) return '';
   if (typeof text === 'string') return text;
-  return (lang === 'de' ? text.de : undefined) ?? text.en;
+  return text[lang];
 }

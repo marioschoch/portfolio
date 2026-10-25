@@ -4,7 +4,7 @@
  * Twitter card and optional JSON-LD.
  */
 import { site } from '@/data/site';
-import { langs, localizePath, ogLocales, stripLang, type Lang } from '@/i18n/utils';
+import { langs, localizePath, ogImagePath, ogLocales, stripLang, type Lang } from '@/i18n/utils';
 
 export interface Props {
   lang: Lang;
@@ -29,7 +29,7 @@ const {
   lang,
   title,
   description,
-  image = '/og/default.png',
+  image = ogImagePath('default', lang),
   type = 'website',
   translated = true,
   noindex = false,

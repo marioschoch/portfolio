@@ -44,11 +44,7 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
       <figure class="hero-photo">
         <Picture
           src={heroImage}
-          alt={
-            lang === 'de'
-              ? 'Gruppe von Rennvelofahrern in voller Fahrt'
-              : 'A group of road cyclists riding at speed'
-          }
+          alt={t('home.photoAlt')}
           widths={[600, 900, 1300, 1800]}
           sizes="(min-width: 640px) 52vw, 112vw"
           formats={['avif', 'webp']}
@@ -99,7 +95,7 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
 
     <div class="container-page mt-auto flex flex-col-reverse gap-6 pt-14 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
       <p class="label">
-        {site.location}
+        {tx(site.location, lang)}
         <span aria-hidden="true"> · </span>
         {t('home.photoCredit')} Lars Meier
       </p>
@@ -164,10 +160,10 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
           {featured.map((p, i) => (
             <li data-reveal>
               <div class="mb-5 lg:hidden">
-                {p.entry.data.cover ? (
+                {p.cover ? (
                   <Image
-                    src={p.entry.data.cover.src}
-                    alt={p.entry.data.cover.alt}
+                    src={p.cover.src}
+                    alt={p.cover.alt}
                     widths={[480, 720, 960]}
                     sizes="100vw"
                     class="aspect-[16/10] w-full object-cover"
@@ -187,7 +183,8 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
                   {p.title}
                 </span>
                 <span class="mt-2 block label">
-                  {p.entry.data.tags.join(', ')} · {p.entry.data.timeframe.start.getUTCFullYear()}
+                  {p.entry.data.tags.map((tag) => t(`tag.${tag}`)).join(', ')} ·{' '}
+                  {p.entry.data.timeframe.start.getUTCFullYear()}
                 </span>
               </a>
             </li>

@@ -97,6 +97,10 @@ const projectsDe = defineCollection({
     summary: z.string().min(40).max(220),
     role: z.string().optional(),
     keyFigureLabels: z.array(z.string()).optional(),
+    /** Alt text of the cover image. */
+    coverAlt: altText.optional(),
+    /** Replaces the whole tools list (same items, translated). */
+    tools: z.array(z.string()).min(1).optional(),
   }),
 });
 

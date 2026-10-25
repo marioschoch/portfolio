@@ -1,0 +1,30 @@
+---
+title: NumTrip
+summary: Ein Zahlen-Kombinierspiel für das Terminal, im Gymnasium in Python geschrieben. Gleiche Nachbarn zusammenführen, verdoppeln und versuchen, 256 zu erreichen. Direkt hier im Browser spielbar.
+role: 'Design und Programmierung'
+coverAlt: Ein NumTrip-Spielfeld im Terminal, ein 5×5-Raster aus den Zahlen 1, 2 und 4
+keyFigureLabels:
+  - Zeilen Python
+  - Spielfeld
+  - Zahl zum Gewinnen
+---
+
+## Was NumTrip ist
+
+NumTrip ist ein Zahlen-Kombinierspiel, bei dem das Ziel ist, die Zahl 256 zu erreichen. Das gelingt, indem man auf gleiche Zahlen klickt, die nebeneinander liegen. Dadurch verdoppelt sich die Zahl, und die «Zahlenwolke» verschwindet. Wenn es keine Möglichkeiten mehr gibt oder man 256 erreicht hat, ist das Spiel vorbei.
+
+## Warum ich es gebaut habe
+
+Das Spiel war eine Aufgabe im Ergänzungsfach Informatik am Gymnasium. Das Spiel selbst und die Vorgaben waren festgelegt. Ziel war, grundlegende Algorithmen und Python zu lernen und sich mit Programmierstrategien auseinanderzusetzen.
+
+## Wie es funktioniert
+
+Das Spiel verwendet den floodfill()-Algorithmus, um das Spielfeld am Anfang und nach jedem Klick auf eine Zahlenwolke mit Zufallszahlen zu füllen. Ausserdem ist ein gravity()-Algorithmus umgesetzt, der dafür sorgt, dass die nach dem Kombinieren frei gewordenen Felder von den Zahlen darüber aufgefüllt werden.
+
+## Was ich gelernt habe
+
+Beim Programmieren dieses Spiels habe ich die Grundlagen von Python gelernt: wie man ein Projekt top-down plant, wie man verschiedene Algorithmen umsetzt und wie man vorgeht, wenn etwas nicht funktioniert und man es debuggen muss. Gleichzeitig bin ich GitHub nähergekommen und habe gelernt, dass die Dokumentation des Prozesses genauso wichtig ist wie das Programmieren selbst.
+
+## Was ich heute anders machen würde
+
+Wenn ich ein paar Jahre später auf den Code schaue, würde ich wohl vieles an der Struktur, den Variablen und der Dokumentation ändern. Wichtig ist auch: Damals war KI noch keine Option, und alles entstand von Hand. Das macht dieses erste Projekt im Rückblick umso besonderer.

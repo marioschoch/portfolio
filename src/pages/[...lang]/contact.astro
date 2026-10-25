@@ -4,6 +4,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeader from '@/components/PageHeader.astro';
 import ObfuscatedEmail from '@/components/ObfuscatedEmail.astro';
 import { site } from '@/data/site';
+import { tx } from '@/data/cv';
 import { langPaths, useTranslations, type Lang } from '@/i18n/utils';
 
 export const getStaticPaths = langPaths;
@@ -42,7 +43,7 @@ const rows = [
     ))}
     <div class="contact-row" data-reveal>
       <dt class="label">{t('contact.location')}</dt>
-      <dd>{site.location}</dd>
+      <dd>{tx(site.location, lang)}</dd>
     </div>
   </dl>
 </BaseLayout>

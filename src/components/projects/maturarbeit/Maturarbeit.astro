@@ -6,13 +6,14 @@
  * first-page.png is page 1 of that PDF, shown until the reader has loaded.
  */
 import PdfViewer from '@/components/PdfViewer.astro';
-import { type Lang } from '@/i18n/utils';
+import { useTranslations, type Lang } from '@/i18n/utils';
 import firstPage from './first-page.png';
 
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
+const t = useTranslations(lang);
 ---
 
 <PdfViewer
@@ -21,6 +22,6 @@ const { lang } = Astro.props;
   title="Von Muskelkraft zu Strom"
   pages={38}
   poster={firstPage}
-  docLanguage={lang === 'de' ? 'Deutsch' : 'In German'}
+  docLanguage={t('pdf.inGerman')}
   lang={lang}
 />

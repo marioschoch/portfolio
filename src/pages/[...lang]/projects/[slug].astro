@@ -20,7 +20,15 @@ import Maturarbeit from '@/components/projects/maturarbeit/Maturarbeit.astro';
 import { getCollection } from 'astro:content';
 import { getProjectUpdates, localizeProject } from '@/lib/content';
 import { site } from '@/data/site';
-import { formatDate, isoDate, langs, localizePath, useTranslations, type Lang } from '@/i18n/utils';
+import {
+  formatDate,
+  isoDate,
+  langs,
+  localizePath,
+  ogImagePath,
+  useTranslations,
+  type Lang,
+} from '@/i18n/utils';
 
 export async function getStaticPaths() {
   const entries = await getCollection('projects');
@@ -53,7 +61,7 @@ const jsonLd = {
   url: new URL(localizePath(`/projects/${entry.id}/`, lang), site.url).href,
   dateCreated: isoDate(data.timeframe.start),
   dateModified: isoDate(project.lastUpdated),
-  keywords: [...data.tags, ...data.tools].join(', '),
+  keywords: [...data.tags.map((tag) => t(`tag.${tag}`)), ...project.tools].join(', '),
   author: { '@type': 'Person', name: site.name, url: site.url },
 };
 ---
@@ -62,7 +70,7 @@ const jsonLd = {
   lang={lang}
   title={project.title}
   description={project.summary}
-  image={`/og/projects/${entry.id}.png`}
+  image={ogImagePath(`projects/${entry.id}`, lang)}
   type="article"
   translated={project.translated}
   publishedTime={data.timeframe.start}
@@ -71,7 +79,7 @@ const jsonLd = {
 >
   <article>
     <header class="container-page pt-10 pb-16 sm:pt-14 sm:pb-24">
-      <nav aria-label="Breadcrumb" class="mb-12">
+      <nav aria-label={t('project.breadcrumb')} class="mb-12">
         <a href={localizePath('/projects/', lang)} class="link">
           ← {t('project.back')}
         </a>
@@ -83,7 +91,9 @@ const jsonLd = {
         <div class="mt-10 md:ml-[50%]">
           <p class="max-w-[40ch] text-lead">{project.summary}</p>
           <p class="mt-5 flex flex-wrap gap-x-5 gap-y-1 label">
-            <span aria-label="Tags">{data.tags.map((tag) => `#${tag}`).join(' ')}</span>
+            <span aria-label={t('project.tags')}>
+              {data.tags.map((tag) => `#${t(`tag.${tag}`)}`).join(' ')}
+            </span>
             <span>
               {project.minutesRead} {t('project.readingTime')}
             </span>
@@ -103,10 +113,10 @@ const jsonLd = {
 
       {Showcase ? (
         <Showcase lang={lang} />
-      ) : data.cover ? (
+      ) : project.cover ? (
         <Image
-          src={data.cover.src}
-          alt={data.cover.alt}
+          src={project.cover.src}
+          alt={project.cover.alt}
           widths={[640, 960, 1280, 1920]}
           sizes="(min-width: 1536px) 92rem, 100vw"
           class="w-full"

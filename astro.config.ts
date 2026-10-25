@@ -1,10 +1,35 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
-import { existsSync } from 'node:fs';
+import type { AstroIntegration } from 'astro';
+import { existsSync, readdirSync } from 'node:fs';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { fontsourceVariants } from './src/lib/fontsource';
+
+/**
+ * Lists projects without a German translation at the start of every build: their /de/ page
+ * silently shows the English text, which is easy to miss otherwise.
+ */
+function missingTranslations(): AstroIntegration {
+  const dir = './src/content/projects';
+  return {
+    name: 'missing-translations',
+    hooks: {
+      'astro:build:start': ({ logger }) => {
+        const missing = readdirSync(dir, { withFileTypes: true })
+          .filter((d) => d.isDirectory())
+          .map((d) => d.name)
+          .filter(
+            (slug) => !existsSync(`${dir}/${slug}/de.mdx`) && !existsSync(`${dir}/${slug}/de.md`),
+          );
+        if (missing.length > 0) {
+          logger.warn(`No German translation (de.mdx), /de/ shows English: ${missing.join(', ')}`);
+        }
+      },
+    },
+  };
+}
 
 // https://docs.astro.build/en/reference/configuration-reference/
 export default defineConfig({
@@ -41,6 +66,7 @@ export default defineConfig({
 
   integrations: [
     mdx(),
+    missingTranslations(),
     sitemap({
       i18n: { defaultLocale: 'en', locales: { en: 'en-GB', de: 'de-CH' } },
       // German project pages without a de.mdx only show the English text (canonical → English),

@@ -20,6 +20,9 @@ export interface LocalizedProject {
   title: string;
   summary: string;
   role: string;
+  tools: string[];
+  /** Cover image with the alt text in the requested language. */
+  cover: ProjectEntry['data']['cover'];
   keyFigures: ProjectEntry['data']['keyFigures'];
   minutesRead: number;
   lastUpdated: Date;
@@ -71,6 +74,11 @@ export async function localizeProject(entry: ProjectEntry, lang: Lang): Promise<
     title: translation?.data.title ?? entry.data.title,
     summary: translation?.data.summary ?? entry.data.summary,
     role: translation?.data.role ?? entry.data.role,
+    tools: translation?.data.tools ?? entry.data.tools,
+    cover: entry.data.cover && {
+      ...entry.data.cover,
+      alt: translation?.data.coverAlt ?? entry.data.cover.alt,
+    },
     keyFigures,
     minutesRead: readingMinutes(body),
     lastUpdated: new Date(Math.max(...dates)),

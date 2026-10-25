@@ -36,9 +36,9 @@ const items = [
   ...projects.map((p) => ({
     group: t('palette.projects'),
     title: p.title,
-    hint: p.entry.data.tags.join(' · '),
+    hint: p.entry.data.tags.map((tag) => t(`tag.${tag}`)).join(' · '),
     href: localizePath(`/projects/${p.id}/`, lang),
-    keywords: [...p.entry.data.tools, ...p.entry.data.tags, p.summary].join(' '),
+    keywords: [...p.tools, ...p.entry.data.tags.map((tag) => t(`tag.${tag}`)), p.summary].join(' '),
   })),
 ];
 ---

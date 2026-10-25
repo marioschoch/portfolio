@@ -4,6 +4,14 @@
  * Routing: English lives at the root (`/projects/`), German under `/de/` (`/de/projects/`).
  * Every page is a single `src/pages/[...lang]/…` file whose `getStaticPaths` emits both
  * variants via `langPaths()`, so page code is never duplicated per language.
+ *
+ * Where a text lives (never as a `lang === 'de' ? … : …` in a page):
+ * - interface strings (labels, buttons, alt texts used site-wide) → `ui.ts`, via `useTranslations`
+ * - data (site, CV, Now) → `{ en, de }` objects in `src/data/`, via `tx`; a plain string means
+ *   the same text in both languages
+ * - long texts of one page → a `copy = { en, de }[lang]` object at the top of that page
+ * - project texts → `src/content/projects/<slug>/de.mdx` next to the English `index.mdx`;
+ *   a missing one is reported at build time (see astro.config.ts)
  */
 import { defaultLang, languages, ui, type Lang, type UiKey } from './ui';
 
@@ -20,9 +28,9 @@ export function langPaths() {
   }));
 }
 
-/** Translate a UI key; keys missing in a language fall back to English. */
+/** Translate a UI key (every language has every key, enforced by the type of `ui`). */
 export function useTranslations(lang: Lang) {
-  return (key: UiKey): string => ui[lang][key] ?? ui.en[key];
+  return (key: UiKey): string => ui[lang][key];
 }
 
 /**
@@ -33,6 +41,11 @@ export function localizePath(path: string, lang: Lang): string {
   const clean = path.replace(/^\/+|\/+$/g, '');
   const prefix = lang === defaultLang ? '' : `/${lang}`;
   return clean ? `${prefix}/${clean}/` : `${prefix}/`;
+}
+
+/** Open Graph image of a page: `ogImagePath('projects/x', 'de')` → `/og/de/projects/x.png` */
+export function ogImagePath(name: string, lang: Lang): string {
+  return `/og${lang === defaultLang ? '' : `/${lang}`}/${name}.png`;
 }
 
 /** Strip the language prefix from a pathname: `/de/projects/x/` → `/projects/x/`. */

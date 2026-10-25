@@ -49,7 +49,7 @@ const usedTags = projectTags.filter((tag) => projects.some((p) => p.entry.data.t
             data-value={tag}
             aria-pressed="false"
           >
-            {tag}
+            {t(`tag.${tag}`)}
           </button>
         ))}
       </fieldset>
