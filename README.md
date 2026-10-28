@@ -119,10 +119,13 @@ It appears in the project's log, on the home page (latest three) and in `/rss.xm
 - **Web version:** edit `src/data/cv.ts`. Text fields are either a plain string or `{ en: '…', de: '…' }`.
   Projects are referenced by folder name, so titles and links stay in sync. Empty lists (e.g. `awards: []`)
   hide their section.
-- **PDF:** export your CV as PDF and save it as **`public/cv/Mario-Schoch-CV.pdf`**. On the next build the
-  "Download PDF" and "View PDF" buttons appear on `/cv`. Updating the CV means replacing this one file. The
-  file name is set in `site.ts → cvPdf`.
-- The page also prints cleanly on A4 ("Print" button or Ctrl/Cmd+P).
+- **PDF:** after editing `cv.ts`, run **`npm run cv:pdf`** and commit the two PDFs it writes to `public/cv/`
+  (`Mario-Schoch-CV.pdf` in English, `Mario-Schoch-Lebenslauf.pdf` in German; file names in `site.ts → cvPdf`).
+  The script starts the dev server, prints the A4 layout `src/pages/[...lang]/cv/pdf.astro` with your installed
+  Chrome (set `CHROME_PATH` if it isn't found) and warns if the CV no longer fits on one page. That layout exists
+  only in the dev server (open `/cv/pdf/` there to preview it); the deployed site ships just the PDFs. Each
+  language's `/cv` page shows its "Download PDF" button once that PDF exists.
+- No address, phone number or date of birth, neither on the page nor in the PDF.
 
 ## How to add images
 

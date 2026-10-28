@@ -1,50 +1,38 @@
 ---
 /**
- * CV page, rendered from src/data/cv.ts. Prints cleanly on A4 (see @media print in global.css).
- * If public/cv/Mario-Schoch-CV.pdf exists at build time, "View" and "Download" buttons appear.
+ * CV page, rendered from src/data/cv.ts. The downloadable PDF is a separate A4 layout of the same
+ * data (cv/pdf.astro), printed to public/cv/ by `npm run cv:pdf`; the button appears once it exists.
  */
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ObfuscatedEmail from '@/components/ObfuscatedEmail.astro';
-import { cv, tx, type CvEntry } from '@/data/cv';
+import portrait from '@/assets/portrait.jpg';
+import { cv, cefrStep, cvDate, cvRange, tx, type CvEntry } from '@/data/cv';
 import { site } from '@/data/site';
 import { getProjects } from '@/lib/content';
-import {
-  langPaths,
-  localizePath,
-  locales,
-  useTranslations,
-  type Lang,
-  type UiKey,
-} from '@/i18n/utils';
+import { langPaths, localizePath, useTranslations, type Lang, type UiKey } from '@/i18n/utils';
 
 export const getStaticPaths = langPaths;
 const { lang } = Astro.props as { lang: Lang };
 const t = useTranslations(lang);
 
 // Builds always run from the project root, so the public/ folder is resolved from there.
-const hasPdf = existsSync(join(process.cwd(), 'public', site.cvPdf));
+const pdfPath = join(process.cwd(), 'public', site.cvPdf[lang]);
+const pdfSize = existsSync(pdfPath)
+  ? `${Math.round(statSync(pdfPath).size / 1000).toLocaleString(lang)} kB`
+  : null;
 
 const allProjects = await getProjects(lang);
-const projects = cv.projects.map((id) => {
+const findProject = (id: string) => {
   const project = allProjects.find((p) => p.id === id);
   // Fail the build on typos instead of silently dropping the project.
   if (!project) throw new Error(`src/data/cv.ts references unknown project "${id}"`);
   return project;
-});
-
-/** '2024-07' → 'Jul 2024' in the current language. */
-const month = (ym: string) =>
-  new Intl.DateTimeFormat(locales[lang], {
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${ym}-01T00:00:00Z`));
-const range = (e: { start: string; end?: string | undefined }) =>
-  e.end === e.start
-    ? month(e.start)
-    : `${month(e.start)} – ${e.end ? month(e.end) : t('spec.present')}`;
+};
+const projects = cv.projects.map(findProject);
+const projectHref = (id: string) => localizePath(`/projects/${findProject(id).id}/`, lang);
 
 const sections: { key: UiKey; entries: CvEntry[] }[] = [
   { key: 'cv.education', entries: cv.education },
@@ -53,14 +41,13 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
 ---
 
 <BaseLayout lang={lang} title={t('cv.title')} description={tx(cv.headline, lang)}>
-  <div class="container-page pt-16 sm:pt-24 print:max-w-none print:p-0">
-    <header class="grid gap-10 pb-8 lg:grid-cols-12 print:block print:pb-4" data-reveal>
-      <div class="lg:col-span-9">
-        <h1 class="display print:text-[26pt] print:tracking-tight">{site.name}</h1>
-        <p class="mt-8 max-w-[40ch] text-lead print:mt-2 print:text-[11pt]">
-          {tx(cv.headline, lang)}
-        </p>
-        <ul class="mt-6 flex flex-wrap gap-x-6 gap-y-2 print:mt-2 print:text-[9pt]">
+  <div class="container-page pt-16 sm:pt-24">
+    <header class="grid gap-10 lg:grid-cols-12 lg:gap-8">
+      <div class="lg:col-span-9" data-reveal>
+        <p class="label">{t('cv.title')}</p>
+        <h1 class="display mt-4">{site.name}</h1>
+        <p class="mt-8 max-w-[40ch] text-lead">{tx(cv.headline, lang)}</p>
+        <ul class="mt-6 flex flex-wrap gap-x-6 gap-y-2">
           <li>{tx(site.location, lang)}</li>
           <li>
             <ObfuscatedEmail class="link" />
@@ -76,33 +63,43 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
             </a>
           </li>
         </ul>
-      </div>
-      <div class="no-print flex flex-wrap items-center gap-2 lg:col-span-3 lg:flex-col lg:items-end lg:justify-end">
-        <p class="label mr-auto lg:mr-0 lg:mb-2">{t('cv.title')}</p>
-        {hasPdf && (
-          <>
-            <a href={site.cvPdf} class="btn btn-primary" download>
+        {pdfSize && (
+          <p class="mt-10 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <a href={site.cvPdf[lang]} class="btn btn-primary" download>
               {t('cv.download')}
+              <span aria-hidden="true">↓</span>
             </a>
-            <a href={site.cvPdf} class="btn" target="_blank" rel="noopener">
-              {t('cv.view')} ↗
-            </a>
-          </>
+            <span class="label">PDF · A4 · {pdfSize}</span>
+          </p>
         )}
-        <button type="button" class="btn" data-print>
-          {t('cv.print')}
-        </button>
+      </div>
+      <div class="order-first lg:order-none lg:col-span-3" data-reveal>
+        <Image
+          src={portrait}
+          alt={t('cv.portraitAlt')}
+          widths={[240, 480, 720]}
+          sizes="(min-width: 1024px) 15rem, 9rem"
+          class="aspect-[4/5] w-36 object-cover object-[50%_20%] lg:ml-auto lg:w-full lg:max-w-60"
+          loading="eager"
+        />
       </div>
     </header>
+
+    <section class="cv-section">
+      <h2 class="cv-heading">{t('cv.about')}</h2>
+      <p class="cv-body max-w-[46rem] text-lead leading-[1.45]" data-reveal>
+        {tx(cv.about, lang)}
+      </p>
+    </section>
 
     {sections.map(({ key, entries }) =>
       entries.length ? (
         <section class="cv-section">
           <h2 class="cv-heading">{t(key)}</h2>
-          <ol class="cv-body space-y-10 print:space-y-3">
+          <ol class="cv-body space-y-10">
             {entries.map((e) => (
-              <li class="cv-entry print-break-avoid" data-reveal>
-                <p class="cv-date">{range(e)}</p>
+              <li class="cv-entry" data-reveal>
+                <p class="cv-date">{cvRange(e, lang)}</p>
                 <div>
                   <h3 class="cv-title">{tx(e.title, lang)}</h3>
                   <p>
@@ -110,11 +107,31 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
                     {e.location && <span class="text-muted"> · {tx(e.location, lang)}</span>}
                   </p>
                   {e.details && (
-                    <ul class="mt-3 list-disc space-y-1 pl-5 marker:text-muted print:mt-1">
+                    <ul class="mt-3 list-disc space-y-1 pl-5 marker:text-muted">
                       {e.details.map((d) => (
                         <li>{tx(d, lang)}</li>
                       ))}
                     </ul>
+                  )}
+                  {e.thesis && (
+                    <a
+                      href={projectHref(e.thesis.project)}
+                      class="group mt-5 flex max-w-[40rem] items-baseline justify-between gap-6 bg-surface px-5 py-4 transition-colors hover:bg-surface-2"
+                    >
+                      <span>
+                        <span class="label block">{t('cv.thesis')}</span>
+                        <span class="mt-1 block">
+                          <span class="font-semibold">«{e.thesis.title}»</span>,{' '}
+                          {tx(e.thesis.note, lang)}
+                        </span>
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        class="transition-transform duration-200 group-hover:translate-x-1"
+                      >
+                        →
+                      </span>
+                    </a>
                   )}
                 </div>
               </li>
@@ -127,9 +144,9 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
     {projects.length > 0 && (
       <section class="cv-section">
         <h2 class="cv-heading">{t('cv.projects')}</h2>
-        <ol class="cv-body space-y-8 print:space-y-2">
+        <ol class="cv-body space-y-8">
           {projects.map((p) => (
-            <li class="cv-entry print-break-avoid" data-reveal>
+            <li class="cv-entry" data-reveal>
               <p class="cv-date">{p.entry.data.timeframe.start.getUTCFullYear()}</p>
               <div>
                 <h3 class="cv-title">
@@ -149,15 +166,15 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
     {cv.volunteering.length > 0 && (
       <section class="cv-section">
         <h2 class="cv-heading">{t('cv.volunteering')}</h2>
-        <ol class="cv-body space-y-10 print:space-y-3">
+        <ol class="cv-body space-y-10">
           {cv.volunteering.map((e) => (
-            <li class="cv-entry print-break-avoid" data-reveal>
-              <p class="cv-date">{range(e)}</p>
+            <li class="cv-entry" data-reveal>
+              <p class="cv-date">{cvRange(e, lang)}</p>
               <div>
                 <h3 class="cv-title">{tx(e.title, lang)}</h3>
                 <p>{tx(e.org, lang)}</p>
                 {e.details?.map((d) => (
-                  <p class="mt-3 max-w-[60ch] print:mt-1">{tx(d, lang)}</p>
+                  <p class="mt-3 max-w-[60ch]">{tx(d, lang)}</p>
                 ))}
               </div>
             </li>
@@ -168,11 +185,11 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
 
     <section class="cv-section">
       <h2 class="cv-heading">{t('cv.skills')}</h2>
-      <dl class="cv-body space-y-4 print:space-y-1" data-reveal>
+      <dl class="cv-body space-y-4" data-reveal>
         {cv.skills.map((s) => (
           <div class="cv-entry">
             <dt class="cv-date">{tx(s.category, lang)}</dt>
-            <dd>{s.items.join(', ')}</dd>
+            <dd>{s.items.map((item) => tx(item, lang)).join(', ')}</dd>
           </div>
         ))}
       </dl>
@@ -180,11 +197,21 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
 
     <section class="cv-section">
       <h2 class="cv-heading">{t('cv.languages')}</h2>
-      <dl class="cv-body space-y-4 print:space-y-1" data-reveal>
+      <dl class="cv-body space-y-4" data-reveal>
         {cv.languages.map((l) => (
           <div class="cv-entry">
             <dt class="cv-date">{tx(l.language, lang)}</dt>
-            <dd>{tx(l.level, lang)}</dd>
+            <dd class="flex items-center gap-5">
+              {/* The six CEFR steps, A1 to C2. */}
+              <span class="flex gap-1" aria-hidden="true">
+                {[1, 2, 3, 4, 5, 6].map((step) => (
+                  <span
+                    class:list={['h-2 w-5', step <= cefrStep(l.level) ? 'bg-fg' : 'bg-surface-2']}
+                  />
+                ))}
+              </span>
+              {l.level === 'native' ? t('cv.native') : l.level}
+            </dd>
           </div>
         ))}
       </dl>
@@ -193,10 +220,10 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
     {cv.awards.length > 0 && (
       <section class="cv-section">
         <h2 class="cv-heading">{t('cv.awards')}</h2>
-        <ul class="cv-body space-y-4 print:space-y-1" data-reveal>
+        <ul class="cv-body space-y-4" data-reveal>
           {cv.awards.map((a) => (
             <li class="cv-entry">
-              <p class="cv-date">{month(a.date)}</p>
+              <p class="cv-date">{cvDate(a.date, lang)}</p>
               <p>
                 <span class="font-semibold">{tx(a.title, lang)}</span>
                 {a.org && <> · {tx(a.org, lang)}</>}
@@ -213,25 +240,21 @@ const sections: { key: UiKey; entries: CvEntry[] }[] = [
   @reference '../../styles/global.css';
   /* Each section: its heading on the left quarter, the entries on the right. */
   .cv-section {
-    @apply mt-20 grid gap-6 sm:mt-28 lg:grid-cols-12 lg:gap-8 print:mt-4 print:block;
+    @apply mt-20 grid gap-6 sm:mt-28 lg:grid-cols-12 lg:gap-8;
   }
   .cv-heading {
-    @apply heading lg:col-span-3 print:mb-2 print:text-[12pt];
+    @apply heading lg:col-span-3;
   }
   .cv-body {
     @apply lg:col-span-9;
   }
   .cv-entry {
-    @apply grid gap-1 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-8 print:grid-cols-[8rem_minmax(0,1fr)] print:gap-4;
+    @apply grid gap-1 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-8;
   }
   .cv-date {
     @apply pt-0.5 text-small text-muted tabular-nums sm:pt-1;
   }
   .cv-title {
-    @apply text-lead leading-snug font-semibold print:text-[10.5pt];
+    @apply text-lead leading-snug font-semibold;
   }
 </style>
-
-<script>
-  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
-</script>

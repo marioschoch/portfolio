@@ -33,7 +33,7 @@ Run `npm run todos` to list every placeholder in the code. Each item below says 
 
 ### Files
 
-- [ ] **CV PDF** → `public/cv/Mario-Schoch-CV.pdf` (exact file name)
+- [ ] **CV PDF** → `npm run cv:pdf` after every change to `src/data/cv.ts`, then commit `public/cv/*.pdf`
 - [ ] **Portrait photo** → `src/assets/portrait.jpg` (portrait format, ≥ 800 px wide), then follow the comment in
       `about.astro`
 - [ ] **Project photos** (per project: 1 cover + 2–6 gallery images, each with a one-line description of what's

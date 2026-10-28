@@ -1,0 +1,385 @@
+---
+/**
+ * One A4 page of the CV, printed to public/cv/ as the downloadable PDF by `npm run cv:pdf`
+ * (scripts/cv-pdf.mjs). Same data as the /cv page (src/data/cv.ts), its own print layout.
+ *
+ * Only the dev server renders it: the PDF is what ships, not this page, which also keeps the
+ * plain e-mail address (a clickable mailto in the PDF) out of the deployed HTML.
+ */
+import { Font, Image } from 'astro:assets';
+import portrait from '@/assets/portrait.jpg';
+import { cv, cefrStep, cvDate, cvRange, tx, type CvEntry } from '@/data/cv';
+import { site } from '@/data/site';
+import { getProjects } from '@/lib/content';
+import {
+  langPaths,
+  localizePath,
+  locales,
+  useTranslations,
+  type Lang,
+  type UiKey,
+} from '@/i18n/utils';
+
+export function getStaticPaths() {
+  return import.meta.env.DEV ? langPaths() : [];
+}
+const { lang } = Astro.props as { lang: Lang };
+const t = useTranslations(lang);
+
+/** Absolute site URL of a page in this language, for links that work from inside the PDF. */
+const siteHref = (path: string) => new URL(localizePath(path, lang), site.url).href;
+const bare = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '');
+
+const email = `${site.email.user}@${site.email.domain}`;
+const contact = [
+  { label: t('contact.email'), href: `mailto:${email}`, text: email },
+  { label: t('link.website'), href: siteHref('/'), text: bare(site.url) },
+  { label: t('contact.linkedin'), href: site.links.linkedin, text: 'linkedin.com/in/mario-schoch' },
+  { label: t('contact.github'), href: site.links.github, text: bare(site.links.github) },
+  { label: t('contact.location'), text: tx(site.location, lang) },
+];
+
+const allProjects = await getProjects(lang);
+const findProject = (id: string) => {
+  const project = allProjects.find((p) => p.id === id);
+  if (!project) throw new Error(`src/data/cv.ts references unknown project "${id}"`);
+  return project;
+};
+const projects = cv.projects.map(findProject);
+
+const sections: { key: UiKey; entries: CvEntry[] }[] = [
+  { key: 'cv.education', entries: cv.education },
+  { key: 'cv.experience', entries: cv.experience },
+  { key: 'cv.volunteering', entries: cv.volunteering },
+];
+
+const asOf = new Intl.DateTimeFormat(locales[lang], { month: 'long', year: 'numeric' }).format(
+  new Date(),
+);
+---
+
+<!doctype html>
+<html lang={locales[lang]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <!-- Where scripts/cv-pdf.mjs saves this page (under public/). -->
+    <meta name="cv-pdf" content={site.cvPdf[lang]} />
+    <title>{site.name} · {t('cv.pdfTitle')}</title>
+    <Font cssVariable="--font-plex-sans" />
+  </head>
+  <body>
+    <div class="page">
+      <aside class="side">
+        <Image
+          src={portrait}
+          alt={t('cv.portraitAlt')}
+          width={640}
+          format="jpg"
+          quality={88}
+          class="portrait"
+          loading="eager"
+        />
+
+        <h2>{t('contact.title')}</h2>
+        <dl class="facts">
+          {contact.map((c) => (
+            <div>
+              <dt>{c.label}</dt>
+              <dd>{c.href ? <a href={c.href}>{c.text}</a> : c.text}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <h2>{t('cv.languages')}</h2>
+        <ul class="languages">
+          {cv.languages.map((l) => (
+            <li>
+              <span class="language">{tx(l.language, lang)}</span>
+              <span class="level">{l.level === 'native' ? t('cv.native') : l.level}</span>
+              <span class="steps" aria-hidden="true">
+                {[1, 2, 3, 4, 5, 6].map((step) => (
+                  <span class:list={[step <= cefrStep(l.level) && 'on']} />
+                ))}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <h2>{t('cv.skills')}</h2>
+        <dl class="facts">
+          {cv.skills.map((s) => (
+            <div>
+              <dt>{tx(s.category, lang)}</dt>
+              <dd>{s.items.map((item) => tx(item, lang)).join(', ')}</dd>
+            </div>
+          ))}
+        </dl>
+      </aside>
+
+      <main class="main">
+        <header>
+          <h1>{site.name}</h1>
+          <p class="headline">{tx(cv.headline, lang)}</p>
+          <p class="about">{tx(cv.about, lang)}</p>
+        </header>
+
+        {sections.map(({ key, entries }) =>
+          entries.length ? (
+            <section>
+              <h2>{t(key)}</h2>
+              <ol>
+                {entries.map((e) => (
+                  <li class="entry">
+                    <p class="date">{cvRange(e, lang)}</p>
+                    <div>
+                      <h3>{tx(e.title, lang)}</h3>
+                      <p class="org">
+                        {tx(e.org, lang)}
+                        {e.location && <span class="muted"> · {tx(e.location, lang)}</span>}
+                      </p>
+                      {e.details?.map((d) => (
+                        <p class="detail">{tx(d, lang)}</p>
+                      ))}
+                      {e.thesis && (
+                        <p class="thesis">
+                          <span class="muted">{t('cv.thesis')}</span>{' '}
+                          <a href={siteHref(`/projects/${findProject(e.thesis.project).id}/`)}>
+                            «{e.thesis.title}»
+                          </a>
+                          {`, ${tx(e.thesis.note, lang)}`}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null,
+        )}
+
+        {projects.length > 0 && (
+          <section>
+            <h2>{t('cv.projects')}</h2>
+            <ol>
+              {projects.map((p) => (
+                <li class="entry">
+                  <p class="date">{p.entry.data.timeframe.start.getUTCFullYear()}</p>
+                  <div>
+                    <h3>
+                      <a href={siteHref(`/projects/${p.id}/`)}>{p.title}</a>
+                    </h3>
+                    <p class="detail">{p.summary}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        {cv.awards.length > 0 && (
+          <section>
+            <h2>{t('cv.awards')}</h2>
+            <ol>
+              {cv.awards.map((a) => (
+                <li class="entry">
+                  <p class="date">{cvDate(a.date, lang)}</p>
+                  <div>
+                    <h3>{tx(a.title, lang)}</h3>
+                    {a.org && <p class="org">{tx(a.org, lang)}</p>}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        <footer>
+          {`${t('cv.asOf')} ${asOf}`} · {t('cv.latest')}{' '}
+          <a href={siteHref('/cv/')}>{bare(siteHref('/cv/'))}</a>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  /* The site's oxblood on grey: grey sidebar, white paper for the main column. */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  :root {
+    --ink: #7d0c14;
+    --text: #2a2122;
+    --muted: #6f3d42;
+    --side: #e2e2e2;
+    --off: #c4c4c4;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background: #fff;
+    color: var(--text);
+    font-family: var(--font-plex-sans), system-ui, sans-serif;
+    font-size: 9.3pt;
+    line-height: 1.42;
+    font-feature-settings: 'kern', 'liga';
+    text-rendering: optimizeLegibility;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Long German compounds would otherwise leave ragged gaps in the narrow columns. */
+  :lang(de) {
+    hyphens: auto;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  ol,
+  ul {
+    list-style: none;
+  }
+  h1,
+  h2,
+  h3 {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .muted {
+    color: var(--muted);
+  }
+
+  .page {
+    display: grid;
+    grid-template-columns: 64mm minmax(0, 1fr);
+    width: 210mm;
+    min-height: 297mm;
+  }
+
+  /* Sidebar: portrait, contact, languages, skills. */
+  .side {
+    background: var(--side);
+    color: var(--ink);
+    padding: 13mm 8mm 12mm 9mm;
+  }
+  .portrait {
+    display: block;
+    width: 100%;
+    height: 59mm;
+    object-fit: cover;
+    object-position: 50% 22%;
+  }
+  .side h2 {
+    margin: 8.5mm 0 3mm;
+    font-size: 11pt;
+    letter-spacing: -0.015em;
+  }
+  .facts > div + div {
+    margin-top: 2.2mm;
+  }
+  .facts dt {
+    font-size: 7.8pt;
+    color: var(--muted);
+  }
+  .facts dd {
+    font-size: 9pt;
+    overflow-wrap: anywhere;
+    hyphens: manual;
+  }
+  .languages li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    row-gap: 1.2mm;
+    font-size: 9pt;
+  }
+  .languages li + li {
+    margin-top: 2.6mm;
+  }
+  .level {
+    font-size: 7.8pt;
+    color: var(--muted);
+  }
+  .steps {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 0.8mm;
+  }
+  .steps span {
+    flex: 1;
+    height: 1.3mm;
+    background: var(--off);
+  }
+  .steps span.on {
+    background: var(--ink);
+  }
+
+  /* Main column: name, profile, timeline sections. */
+  .main {
+    display: flex;
+    flex-direction: column;
+    padding: 13mm 13mm 10mm 11mm;
+  }
+  h1 {
+    font-size: 34pt;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+  }
+  .headline {
+    margin-top: 3mm;
+    font-size: 11.5pt;
+    color: var(--ink);
+  }
+  .about {
+    margin-top: 4.5mm;
+  }
+  .main h2 {
+    margin: 8mm 0 3.2mm;
+    font-size: 13pt;
+    letter-spacing: -0.02em;
+  }
+  .entry {
+    display: grid;
+    grid-template-columns: 27mm minmax(0, 1fr);
+    column-gap: 3mm;
+    break-inside: avoid;
+  }
+  .entry + .entry {
+    margin-top: 3mm;
+  }
+  .date {
+    padding-top: 1pt;
+    font-size: 7.8pt;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  h3 {
+    font-size: 10pt;
+    line-height: 1.3;
+    color: var(--text);
+  }
+  .org {
+    color: var(--ink);
+  }
+  .detail,
+  .thesis {
+    margin-top: 0.8mm;
+    font-size: 8.8pt;
+  }
+  .thesis a {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  footer {
+    margin-top: auto;
+    padding-top: 6mm;
+    font-size: 7.5pt;
+    color: var(--muted);
+  }
+</style>

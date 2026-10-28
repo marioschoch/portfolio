@@ -27,8 +27,8 @@ export const site = {
     github: 'https://github.com/marioschoch',
     linkedin: 'https://www.linkedin.com/in/mario-schoch-56b851354/',
   },
-  // Drop your CV PDF into public/cv/ with exactly this file name; the CV page detects it at build time.
-  cvPdf: '/cv/Mario-Schoch-CV.pdf',
+  // CV PDFs per language, generated from src/data/cv.ts by `npm run cv:pdf` (scripts/cv-pdf.mjs).
+  cvPdf: { en: '/cv/Mario-Schoch-CV.pdf', de: '/cv/Mario-Schoch-Lebenslauf.pdf' },
   // Cloudflare Web Analytics token (plain JS snippet, works on any host, no cookies, no DNS change).
   // Provided at build time via the PUBLIC_CF_ANALYTICS_TOKEN GitHub secret (see docs/DEPLOYMENT.md);
   // when empty (e.g. locally) no beacon is included.
