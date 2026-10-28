@@ -1,20 +1,15 @@
 ---
-/**
- * Chronological log of updates. Used on project pages (one project) and on the global
- * updates feed (all projects, with a link to the project of each entry).
- */
+/** Chronological log of one project's updates, shown on its project page. */
 import { render } from 'astro:content';
 import type { UpdateEntry } from '@/lib/content';
-import { formatDate, isoDate, localizePath, type Lang } from '@/i18n/utils';
+import { formatDate, isoDate, type Lang } from '@/i18n/utils';
 
 interface Props {
   updates: UpdateEntry[];
   lang: Lang;
-  /** Map project id → title; when given, each entry links to its project. */
-  projectTitles?: Record<string, string>;
   headingLevel?: 'h2' | 'h3';
 }
-const { updates, lang, projectTitles, headingLevel: Heading = 'h3' } = Astro.props;
+const { updates, lang, headingLevel: Heading = 'h3' } = Astro.props;
 const rendered = await Promise.all(
   updates.map(async (u) => ({ u, Content: (await render(u)).Content })),
 );
@@ -23,16 +18,8 @@ const rendered = await Promise.all(
 <ol class="space-y-16">
   {rendered.map(({ u, Content }) => (
     <li id={u.id} data-reveal>
-      <p class="flex flex-wrap items-baseline gap-x-3 gap-y-1 label">
+      <p class="label">
         <time datetime={isoDate(u.data.date)}>{formatDate(u.data.date, lang)}</time>
-        {projectTitles && (
-          <a
-            href={localizePath(`/projects/${u.data.project.id}/`, lang)}
-            class="text-fg underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current"
-          >
-            {projectTitles[u.data.project.id]}
-          </a>
-        )}
       </p>
       <Heading class="mt-2 text-lead leading-snug">
         <a

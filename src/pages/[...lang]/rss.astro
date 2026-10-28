@@ -7,7 +7,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeader from '@/components/PageHeader.astro';
 import { getUpdates } from '@/lib/content';
 import { site } from '@/data/site';
-import { formatDate, langPaths, localizePath, useTranslations, type Lang } from '@/i18n/utils';
+import { formatDate, langPaths, useTranslations, type Lang } from '@/i18n/utils';
 
 export const getStaticPaths = langPaths;
 const { lang } = Astro.props as { lang: Lang };
@@ -62,14 +62,9 @@ const steps = [t('rss.step1'), t('rss.step2'), t('rss.step3')];
           <span class="text-muted"> · {formatDate(updates[0]!.data.date, lang)}</span>
         </p>
       )}
-      <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2">
-        <a href={localizePath('/updates/', lang)} class="link">
-          {t('nav.updates')} →
-        </a>
-        <a href="/rss.xml" class="link" type="application/rss+xml">
-          {t('rss.raw')}
-        </a>
-      </div>
+      <a href="/rss.xml" class="link mt-6 inline-block" type="application/rss+xml">
+        {t('rss.raw')}
+      </a>
     </section>
   </div>
 </BaseLayout>

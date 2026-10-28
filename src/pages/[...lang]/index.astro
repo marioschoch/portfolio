@@ -222,13 +222,10 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
   {latest.length > 0 && (
     <section class="container-page section" aria-labelledby="latest-heading">
       <div class="grid gap-12 lg:grid-cols-12">
-        <div class="flex flex-col justify-between gap-6 lg:col-span-4" data-reveal>
+        <div class="lg:col-span-4" data-reveal>
           <h2 id="latest-heading" class="heading">
             {t('home.latest')}
           </h2>
-          <a href={localizePath('/updates/', lang)} class="link self-start">
-            {t('home.allUpdates')} →
-          </a>
         </div>
         <ol class="space-y-10 lg:col-span-8 lg:col-start-5">
           {latest.map((u) => (

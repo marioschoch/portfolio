@@ -112,8 +112,7 @@ summary: Optional one-line teaser for the feed/RSS (otherwise the first paragrap
 What happened, what you measured, what's next.
 ```
 
-It appears in the project's log, in the global **Updates** feed, on the home page (latest three) and in
-`/rss.xml`.
+It appears in the project's log, on the home page (latest three) and in `/rss.xml`.
 
 ## How to edit the CV
 
