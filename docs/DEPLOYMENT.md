@@ -8,7 +8,7 @@ changes.**
 git push (main) ──▶ GitHub Actions: npm ci → lint → build → upload changed files (SFTP) ──▶ /marioschoch.ch/
 ```
 
-- `npm run build` produces `dist/`: every page, the RSS feed, sitemap, link-preview images, and an
+- `npm run build` produces `dist/`: every page, sitemap, link-preview images, and an
   `.htaccess` with redirects, caching and security headers.
 - `scripts/deploy.mjs` uploads only files that changed and deletes only files that an earlier deploy
   uploaded and that no longer exist. It never touches anything else in the web root (e.g. `.well-known/`
@@ -256,7 +256,7 @@ owns it, and another browser or phone counts as a new player.
 
 | Section      | What it does                                                                                                                                                                                                                           |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Redirects    | www → `marioschoch.ch`, http → https, `/x/index.html` and `/x.html` → `/x/`, `/cv` → `/cv/` (always to https, also behind Plesk's nginx proxy)                                                                                   |
+| Redirects    | www → `marioschoch.ch`, http → https, `/x/index.html` and `/x.html` → `/x/`, `/cv` → `/cv/` (always to https, also behind Plesk's nginx proxy)                                                                                         |
 | 404          | `ErrorDocument 404 /404.html` with a real 404 status; no directory listings                                                                                                                                                            |
 | Hidden files | All dotfiles (`.htaccess`, `.deploy-manifest.json`) return 403; `.well-known/` stays reachable for Let's Encrypt                                                                                                                       |
 | Compression  | brotli if the server has it, gzip otherwise                                                                                                                                                                                            |

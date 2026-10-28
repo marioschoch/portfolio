@@ -188,22 +188,6 @@ const en = {
   'pdf.loading': 'Loading document…',
   'pdf.error': 'The reader could not load the document. You can still open or download the PDF.',
   'fallback.notice': 'This page is not yet available in German — showing the English version.',
-  'footer.rss': 'RSS',
-  'rss.title': 'RSS feed',
-  'rss.intro':
-    'Follow new project updates in a feed reader app — no e-mail sign-up or account needed.',
-  'rss.address': 'Feed address',
-  'rss.copy': 'Copy',
-  'rss.copied': 'Copied',
-  'rss.how': 'How it works',
-  'rss.step1': 'Copy the feed address above.',
-  'rss.step2':
-    'Paste it into a feed reader, e.g. NetNewsWire, Feedly or Inoreader (look for “Add feed” or “Subscribe”).',
-  'rss.step3': 'New updates from this site then appear in the app automatically.',
-  'rss.empty':
-    'No updates have been published yet — the feed fills automatically once the first one is out.',
-  'rss.count': 'Updates in the feed',
-  'rss.raw': 'Open the raw feed (XML)',
   'footer.source': 'Built with Astro · hosted in Switzerland',
   'notFound.title': 'Page not found',
   'notFound.text': 'The page you are looking for does not exist or has moved.',
@@ -400,22 +384,6 @@ const de: Record<UiKey, string> = {
     'Die Ansicht konnte das Dokument nicht laden. Das PDF lässt sich trotzdem öffnen oder herunterladen.',
   'fallback.notice':
     'Diese Seite ist noch nicht auf Deutsch verfügbar — angezeigt wird die englische Version.',
-  'footer.rss': 'RSS',
-  'rss.title': 'RSS-Feed',
-  'rss.intro':
-    'Neue Projekt-Updates in einer Feed-Reader-App verfolgen — ohne E-Mail-Anmeldung oder Konto.',
-  'rss.address': 'Feed-Adresse',
-  'rss.copy': 'Kopieren',
-  'rss.copied': 'Kopiert',
-  'rss.how': 'So funktioniert es',
-  'rss.step1': 'Die Feed-Adresse oben kopieren.',
-  'rss.step2':
-    'In einen Feed-Reader einfügen, z. B. NetNewsWire, Feedly oder Inoreader (unter „Feed hinzufügen“ oder „Abonnieren“).',
-  'rss.step3': 'Neue Updates dieser Website erscheinen danach automatisch in der App.',
-  'rss.empty':
-    'Bisher sind noch keine Updates erschienen — der Feed füllt sich automatisch, sobald das erste veröffentlicht ist.',
-  'rss.count': 'Updates im Feed',
-  'rss.raw': 'Rohen Feed öffnen (XML)',
   'footer.source': 'Gebaut mit Astro · gehostet in der Schweiz',
   'notFound.title': 'Seite nicht gefunden',
   'notFound.text': 'Die gesuchte Seite existiert nicht oder wurde verschoben.',

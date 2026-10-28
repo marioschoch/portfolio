@@ -111,7 +111,7 @@ const updates = defineCollection({
     date: z.coerce.date(),
     /** Must match a project folder name — the build fails on typos. */
     project: reference('projects'),
-    /** Optional short teaser for the feed and RSS; falls back to the first paragraph. */
+    /** Optional short teaser for the home page; falls back to the first paragraph. */
     summary: z.string().max(240).optional(),
   }),
 });

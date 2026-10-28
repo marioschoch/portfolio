@@ -76,7 +76,7 @@ jobs:
 
       - name: Smoke test
         run: |
-          for path in / /projects/ /cv/ /de/ /rss.xml; do
+          for path in / /projects/ /cv/ /de/; do
             code=$(curl -s -o /dev/null -w '%{http_code}' "https://marioschoch.ch$path")
             echo "$path → $code"
             [ "$code" = "200" ] || exit 1

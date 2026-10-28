@@ -5,7 +5,7 @@
 
 export const site = {
   name: 'Mario Schoch',
-  // Canonical domain (no www) — used for canonical URLs, sitemap, RSS and OG images.
+  // Canonical domain (no www) — used for canonical URLs, sitemap and OG images.
   // Keep in sync with `site` in astro.config.ts and the Sitemap line in public/robots.txt.
   url: 'https://marioschoch.ch',
   // One-line positioning, shown under the name on the home page and used as default meta description.

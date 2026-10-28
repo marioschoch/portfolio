@@ -106,13 +106,13 @@ Create a Markdown file in `src/content/updates/`, named `YYYY-MM-DD-short-title.
 title: Shooter v3 tested
 date: 2026-04-02
 project: delivery-robot # must match a project folder name — typos fail the build
-summary: Optional one-line teaser for the feed/RSS (otherwise the first paragraph is used).
+summary: Optional one-line teaser for the home page (otherwise the first paragraph is used).
 ---
 
 What happened, what you measured, what's next.
 ```
 
-It appears in the project's log, on the home page (latest three) and in `/rss.xml`.
+It appears in the project's log and on the home page (latest three).
 
 ## How to edit the CV
 
