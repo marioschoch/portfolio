@@ -135,7 +135,7 @@ const asOf = new Intl.DateTimeFormat(locales[lang], { month: 'long', year: 'nume
                     <div>
                       <h3>{tx(e.title, lang)}</h3>
                       <p class="org">
-                        {tx(e.org, lang)}
+                        {e.url ? <a href={e.url}>{tx(e.org, lang)}</a> : tx(e.org, lang)}
                         {e.location && <span class="muted"> · {tx(e.location, lang)}</span>}
                       </p>
                       {e.details?.map((d) => (

@@ -16,6 +16,8 @@ export type Text = string | { en: string; de: string };
 export interface CvEntry {
   title: Text;
   org: Text;
+  /** Website of the school or company; the name links to it. */
+  url?: string;
   location?: Text;
   start: string;
   end?: string;
@@ -60,6 +62,7 @@ export const cv: Cv = {
         de: 'BSc Maschineningenieurwissenschaften',
       },
       org: 'ETH Zürich, D-MAVT',
+      url: 'https://mavt.ethz.ch/',
       location: 'Zürich',
       start: '2025-09',
       details: [
@@ -76,6 +79,7 @@ export const cv: Cv = {
         de: 'Zweisprachige Matura Deutsch und Französisch',
       },
       org: 'Gymnasium Biel-Seeland',
+      url: 'https://www.gbsl.ch/',
       location: 'Biel/Bienne',
       start: '2020',
       end: '2024',
@@ -100,6 +104,7 @@ export const cv: Cv = {
         de: 'Zweisprachige Sekundarstufe Deutsch und Französisch',
       },
       org: 'Filière Bilingue',
+      url: 'https://www.biel-bienne.ch/schulen/fibi',
       location: 'Biel/Bienne',
       start: '2018',
       end: '2020',
@@ -110,6 +115,7 @@ export const cv: Cv = {
         de: 'Internationale Schule, Unterrichtssprache Englisch',
       },
       org: 'Canadian International School',
+      url: 'https://www.canadianinternationalschool.com/',
       location: { en: 'Bangalore, India', de: 'Bangalore, Indien' },
       start: '2013',
       end: '2017',
@@ -120,6 +126,7 @@ export const cv: Cv = {
     {
       title: { en: 'R&D Intern', de: 'Praktikant Forschung & Entwicklung' },
       org: 'BMC Switzerland',
+      url: 'https://bmc-switzerland.com/',
       start: '2026-06',
       end: '2026-06',
       details: [
@@ -132,6 +139,7 @@ export const cv: Cv = {
     {
       title: { en: 'Sales and goods receipt', de: 'Verkauf und Wareneingang' },
       org: 'Veloplus',
+      url: 'https://www.veloplus.ch/',
       location: 'Ostermundigen',
       start: '2025',
       end: '2025',
@@ -139,18 +147,21 @@ export const cv: Cv = {
     {
       title: { en: 'Road construction', de: 'Strassenbau' },
       org: 'Seelandjob AG',
+      url: 'https://www.seelandjob.ch/',
       start: '2024',
       end: '2024',
     },
     {
       title: { en: 'Production worker', de: 'Mitarbeiter Produktion' },
       org: 'Keldan GmbH',
+      url: 'https://keldanlights.com/',
       start: '2021',
       end: '2024',
     },
     {
       title: { en: 'Cashier', de: 'Kassierer' },
       org: 'Coop',
+      url: 'https://www.coop.ch/',
       start: '2020',
       end: '2021',
     },
@@ -194,6 +205,7 @@ export const cv: Cv = {
     {
       title: { en: 'Board member', de: 'Vorstandsmitglied' },
       org: 'VELOVE Uni ZH',
+      // TODO: url of the association's website (velove.ch is a different company, VELOVE GmbH).
       location: 'Zürich',
       start: '2025-09', // TODO: month
       details: [
