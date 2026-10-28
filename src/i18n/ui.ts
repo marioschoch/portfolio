@@ -11,7 +11,6 @@ const en = {
   'nav.home': 'Home',
   'nav.projects': 'Projects',
   'nav.cv': 'CV',
-  'nav.about': 'About',
   'nav.contact': 'Contact',
   'nav.snake': 'Snake',
   'nav.skip': 'Skip to content',
@@ -101,8 +100,6 @@ const en = {
   'cv.languages': 'Languages',
   'cv.awards': 'Awards',
   'cv.volunteering': 'Volunteering',
-  'about.title': 'About',
-  'about.beyond': 'Beyond engineering',
   'contact.title': 'Contact',
   'contact.intro':
     'The quickest way to reach me is by e-mail. For internship, job or master’s enquiries, a short note about the role is appreciated.',
@@ -219,7 +216,6 @@ const de: Record<UiKey, string> = {
   'nav.home': 'Start',
   'nav.projects': 'Projekte',
   'nav.cv': 'Lebenslauf',
-  'nav.about': 'Über mich',
   'nav.contact': 'Kontakt',
   'nav.snake': 'Snake',
   'nav.skip': 'Zum Inhalt springen',
@@ -309,8 +305,6 @@ const de: Record<UiKey, string> = {
   'cv.languages': 'Sprachen',
   'cv.awards': 'Auszeichnungen',
   'cv.volunteering': 'Ehrenamt',
-  'about.title': 'Über mich',
-  'about.beyond': 'Neben dem Ingenieurwesen',
   'contact.title': 'Kontakt',
   'contact.intro':
     'Am schnellsten erreichen Sie mich per E-Mail. Bei Anfragen zu Praktika, Stellen oder Masterprogrammen freue ich mich über eine kurze Beschreibung der Rolle.',

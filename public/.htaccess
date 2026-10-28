@@ -56,7 +56,7 @@ ErrorDocument 404 /404.html
   RewriteCond %{DOCUMENT_ROOT}/%1/index.html -f
   RewriteRule ^ %{ENV:CANONICAL_SCHEME}://%{HTTP_HOST}/%1/ [R=301,L,NE]
 
-  # 5. Directories always end with a slash: /about → /about/ (query string is kept).
+  # 5. Directories always end with a slash: /cv → /cv/ (query string is kept).
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteCond %{REQUEST_URI} !/$
   RewriteRule ^ %{ENV:CANONICAL_SCHEME}://%{HTTP_HOST}%{REQUEST_URI}/ [R=301,L,NE]

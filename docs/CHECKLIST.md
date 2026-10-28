@@ -34,8 +34,7 @@ Run `npm run todos` to list every placeholder in the code. Each item below says 
 ### Files
 
 - [ ] **CV PDF** → `npm run cv:pdf` after every change to `src/data/cv.ts`, then commit `public/cv/*.pdf`
-- [ ] **Portrait photo** → `src/assets/portrait.jpg` (portrait format, ≥ 800 px wide), then follow the comment in
-      `about.astro`
+- [ ] **Portrait photo** → `src/assets/portrait.jpg` (portrait format, ≥ 800 px wide), shown on the CV page
 - [ ] **Project photos** (per project: 1 cover + 2–6 gallery images, each with a one-line description of what's
       visible)
   - [ ] Delivery robot: robot on the track, motor shield, shooter mechanism, web interface screenshot
@@ -51,7 +50,6 @@ Run `npm run todos` to list every placeholder in the code. Each item below says 
 - [ ] **Updates** (`src/content/updates/*.md`): replace the six example entries with real ones (or delete
       them).
 - [ ] **CV** (`src/data/cv.ts`): school, start dates, work experience, skills, language levels, awards
-- [ ] **About** (`src/pages/[...lang]/about.astro`): intro, story, what you're looking for, beyond engineering
 - [ ] **Now** (`src/data/now.ts`): 2–4 current items
 - [ ] **German translation** of the robot project (`delivery-robot/de.mdx`): review once the English text
       is final. Add `de.mdx` for other projects whenever you like.

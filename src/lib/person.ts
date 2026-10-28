@@ -1,4 +1,4 @@
-/** JSON-LD `Person` structured data (used on the home and about pages). */
+/** JSON-LD `Person` structured data (used on the home page). */
 import { site } from '@/data/site';
 
 export const personJsonLd = {

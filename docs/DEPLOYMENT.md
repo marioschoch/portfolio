@@ -150,7 +150,7 @@ No `DEPLOY_PASSWORD` is needed for SFTP; don't store one.
 3. Check in the browser:
    - [ ] `https://marioschoch.ch` loads with a valid lock icon.
    - [ ] `http://marioschoch.ch` and `https://www.marioschoch.ch` redirect to `https://marioschoch.ch/`.
-   - [ ] `https://marioschoch.ch/about` redirects to `/about/`; `https://marioschoch.ch/nonexistent` shows
+   - [ ] `https://marioschoch.ch/cv` redirects to `/cv/`; `https://marioschoch.ch/nonexistent` shows
          the custom 404 page.
    - [ ] Switch EN/DE, open the command palette (Ctrl/Cmd+K), load the 3D model on the robot project.
 4. Check headers: `curl -sI https://marioschoch.ch/ | grep -iE "strict|content-security|cache"`, or
@@ -256,7 +256,7 @@ owns it, and another browser or phone counts as a new player.
 
 | Section      | What it does                                                                                                                                                                                                                           |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Redirects    | www → `marioschoch.ch`, http → https, `/x/index.html` and `/x.html` → `/x/`, `/about` → `/about/` (always to https, also behind Plesk's nginx proxy)                                                                                   |
+| Redirects    | www → `marioschoch.ch`, http → https, `/x/index.html` and `/x.html` → `/x/`, `/cv` → `/cv/` (always to https, also behind Plesk's nginx proxy)                                                                                   |
 | 404          | `ErrorDocument 404 /404.html` with a real 404 status; no directory listings                                                                                                                                                            |
 | Hidden files | All dotfiles (`.htaccess`, `.deploy-manifest.json`) return 403; `.well-known/` stays reachable for Let's Encrypt                                                                                                                       |
 | Compression  | brotli if the server has it, gzip otherwise                                                                                                                                                                                            |

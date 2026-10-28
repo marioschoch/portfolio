@@ -145,8 +145,7 @@ It appears in the project's log, on the home page (latest three) and in `/rss.xm
   </figure>
   ```
 
-- **Portrait on the About page:** save it as `src/assets/portrait.jpg` and follow the comment at the top of
-  `src/pages/[...lang]/about.astro`.
+- **Portrait on the CV page:** save it as `src/assets/portrait.jpg`.
 
 ## How to add a 3D model
 
@@ -174,7 +173,6 @@ never slows down the page. `public/models/delivery-robot.glb` is a generated **p
   `keyFigureLabels`) and the German body text. All specs, images and links come from the English file.
 - Untranslated German project pages show the English text with a short notice, point their canonical URL to
   the English page, and are left out of the sitemap.
-- About-page texts live directly in `src/pages/[...lang]/about.astro` (`copy.en` / `copy.de`).
 
 ## Other things to edit
 
