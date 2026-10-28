@@ -85,9 +85,8 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
       <p class="mx-auto max-w-[24ch] text-heading leading-tight font-medium tracking-[-0.02em]">
         {site.tagline[lang]}
       </p>
-      <p class="mt-4">{site.status[lang]}</p>
       {site.availableFrom && (
-        <p class="mt-2">
+        <p class="mt-4">
           {t('home.openTo')} {site.availableFrom[lang]}
         </p>
       )}
