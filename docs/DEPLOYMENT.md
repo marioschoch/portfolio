@@ -109,7 +109,7 @@ only needed once, to install the SSH key (and for the FTPS fallback).
 2. Push the local repository:
 
    ```bash
-   cd ~/Desktop/Projekte/Website
+   cd ~/Projekte/Website
    git remote add origin https://github.com/marioschoch/portfolio.git
    git push -u origin main
    ```
