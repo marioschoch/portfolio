@@ -53,7 +53,7 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
           formats={['avif', 'webp']}
           loading="eager"
           fetchpriority="high"
-          class="aspect-[4/5] w-full object-cover object-[28%_50%]"
+          class="aspect-[4/5] w-full object-cover"
         />
       </figure>
       <h1 class="hero-name md:row-start-1">{site.name}</h1>
@@ -68,8 +68,6 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
       </div>
       <p class="mt-6 label md:col-span-3 md:col-start-1 md:row-start-3 md:mt-4">
         {tx(site.location, lang)}
-        <span aria-hidden="true"> · </span>
-        {t('home.photoCredit')} Lars Meier
       </p>
       <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4 md:col-span-6 md:col-start-4 md:row-start-4 md:mt-12 md:self-end">
         <ul class="flex flex-wrap gap-x-6 gap-y-2">
@@ -129,7 +127,7 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
         </a>
         <ol class="grid grid-cols-subgrid content-start self-start border-t border-rule md:col-span-9 md:col-start-4 md:row-start-2">
           {featured.map((p, i) => (
-            <li class="col-span-full grid grid-cols-subgrid border-b border-rule">
+            <li class="relative col-span-full grid grid-cols-subgrid border-b border-rule">
               <div class="col-span-full pt-4 md:hidden">
                 {p.cover ? (
                   <Image
@@ -146,7 +144,7 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
               </div>
               <a
                 href={localizePath(`/projects/${p.id}/`, lang)}
-                class="work-row col-span-full grid grid-cols-subgrid gap-y-2 py-4 md:py-6"
+                class="work-row col-span-full grid grid-cols-subgrid gap-y-2 py-4 after:absolute after:inset-0 md:py-6"
                 data-work-row={i}
                 aria-current={i === 0 ? 'true' : undefined}
               >

@@ -30,8 +30,7 @@ const en = {
   'home.allProjects': 'All projects',
   'home.latest': 'Latest updates',
   'home.now': 'Now',
-  'home.photoCredit': 'Photo:',
-  'home.photoAlt': 'A group of road cyclists riding at speed',
+  'home.photoAlt': 'A road cyclist climbing a mountain pass',
   'home.nowUpdated': 'As of',
   'projects.title': 'Projects',
   'projects.intro':
@@ -250,8 +249,7 @@ const de: Record<UiKey, string> = {
   'home.allProjects': 'Alle Projekte',
   'home.latest': 'Neueste Updates',
   'home.now': 'Aktuell',
-  'home.photoCredit': 'Foto:',
-  'home.photoAlt': 'Gruppe von Rennvelofahrern in voller Fahrt',
+  'home.photoAlt': 'Rennvelofahrer am Anstieg einer Passstrasse',
   'home.nowUpdated': 'Stand',
   'projects.title': 'Projekte',
   'projects.intro':
