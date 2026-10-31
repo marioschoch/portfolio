@@ -33,14 +33,18 @@ src/
 ├─ data/
 │  ├─ site.ts                 # name, domain, links, e-mail, status line, availability
 │  ├─ cv.ts                   # CV data (single source for the /cv page)
-│  └─ now.ts                  # "Now" box on the home page
+│  └─ now.ts                  # "Now" section on the home page
 ├─ i18n/ui.ts                 # all UI strings in English + German
 ├─ pages/[...lang]/           # every page exists once and renders at /… and /de/…
-├─ components/  layouts/  lib/  styles/
+├─ assets/fonts/              # Inter Tight (vendored subset, OFL), see "Design"
+├─ styles/global.css          # all design tokens, the grid and the shared styles
+├─ components/  layouts/  lib/
 public/
-├─ cv/Mario-Schoch-CV.pdf     # your uploaded CV (download/view buttons appear automatically)
+├─ favicon.svg                # "MS" mark, see "Design"
+├─ cv/*.pdf                   # CV PDFs written by `npm run cv:pdf`
 ├─ models/*.glb               # 3D models
 └─ files/                     # other downloads (e.g. report PDFs)
+design-refs/                  # content check for design changes (not part of the build)
 ```
 
 ---
@@ -164,7 +168,7 @@ It appears in the project's log and on the home page (latest three).
    ```
 
 The viewer only downloads the model and the viewer library when a visitor clicks "Load 3D model", so it
-never slows down the page. `public/models/delivery-robot.glb` is a generated **placeholder**. Replace it.
+never slows down the page.
 
 ## Translations (EN/DE)
 
@@ -174,15 +178,53 @@ never slows down the page. `public/models/delivery-robot.glb` is a generated **p
 - Untranslated German project pages show the English text with a short notice, point their canonical URL to
   the English page, and are left out of the sitemap.
 
+## Design
+
+The site is set in the International Typographic Style (Swiss Style). Everything visual is defined in
+`src/styles/global.css`, with the tokens at the top:
+
+- **Colours:** paper `#f2f1ec`, ink `#111111`, a muted grey and one red accent (`#e8401f`). Dark mode
+  redefines the same tokens (system preference or the theme toggle). Red appears about once per screen and is
+  used for text only from 24 px up (contrast); body text and links stay ink.
+- **Grid:** the `grid-page` utility gives 4 columns on phones and 12 from 768 px (`--cols`, `--margin`,
+  `--gutter`). Children span the full width until they are placed, e.g. `md:col-span-9 md:col-start-4`.
+  Meta (labels, dates, specs) sits in columns 1–3, content in 4–12.
+- **Type:** Inter Tight in 400, 500 and 600. Sizes are `text-small`, `text-body` and `text-lead`, plus the
+  utilities `heading`, `display-m` and `display` (page titles). Spacing uses an 8 px unit.
+- **Section numbers** (01, 02 …) come from a CSS counter in the `section-title` utility, so they renumber
+  themselves when a section is added or hidden, and screen readers skip them.
+- **Hairlines, not boxes:** 1 px rules separate things. No rounded corners, shadows, gradients or decorative
+  icons. Motion is limited to 150 ms colour and underline changes and is switched off under
+  `prefers-reduced-motion`.
+- **Favicon:** `public/favicon.svg` is "MS" in Inter Tight SemiBold, stored as outlines so it doesn't depend
+  on installed fonts, with a red square. It inverts in dark mode.
+
+### Checking that a design change kept the content
+
+`design-refs/content-extract.mjs` takes a snapshot of every built page (visible text, links, images and alt
+texts, labels, metadata) and diffs two snapshots. `design-refs/content-baseline.json` is the content before
+the Swiss redesign.
+
+```bash
+npm run build
+node design-refs/content-extract.mjs extract dist /tmp/content.json
+node design-refs/content-extract.mjs diff design-refs/content-baseline.json /tmp/content.json
+```
+
+Against this baseline, the diff shows the redesign's approved decorative changes (the hidden repeats of the
+name removed, row numbers 01/02 added) plus any content edited since. To take a new baseline, extract into
+`design-refs/content-baseline.json` and run `npx prettier --write` on it (CI checks formatting).
+
 ## Other things to edit
 
 | What                                | Where                                                 |
 | ----------------------------------- | ----------------------------------------------------- |
 | Name, domain, links, status, e-mail | `src/data/site.ts` (domain also in `astro.config.ts`) |
-| "Now" box                           | `src/data/now.ts`                                     |
-| Colours, fonts, spacing             | `src/styles/global.css` (tokens at the top)           |
+| "Now" section                       | `src/data/now.ts`                                     |
+| Colours, fonts, grid, spacing       | `src/styles/global.css` (tokens at the top)           |
 | Navigation entries                  | `src/components/Header.astro`                         |
 | Open Graph images (link previews)   | generated automatically, layout in `src/lib/og.ts`    |
+| Favicon                             | `public/favicon.svg`                                  |
 | Redirects, cache & security headers | `public/.htaccess` (Apache)                           |
 
 ## How to deploy
@@ -201,9 +243,16 @@ are removed; nothing else on the server is touched.
 
 ## Implementation notes
 
-- **Fonts:** IBM Plex Sans/Mono are self-hosted from `@fontsource` via Astro's Fonts API with the `local`
-  provider (`src/lib/fontsource.ts`). Astro 7.4's `npm` font provider fails on `file://` URLs, which is why
-  the variants are listed explicitly. Astro generates size-matched fallback fonts, so there is no layout shift.
+- **Fonts** are self-hosted through Astro's Fonts API with the `local` provider. Astro generates size-matched
+  fallback fonts, so there is no layout shift.
+  - **Inter Tight** (`src/assets/fonts/`, OFL) is a variable-weight subset (400–600, roman and italic) of the
+    Google Fonts release. It holds Latin plus the arrows and symbols the texts use. A character outside the
+    subset falls back to Arial; to add one, re-subset the variable font with fonttools
+    (`fonttools varLib.instancer … wght=400:600`, then `pyftsubset … --flavor=woff2`). The two static
+    `.woff` files are for the Open Graph images, because Satori can't read variable WOFF2.
+  - **IBM Plex Mono** (code, NumTrip terminal) and **IBM Plex Sans** (only the dev-only CV PDF layout, so
+    `npm run cv:pdf` output stays the same) come from `@fontsource` (`src/lib/fontsource.ts`). Astro 7.4's
+    `npm` font provider fails on `file://` URLs, which is why their variants are listed explicitly.
 - **Content Security Policy:** Astro inlines small scripts, so `scripts/csp-hashes.mjs` (run by
   `npm run build`) hashes every inline script and writes the hashes into `dist/.htaccess`. No
   `'unsafe-inline'` is needed for scripts.
@@ -212,9 +261,10 @@ are removed; nothing else on the server is touched.
   `.deploy-manifest.json` (path → SHA-256) on the server, uploads only changed files, deletes only files it
   uploaded itself, and refuses any target folder other than the web root (`WEB_ROOT_NAMES`). On kreativmedia, SSH runs on
   port 2121 (port 22 is firewalled), so the deploy uses SFTP to `venus.kreativmedia.ch:2121` with an SSH key.
-- **Page transitions** use native cross-document View Transitions (pure CSS, disabled under
-  `prefers-reduced-motion`), not Astro's `<ClientRouter>`. No router JavaScript is needed, and every page
-  stays a normal page load.
+- **No page transitions or scroll animations:** every page is a normal page load, without Astro's
+  `<ClientRouter>` or View Transitions. Prefetching on hover keeps navigation fast.
+- **Code blocks** are monochrome: `global.css` overrides Shiki's theme colours with ink, comments in grey,
+  so red stays the only accent.
 - **Reading time** is computed from the raw entry body (`src/lib/reading-time.ts`), because Astro 7's
   default Markdown engine no longer runs remark plugins.
 - **ESLint** uses v10 with `eslint-plugin-astro`. `eslint-plugin-jsx-a11y` is not yet compatible with
