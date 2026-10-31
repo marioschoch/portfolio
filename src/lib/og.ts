@@ -1,7 +1,8 @@
 /**
  * Open Graph image renderer (1200×630 PNG), run at build time.
  * Satori turns a small element tree into SVG; resvg rasterises it to PNG.
- * Fonts are read from the locally installed @fontsource packages (Satori needs WOFF/TTF).
+ * Fonts are static Inter Tight instances in src/assets/fonts (Satori needs WOFF/TTF, not variable
+ * WOFF2), so link previews are set like the site: ink on paper, hairlines, one red.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -9,31 +10,20 @@ import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { site } from '@/data/site';
 
-const font = (pkg: string, weight: number) =>
-  readFileSync(
-    join(process.cwd(), `node_modules/@fontsource/${pkg}/files/${pkg}-latin-${weight}-normal.woff`),
-  );
+const font = (weight: number) =>
+  readFileSync(join(process.cwd(), `src/assets/fonts/inter-tight-${weight}.woff`));
 
 const fonts = [
-  {
-    name: 'Plex Sans',
-    data: font('ibm-plex-sans', 400),
-    weight: 400 as const,
-    style: 'normal' as const,
-  },
-  {
-    name: 'Plex Sans',
-    data: font('ibm-plex-sans', 600),
-    weight: 600 as const,
-    style: 'normal' as const,
-  },
+  { name: 'Inter Tight', data: font(400), weight: 400 as const, style: 'normal' as const },
+  { name: 'Inter Tight', data: font(500), weight: 500 as const, style: 'normal' as const },
 ];
 
-/** The site's footer colours: grey type on the oxblood field. */
+/** The site's light tokens (src/styles/global.css). */
 const C = {
-  bg: '#7d0c14',
-  fg: '#e2e2e2',
-  muted: '#d9b3b6',
+  bg: '#f2f1ec',
+  fg: '#111111',
+  muted: '#5e5d58',
+  accent: '#e8401f',
 };
 
 type Node = { type: string; props: Record<string, unknown> & { children?: unknown } };
@@ -54,6 +44,8 @@ export interface OgInput {
 
 export async function renderOg({ kicker, title, subtitle, specs = [] }: OgInput): Promise<Buffer> {
   const host = new URL(site.url).host;
+  const big = title.length <= 16;
+  const titleSize = big ? 136 : 80;
   const tree = h(
     'div',
     {
@@ -61,22 +53,17 @@ export async function renderOg({ kicker, title, subtitle, specs = [] }: OgInput)
       height: '100%',
       flexDirection: 'column',
       backgroundColor: C.bg,
-      padding: '56px 72px',
+      padding: '48px 56px',
       boxSizing: 'border-box',
-      fontFamily: 'Plex Sans',
+      fontFamily: 'Inter Tight',
       color: C.fg,
     },
     [
-      h(
-        'div',
-        {
-          width: '100%',
-          justifyContent: 'space-between',
-          fontSize: 24,
-          color: C.muted,
-        },
-        [h('div', {}, kicker), h('div', {}, host)],
-      ),
+      // Two columns, like the site's label column and content column.
+      h('div', { width: '100%', fontSize: 22, color: C.muted }, [
+        h('div', { width: '50%' }, kicker),
+        h('div', {}, host),
+      ]),
       h(
         'div',
         { flexDirection: 'column', flexGrow: 1, justifyContent: 'center', width: '100%' },
@@ -84,15 +71,15 @@ export async function renderOg({ kicker, title, subtitle, specs = [] }: OgInput)
           h(
             'div',
             {
-              fontSize: title.length > 32 ? 72 : 96,
-              fontWeight: 600,
-              lineHeight: 1,
-              letterSpacing: title.length > 32 ? -2.5 : -4,
+              fontSize: titleSize,
+              fontWeight: 500,
+              lineHeight: 0.92,
+              letterSpacing: titleSize * -0.045,
             },
             title,
           ),
           subtitle
-            ? h('div', { fontSize: 28, lineHeight: 1.4, color: C.muted, marginTop: 20 }, subtitle)
+            ? h('div', { fontSize: 30, lineHeight: 1.25, marginTop: 24, maxWidth: 820 }, subtitle)
             : null,
         ].filter(Boolean),
       ),
@@ -100,23 +87,25 @@ export async function renderOg({ kicker, title, subtitle, specs = [] }: OgInput)
         'div',
         {
           width: '100%',
+          borderTop: `1px solid ${C.fg}`,
+          paddingTop: 16,
           justifyContent: 'space-between',
-          alignItems: 'flex-end',
+          alignItems: 'flex-start',
         },
         [
           h(
             'div',
-            { gap: 40 },
+            { gap: 32 },
             specs
               .slice(0, 3)
               .map(([k, v]) =>
-                h('div', { flexDirection: 'column', gap: 6, maxWidth: 300 }, [
+                h('div', { flexDirection: 'column', gap: 4, width: 260 }, [
                   h('div', { fontSize: 18, color: C.muted }, k),
                   h('div', { fontSize: 22 }, v),
                 ]),
               ),
           ),
-          h('div', { fontSize: 26, fontWeight: 600 }, site.name),
+          h('div', { fontSize: 28, fontWeight: 500, color: C.accent }, site.name),
         ],
       ),
     ],

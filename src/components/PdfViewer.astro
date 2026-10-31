@@ -45,16 +45,17 @@ const strings = {
 
 <section
   aria-labelledby="pdf-heading"
+  class="grid-page gap-y-6 border-t border-rule pt-4"
   data-pdf-viewer
   data-src={src}
   data-strings={JSON.stringify(strings)}
 >
-  <div class="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
+  <div class="flex flex-col gap-6 lg:col-span-3">
     <div>
-      <h2 id="pdf-heading" class="heading">
+      <h2 id="pdf-heading" class="section-title">
         {t('pdf.heading')}
       </h2>
-      <p class="mt-3 label">{meta}</p>
+      <p class="mt-2 label">{meta}</p>
     </div>
     <div class="flex flex-wrap gap-2">
       <a href={src} download={fileName} class="btn btn-primary">
@@ -75,26 +76,26 @@ const strings = {
   </div>
 
   <div
-    class="flex flex-col bg-surface [&:fullscreen]:h-dvh"
+    class="flex min-w-0 flex-col bg-surface lg:col-span-9 lg:col-start-4 [&:fullscreen]:h-dvh"
     data-frame
     role="region"
     aria-label={`${t('pdf.viewer')}: ${title}`}
   >
     <div
-      class="flex flex-wrap items-center justify-between gap-2 bg-surface-2 p-2 text-small"
+      class="flex flex-wrap items-center justify-between gap-2 border-y border-rule bg-bg py-2 text-small"
       data-toolbar
     >
       <div class="flex items-center gap-1">
         <button
           type="button"
-          class="btn min-h-10 touch-manipulation bg-bg px-3 py-1.5 text-small"
+          class="btn min-h-10 min-w-10 touch-manipulation border-transparent px-2 text-small"
           data-prev
           aria-label={t('pdf.prev')}
           disabled
         >
           ‹
         </button>
-        <label class="flex items-center gap-1.5 px-1 tabular-nums">
+        <label class="flex items-center gap-2 px-2 tabular-nums">
           <span class="sr-only">{t('pdf.page')}</span>
           <input
             type="number"
@@ -102,7 +103,7 @@ const strings = {
             min="1"
             max={pages}
             value="1"
-            class="h-10 w-14 bg-bg px-2 text-center tabular-nums"
+            class="h-10 w-14 border border-rule bg-bg px-2 text-center tabular-nums"
             data-page
             disabled
           />
@@ -110,7 +111,7 @@ const strings = {
         </label>
         <button
           type="button"
-          class="btn min-h-10 touch-manipulation bg-bg px-3 py-1.5 text-small"
+          class="btn min-h-10 min-w-10 touch-manipulation border-transparent px-2 text-small"
           data-next
           aria-label={t('pdf.next')}
           disabled
@@ -121,7 +122,7 @@ const strings = {
       <div class="flex items-center gap-1">
         <button
           type="button"
-          class="btn min-h-10 touch-manipulation bg-bg px-3 py-1.5 text-small"
+          class="btn min-h-10 min-w-10 touch-manipulation border-transparent px-2 text-small"
           data-zoom-out
           aria-label={t('pdf.zoomOut')}
           disabled
@@ -130,7 +131,7 @@ const strings = {
         </button>
         <button
           type="button"
-          class="btn min-h-10 min-w-16 touch-manipulation bg-bg px-2 py-1.5 text-small tabular-nums"
+          class="btn min-h-10 min-w-16 touch-manipulation border-transparent px-2 text-small tabular-nums"
           data-fit
           aria-label={t('pdf.fit')}
           title={t('pdf.fit')}
@@ -140,7 +141,7 @@ const strings = {
         </button>
         <button
           type="button"
-          class="btn min-h-10 touch-manipulation bg-bg px-3 py-1.5 text-small"
+          class="btn min-h-10 min-w-10 touch-manipulation border-transparent px-2 text-small"
           data-zoom-in
           aria-label={t('pdf.zoomIn')}
           disabled
@@ -149,7 +150,7 @@ const strings = {
         </button>
         <button
           type="button"
-          class="btn min-h-10 touch-manipulation bg-bg px-3 py-1.5 text-small"
+          class="btn min-h-10 min-w-10 touch-manipulation border-transparent px-2 text-small"
           data-fullscreen
           aria-label={t('pdf.fullscreen')}
           title={t('pdf.fullscreen')}
@@ -167,7 +168,7 @@ const strings = {
     </div>
 
     <div
-      class="relative min-h-0 flex-1 overflow-auto overscroll-contain p-3 sm:p-6"
+      class="relative min-h-0 flex-1 overflow-auto overscroll-contain p-4 md:p-6"
       data-stage
       tabindex="0"
     >
@@ -177,11 +178,11 @@ const strings = {
           alt={`${title}, ${t('pdf.page')} 1`}
           widths={[480, 720, 900]}
           sizes="(min-width: 960px) 900px, 100vw"
-          class="block h-auto w-[56.25rem] max-w-full bg-white shadow-sm"
+          class="block h-auto w-[56.25rem] max-w-full bg-white"
           data-poster
         />
       </div>
-      <p class="mt-3 text-center label" data-status aria-live="polite"></p>
+      <p class="mt-2 label" data-status aria-live="polite"></p>
     </div>
   </div>
 </section>
@@ -250,7 +251,7 @@ const strings = {
       drawn.height = Math.floor(viewport.height * ratio);
       drawn.style.width = `${Math.floor(viewport.width)}px`;
       drawn.style.height = `${Math.floor(viewport.height)}px`;
-      drawn.className = 'block bg-white shadow-sm';
+      drawn.className = 'block bg-white';
       drawn.setAttribute('role', 'img');
       drawn.setAttribute('aria-label', `${strings.pageLabel} ${page}`);
 

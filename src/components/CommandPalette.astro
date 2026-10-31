@@ -44,9 +44,9 @@ const items = [
 <dialog
   id="command-palette"
   aria-label={t('palette.title')}
-  class="no-print m-0 mx-auto mt-[12vh] w-[calc(100%-2.5rem)] max-w-xl bg-surface p-0 text-fg shadow-2xl backdrop:bg-black/50"
+  class="no-print m-0 mx-auto mt-[12vh] w-[calc(100%-2rem)] max-w-xl border border-rule bg-bg p-0 text-fg backdrop:bg-bg/80"
 >
-  <div class="flex items-center gap-3 bg-surface-2 px-4">
+  <div class="flex items-center gap-4 border-b border-rule px-4">
     <svg
       width="14"
       height="14"
@@ -78,10 +78,10 @@ const items = [
     <kbd class="label shrink-0 font-sans">Esc</kbd>
   </div>
   <ul id="palette-results" role="listbox" class="max-h-[50vh] overflow-y-auto py-2"></ul>
-  <p class="hidden px-4 py-6 text-center text-muted" data-empty>
+  <p class="hidden px-4 py-6 text-muted" data-empty>
     {t('palette.empty')}
   </p>
-  <p class="bg-surface-2 px-4 py-2.5 label">{t('palette.hint')}</p>
+  <p class="border-t border-rule px-4 py-2 label">{t('palette.hint')}</p>
   <script type="application/json" data-palette-items set:html={JSON.stringify(items)} />
 </dialog>
 
@@ -133,7 +133,7 @@ const items = [
         if (item.group !== lastGroup) {
           lastGroup = item.group;
           const heading = document.createElement('li');
-          heading.className = 'label px-4 pt-3 pb-1';
+          heading.className = 'label px-4 pt-4 pb-1';
           heading.setAttribute('role', 'presentation');
           heading.textContent = item.group;
           list.append(heading);
@@ -143,7 +143,7 @@ const items = [
         li.setAttribute('role', 'option');
         li.setAttribute('aria-selected', String(i === active));
         li.className =
-          'mx-2 flex cursor-pointer items-baseline justify-between gap-4 px-3 py-2.5 aria-selected:bg-fg aria-selected:text-bg';
+          'mx-2 flex cursor-pointer items-baseline justify-between gap-4 px-2 py-2 aria-selected:bg-fg aria-selected:text-bg';
         const title = document.createElement('span');
         title.textContent = item.title;
         const hint = document.createElement('span');

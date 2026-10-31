@@ -1,6 +1,7 @@
 ---
 /**
- * Spec-sheet header block for a project: role, timeframe, team, tools, status, links.
+ * Spec sheet of a project: role, timeframe, team, status, tools, links, as label/value rows
+ * divided by hairlines (placed in the label column of the project page).
  * Rendered as a definition list for correct semantics.
  */
 import type { LocalizedProject } from '@/lib/content';
@@ -10,8 +11,9 @@ import StatusBadge from './StatusBadge.astro';
 interface Props {
   project: LocalizedProject;
   lang: Lang;
+  class?: string;
 }
-const { project, lang } = Astro.props;
+const { project, lang, class: className } = Astro.props;
 const t = useTranslations(lang);
 const { data } = project.entry;
 
@@ -27,14 +29,14 @@ const links = (
   .filter((l): l is { href: string; label: string } => Boolean(l.href));
 ---
 
-<dl class="grid grid-cols-2 gap-x-8 gap-y-8 bg-surface p-6 sm:grid-cols-3 sm:p-8 lg:grid-cols-6">
-  <div class="col-span-2 sm:col-span-1">
+<dl class:list={['border-t border-rule text-small', className]}>
+  <div class="spec-row">
     <dt class="label">{t('spec.role')}</dt>
-    <dd class="mt-1.5">{project.role}</dd>
+    <dd class="spec-value">{project.role}</dd>
   </div>
-  <div>
+  <div class="spec-row">
     <dt class="label">{t('spec.timeframe')}</dt>
-    <dd class="mt-1.5">
+    <dd class="spec-value">
       <time datetime={isoDate(data.timeframe.start)}>
         {formatMonth(data.timeframe.start, lang)}
       </time>
@@ -46,30 +48,30 @@ const links = (
       )}
     </dd>
   </div>
-  <div>
+  <div class="spec-row">
     <dt class="label">{t('spec.team')}</dt>
-    <dd class="mt-1.5">
+    <dd class="spec-value">
       {data.teamSize === 1 ? t('spec.teamSolo') : `${data.teamSize} ${t('spec.teamPeople')}`}
     </dd>
   </div>
-  <div>
+  <div class="spec-row">
     <dt class="label">{t('spec.status')}</dt>
-    <dd class="mt-1.5">
+    <dd class="spec-value">
       <StatusBadge status={data.status} lang={lang} />
     </dd>
   </div>
-  <div class="col-span-2">
+  <div class="spec-row">
     <dt class="label">{t('spec.tools')}</dt>
-    <dd class="mt-1.5">{project.tools.join(', ')}</dd>
+    <dd class="spec-value">{project.tools.join(', ')}</dd>
   </div>
   {links.length > 0 && (
-    <div class="col-span-2 sm:col-span-3 lg:col-span-6">
+    <div class="pt-4">
       <dt class="sr-only">{t('spec.links')}</dt>
       <dd>
-        <ul class="flex flex-wrap gap-2">
+        <ul class="flex flex-col gap-2">
           {links.map((l) => (
             <li>
-              <a href={l.href} class="btn bg-bg" rel="noopener">
+              <a href={l.href} class="link" rel="noopener">
                 {l.label}
                 <span aria-hidden="true">↗</span>
               </a>
@@ -80,3 +82,13 @@ const links = (
     </div>
   )}
 </dl>
+
+<style>
+  @reference '../styles/global.css';
+  .spec-row {
+    @apply grid grid-cols-3 gap-x-4 border-b border-rule py-2;
+  }
+  .spec-value {
+    @apply col-span-2 text-fg;
+  }
+</style>

@@ -38,19 +38,23 @@ const files = [
 ] as const;
 ---
 
-<section aria-labelledby="play-heading" class="grid gap-12 lg:grid-cols-12 lg:gap-8">
-  <div class="min-w-0 lg:col-span-7">
-    <h2 id="play-heading" class="mb-8 heading">
+<section
+  aria-labelledby="play-heading"
+  class="grid-page gap-y-6 border-t border-rule pt-4 lg:gap-y-0"
+>
+  <!-- Heading, game and notes are placed on the page grid directly. -->
+  <div class="contents">
+    <h2 id="play-heading" class="section-title lg:col-span-3">
       {t('numtrip.play')}
     </h2>
-    <div id="numtrip" class="@container" data-strings={JSON.stringify(strings)}>
-      <div class="flex items-center justify-between gap-4 bg-surface-2 py-2 pr-2 pl-4">
+    <div
+      id="numtrip"
+      class="@container min-w-0 lg:col-span-6 lg:col-start-4 lg:row-start-1"
+      data-strings={JSON.stringify(strings)}
+    >
+      <div class="flex items-center justify-between gap-4 border-y border-rule py-1 pl-4">
         <span class="font-mono text-small text-muted">NumTripFinal.py</span>
-        <button
-          type="button"
-          class="btn min-h-10 touch-manipulation bg-bg px-4 py-1.5 text-small"
-          data-restart
-        >
+        <button type="button" class="btn min-h-10 touch-manipulation px-4 text-small" data-restart>
           {t('numtrip.restart')}
         </button>
       </div>
@@ -70,31 +74,42 @@ const files = [
     </div>
   </div>
 
-  <aside class="lg:col-span-4 lg:col-start-9 lg:pt-[calc(var(--text-heading)*1.05+2rem)]">
-    <h3 class="text-lead font-semibold">{t('numtrip.howTo')}</h3>
-    <ol class="mt-4 list-decimal space-y-2 pl-5 marker:text-muted">
+  <aside class="lg:col-span-3 lg:col-start-10 lg:row-start-1">
+    <h3 class="border-t border-rule pt-2 text-lead font-medium lg:border-t-0 lg:pt-0">
+      {t('numtrip.howTo')}
+    </h3>
+    <ol class="mt-4 list-decimal space-y-2 pl-6 marker:tabular-nums">
       <li>{t('numtrip.rule1')}</li>
       <li>{t('numtrip.rule2')}</li>
       <li>{t('numtrip.rule3')}</li>
       <li>{t('numtrip.rule4')}</li>
     </ol>
     <p class="mt-6">{t('numtrip.input')}</p>
-    <p class="mt-4 text-small text-muted">{t('numtrip.quirk')}</p>
-    <p class="mt-4 text-small text-muted">{t('numtrip.port')}</p>
+    <p class="mt-4 label">{t('numtrip.quirk')}</p>
+    <p class="mt-4 label">{t('numtrip.port')}</p>
   </aside>
 </section>
 
-<section aria-labelledby="code-heading" data-code>
-  <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
-    <h2 id="code-heading" class="heading">
+<section
+  aria-labelledby="code-heading"
+  class="grid-page gap-y-6 border-t border-rule pt-4 lg:gap-y-0"
+  data-code
+>
+  <div class="flex flex-col items-start gap-4 lg:col-span-3 lg:row-span-2">
+    <h2 id="code-heading" class="section-title">
       {t('numtrip.code')}
     </h2>
-    <a href={repo} class="btn" rel="noopener">
+    <a href={repo} class="link text-small" rel="noopener">
       {t('numtrip.github')}
       <span aria-hidden="true">↗</span>
     </a>
   </div>
-  <div class="mb-4 hidden flex-wrap gap-2" role="tablist" aria-label={t('numtrip.tabs')} data-tabs>
+  <div
+    class="mb-4 hidden flex-wrap gap-x-6 border-b border-rule lg:col-span-9 lg:col-start-4 lg:row-start-1"
+    role="tablist"
+    aria-label={t('numtrip.tabs')}
+    data-tabs
+  >
     {files.map((file, i) => (
       <button
         type="button"
@@ -103,16 +118,16 @@ const files = [
         aria-controls={`panel-${file.id}`}
         aria-selected={i === 0 ? 'true' : 'false'}
         tabindex={i === 0 ? 0 : -1}
-        class="tab min-h-10 touch-manipulation px-3.5 py-1.5 text-small"
+        class="tab min-h-10 touch-manipulation py-2 text-small"
       >
         {file.tab}
       </button>
     ))}
   </div>
-  <div class="space-y-12">
+  <div class="min-w-0 space-y-12 lg:col-span-9 lg:col-start-4 lg:row-start-2">
     {files.map((file) => (
       <div id={`panel-${file.id}`} role="tabpanel" aria-labelledby={`tab-${file.id}`}>
-        <p class="mb-3 label">{file.note}</p>
+        <p class="mb-2 label">{file.note}</p>
         <Code code={file.code} lang={file.lang} themes={themes} />
       </div>
     ))}
@@ -161,15 +176,16 @@ const files = [
     caret-color: var(--c-fg);
   }
 
+  /* Tabs as plain text on a hairline; the open file is underlined in the ink. */
   .tab {
-    @apply bg-surface text-fg transition-[background-color,color,transform] duration-150 hover:bg-surface-2 active:scale-95;
+    @apply -mb-px border-b-2 border-transparent text-fg transition-colors duration-150 hover:border-rule;
   }
   .tab[aria-selected='true'] {
-    @apply bg-fg text-bg;
+    @apply border-fg font-medium;
   }
 
   [data-code] :global(.astro-code) {
-    @apply max-h-[40rem] p-5 font-mono text-small leading-relaxed;
+    @apply max-h-[40rem] p-4 font-mono text-small leading-relaxed;
   }
   /* Line numbers, so the write-up can refer to them. */
   [data-code] :global(.astro-code code) {

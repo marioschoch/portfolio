@@ -7,113 +7,114 @@
 @import 'tailwindcss';
 
 /* ==========================================================================
-   Design tokens — "the name as a monument", oxblood on grey.
-   Two values carry the page (grey ground, oxblood ink); the same red, as a solid
-   field with grey text, takes the "Now" band and the footer. No lines, no
-   gradients, no shadows at rest: surfaces are told apart by a step in tone.
-   Colours are CSS variables so light/dark mode is a single attribute switch
-   (`<html data-theme="dark">`, set before first paint in ThemeScript.astro).
+   Design tokens — International Typographic Style.
+   Paper, ink and one red. One grotesk (Inter Tight) in two weights, a 12-column
+   grid (4 on phones), one 8 px spacing unit, 1 px hairlines instead of boxes.
+   Every token lives here. Colours are CSS variables so light/dark mode is a single
+   attribute switch (`<html data-theme="dark">`, set before first paint in ThemeScript.astro).
+   Contrast (WCAG 2): ink on paper 16.7:1 · muted on paper 5.8:1 · accent on paper 3.6:1, so
+   accent text only from 24 px up (or as a non-text mark) · ink on accent 4.7:1.
    ========================================================================== */
 
 :root {
   color-scheme: light;
-  --c-bg: #e2e2e2;
-  --c-surface: #d6d6d6;
-  --c-surface-2: #cbcbcb;
-  --c-fg: #7d0c14; /* 8.1:1 on --c-bg */
-  --c-fg-soft: #7d0c14;
-  --c-muted: #6f3d42; /* 6.2:1 on --c-bg, 5.6:1 on --c-surface */
-  --c-accent: #7d0c14;
-  --c-accent-ink: #e2e2e2;
-  --c-accent-soft: #e9c9cb;
-  --c-field: #7d0c14;
-  --c-field-ink: #e2e2e2;
-  --c-field-muted: #d9b3b6; /* 5.2:1 on --c-field */
-  /* Kept for real tables, form fields and the game board, the only places with lines. */
-  --c-rule: #c4c4c4;
-  --c-rule-strong: #a9a9a9;
+  --c-bg: #f2f1ec; /* paper */
+  --c-fg: #111111; /* ink */
+  --c-muted: #5e5d58; /* secondary text, 5.8:1 on paper */
+  --c-rule: #111111; /* hairlines */
+  --c-surface: #e6e5df; /* functional fields only: code, terminal, Snake board, PDF stage */
+  --c-accent: #e8401f; /* the one accent: Swiss red */
+  --c-accent-ink: #111111; /* text on the accent, 4.7:1 */
+  --c-invert-muted: #9c9a93; /* muted text in the inverted section, 6.7:1 on ink */
+  --c-rule-strong: #b3b1a9; /* grid dots on the Snake board */
+
+  /* Grid: 4 columns on phones, 12 from 768 px. */
+  --cols: 4;
+  --margin: 1rem;
+  --gutter: 1rem;
+  /* Spacing: one unit, 8 px. Tailwind's even steps (2, 4, 6, 8, 12, 16, 24, 32) are its multiples. */
+  --unit: 0.5rem;
+  --header-h: 3.5rem;
+}
+
+@media (width >= 48rem) {
+  :root {
+    --cols: 12;
+    --margin: 2rem;
+    --gutter: 1.5rem;
+  }
 }
 
 /* Without JS (no data-theme attribute) the system preference still applies. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --c-bg: #1a1112;
-    --c-surface: #26191b;
-    --c-surface-2: #322123;
-    --c-fg: #eddcdd; /* 14:1 on --c-bg */
-    --c-fg-soft: #eddcdd;
-    --c-muted: #c4a2a5; /* 7.6:1 on --c-bg */
-    --c-accent: #ef8a90; /* 7.4:1 on --c-bg */
-    --c-accent-ink: #1a1112;
-    --c-accent-soft: #4a2226;
-    --c-field: #6e0b12;
-    --c-field-ink: #eddcdd;
-    --c-field-muted: #dcb0b4;
-    --c-rule: #3a2a2c;
-    --c-rule-strong: #4f3a3d;
+    --c-bg: #111111;
+    --c-fg: #f2f1ec;
+    --c-muted: #9c9a93; /* 6.7:1 on --c-bg */
+    --c-rule: #f2f1ec;
+    --c-surface: #1d1d1b;
+    --c-accent: #f04a2c; /* 5.1:1 on --c-bg */
+    --c-accent-ink: #111111;
+    --c-invert-muted: #5e5d58;
+    --c-rule-strong: #3d3c39;
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --c-bg: #1a1112;
-  --c-surface: #26191b;
-  --c-surface-2: #322123;
-  --c-fg: #eddcdd;
-  --c-fg-soft: #eddcdd;
-  --c-muted: #c4a2a5;
-  --c-accent: #ef8a90;
-  --c-accent-ink: #1a1112;
-  --c-accent-soft: #4a2226;
-  --c-field: #6e0b12;
-  --c-field-ink: #eddcdd;
-  --c-field-muted: #dcb0b4;
-  --c-rule: #3a2a2c;
-  --c-rule-strong: #4f3a3d;
+  --c-bg: #111111;
+  --c-fg: #f2f1ec;
+  --c-muted: #9c9a93;
+  --c-rule: #f2f1ec;
+  --c-surface: #1d1d1b;
+  --c-accent: #f04a2c;
+  --c-accent-ink: #111111;
+  --c-invert-muted: #5e5d58;
+  --c-rule-strong: #3d3c39;
 }
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 @theme inline {
   --color-bg: var(--c-bg);
-  --color-surface: var(--c-surface);
-  --color-surface-2: var(--c-surface-2);
   --color-fg: var(--c-fg);
-  --color-fg-soft: var(--c-fg-soft);
   --color-muted: var(--c-muted);
   --color-rule: var(--c-rule);
-  --color-rule-strong: var(--c-rule-strong);
+  --color-surface: var(--c-surface);
   --color-accent: var(--c-accent);
   --color-accent-ink: var(--c-accent-ink);
-  --color-accent-soft: var(--c-accent-soft);
-  --color-field: var(--c-field);
-  --color-field-ink: var(--c-field-ink);
-  --color-field-muted: var(--c-field-muted);
+  --color-invert-muted: var(--c-invert-muted);
 
-  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-sans: var(--font-inter-tight), Arial, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
 /*
- * Five type steps carry every page:
- *   small 14 · body 17 · lead 20–24 · heading 28–44 · display (page titles) / monument (the name)
+ * Type scale. Weights: 400 for text, 500 for headings, 600 only for <strong> in running text.
+ *   small 13 · body 17/24 · lead 20–28 · heading 24–40 · display-m 40–120 (project titles,
+ *   figures) · display 52 px–12vw (page titles) · hero (the name, the full grid width)
  */
 @theme {
   --container-page: 96rem;
-  --container-text: 40rem;
-  --text-small: 0.875rem;
-  --text-small--line-height: 1.45;
+  --container-text: 38rem;
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.4;
+  --text-small--letter-spacing: 0.01em;
   --text-body: 1.0625rem;
-  --text-body--line-height: 1.6;
-  --text-lead: clamp(1.25rem, 0.9rem + 0.9vw, 1.5rem);
-  --text-lead--line-height: 1.4;
-  --text-heading: clamp(1.625rem, 1rem + 1.6vw, 2.25rem);
-  --text-heading--line-height: 1.05;
-  --text-display: clamp(3.25rem, 1rem + 9vw, 10rem);
-  --text-display--line-height: 0.9;
-
-  --ease-out-strong: cubic-bezier(0.16, 1, 0.3, 1);
+  --text-body--line-height: 1.5rem;
+  --text-lead: clamp(1.25rem, 1rem + 0.75vw, 1.75rem);
+  --text-lead--line-height: 1.25;
+  --text-lead--letter-spacing: -0.01em;
+  --text-heading: clamp(1.5rem, 1.05rem + 1.4vw, 2.5rem);
+  --text-heading--line-height: 1.1;
+  --text-heading--letter-spacing: -0.02em;
+  --text-display-m: clamp(2.5rem, 0.75rem + 6vw, 7.5rem);
+  --text-display-m--line-height: 0.92;
+  --text-display-m--letter-spacing: -0.035em;
+  --text-display: clamp(3.25rem, 12vw, 13rem);
+  --text-display--line-height: 0.88;
+  --text-display--letter-spacing: -0.045em;
 }
 
 /* ==========================================================================
@@ -124,30 +125,35 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
-    scroll-padding-top: 5rem;
+    scroll-padding-top: calc(var(--header-h) + 1rem);
   }
 
   body {
     @apply bg-bg font-sans text-body text-fg antialiased;
-    font-feature-settings: 'kern', 'liga';
+    font-feature-settings: 'kern', 'liga', 'calt';
+    overflow-wrap: break-word;
   }
 
   ::selection {
-    background: var(--c-fg);
-    color: var(--c-bg);
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
   }
 
   :focus-visible {
-    outline: 2px solid var(--c-fg);
-    outline-offset: 3px;
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
   }
 
   h1,
   h2,
   h3,
   h4 {
-    @apply font-semibold text-balance;
-    letter-spacing: -0.02em;
+    @apply font-medium;
+  }
+
+  strong,
+  b {
+    @apply font-semibold;
   }
 
   a {
@@ -160,26 +166,68 @@
   }
 }
 
-/* Small secondary text in the text face: dates, meta lines, captions. */
+/* Small secondary text: dates, meta lines, captions, labels. */
 @utility label {
   @apply text-small text-muted;
 }
 
-/* Text link in the ink with an underline that thickens on hover. */
+/* Text link: ink with a hairline underline that turns red and heavier on hover. */
 @utility link {
-  @apply text-fg underline decoration-1 underline-offset-4 transition-[text-decoration-thickness] hover:decoration-2;
+  @apply text-fg underline decoration-current decoration-1 underline-offset-[0.2em] transition-[text-decoration-color] duration-150 hover:decoration-accent hover:decoration-2;
 }
 
-/* Page title: the monument at page scale. */
+/* Link without underline at rest; the red underline appears on hover. */
+@utility link-quiet {
+  @apply underline decoration-transparent decoration-2 underline-offset-[0.2em] transition-[text-decoration-color] duration-150 hover:decoration-accent;
+}
+
+/* Page title. */
 @utility display {
-  @apply text-display font-semibold;
-  letter-spacing: -0.05em;
+  @apply text-display font-medium;
 }
 
-/* Section heading. */
+/* Project titles, key figures. */
+@utility display-m {
+  @apply text-display-m font-medium;
+}
+
+/* Section and entry heading. */
 @utility heading {
-  @apply text-heading font-semibold;
-  letter-spacing: -0.03em;
+  @apply text-heading font-medium;
+}
+
+/* Section heading with its number (01, 02 … in page order) above it. The number is generated
+   content with empty alt text (`/ ''`), so screen readers skip it. */
+@utility section-title {
+  @apply heading;
+  &::before {
+    counter-increment: section;
+    content: counter(section, decimal-leading-zero);
+    content: counter(section, decimal-leading-zero) / '';
+    @apply mb-2 block text-small font-normal tabular-nums;
+  }
+}
+
+/* Section and row numbers (01, 02 …): small, tabular. */
+@utility num {
+  @apply text-small text-fg tabular-nums;
+}
+
+/* The page grid: 4 columns on phones, 12 from 768 px, one gutter. Children span all columns
+   until they are placed (`md:col-span-9 md:col-start-4` …, see the base rule below). */
+@utility grid-page {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+
+@layer base {
+  /* Zero specificity, so any col-span/col-start utility wins. Children of a `contents` wrapper
+     are grid items too. */
+  :where(.grid-page) > :where(*),
+  :where(.grid-page) > :where(.contents) > :where(*) {
+    grid-column: 1 / -1;
+  }
 }
 
 /* ==========================================================================
@@ -187,134 +235,114 @@
    ========================================================================== */
 
 @layer components {
-  /* One pair of tight outer margins on every page: 20 px on phones, 32 px from tablets up. */
+  /* The page margins: 16 px on phones, 32 px from 768 px. */
   .container-page {
-    @apply mx-auto w-full max-w-page px-5 sm:px-8;
+    @apply mx-auto w-full max-w-page;
+    padding-inline: var(--margin);
   }
 
   /* Vertical rhythm between sections (clearly larger than any gap inside one). */
   .section {
-    @apply py-24 sm:py-32 lg:py-40;
+    @apply py-16 md:py-24;
   }
 
-  /* Flat, square-cornered buttons. One fill per state, no outlines. */
+  /* The page's last section ends at the footer padding, not twice the gap. */
+  main > .section:last-child {
+    @apply pb-0;
+  }
+
+  /* Section numbers count per page (see the section-title utility). */
+  main {
+    counter-reset: section;
+  }
+
+  /* Square buttons with a hairline border. Hover inverts to ink. */
   .btn {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 bg-surface px-5 py-2.5 text-body leading-none font-medium text-fg transition-[background-color,color,transform] duration-150 select-none hover:text-bg active:scale-[0.97];
+    @apply inline-flex min-h-11 items-center justify-center gap-2 border border-fg bg-transparent px-4 py-2 text-small leading-none font-medium text-fg transition-colors duration-150 select-none hover:text-bg;
   }
   /* Important, so a background utility on a button (e.g. `btn bg-bg`) can't cancel the hover
      background while the hover text colour still applies, which made the label invisible. */
   .btn:hover:not(:disabled) {
-    @apply bg-fg!;
+    @apply border-fg! bg-fg!;
   }
   .btn:disabled {
     @apply cursor-default opacity-50 hover:text-fg;
   }
 
+  /* The one primary action of a page: the red field. */
   .btn-primary {
-    @apply bg-accent text-accent-ink hover:bg-fg hover:text-bg;
+    @apply border-accent bg-accent text-accent-ink;
   }
 
   /* Long-form content (project write-ups, updates). */
   .prose {
-    @apply max-w-text text-body leading-[1.65] text-fg;
+    @apply max-w-text text-body text-fg;
   }
   .prose > * + * {
-    margin-top: 1.1em;
+    margin-top: 1rem;
   }
   .prose h2 {
-    @apply mt-20 mb-5 heading;
+    @apply mt-16 mb-4 border-t border-rule pt-4 heading;
   }
   .prose h3 {
-    @apply mt-10 text-lead font-semibold;
+    @apply mt-8 text-lead font-medium;
   }
   .prose a {
     @apply link;
   }
-  .prose strong {
-    @apply font-semibold;
-  }
   .prose ul {
-    @apply list-disc pl-5 marker:text-muted;
+    @apply list-disc pl-6 marker:text-fg;
   }
   .prose ol {
-    @apply list-decimal pl-5 marker:text-muted;
+    @apply list-decimal pl-6 marker:text-fg marker:tabular-nums;
   }
   .prose li + li {
-    margin-top: 0.4em;
+    margin-top: 0.5rem;
   }
   .prose code:not(pre code) {
-    @apply bg-surface px-1 py-0.5 font-mono text-[0.88em];
+    @apply bg-surface px-1 font-mono text-[0.88em];
   }
   .prose pre {
-    @apply overflow-x-auto bg-surface p-5 font-mono text-small leading-relaxed;
+    @apply overflow-x-auto bg-surface p-4 font-mono text-small leading-relaxed;
   }
   .prose blockquote {
-    @apply pl-6 text-lead;
+    @apply border-l border-rule pl-6 text-lead;
   }
   .prose table {
     @apply w-full border-collapse text-small;
     font-variant-numeric: tabular-nums;
   }
   .prose th {
-    @apply border-b border-rule-strong py-2 pr-4 text-left font-semibold;
+    @apply border-b border-rule py-2 pr-4 text-left font-medium;
   }
   .prose td {
     @apply border-b border-rule py-2 pr-4 align-top;
   }
-  .prose figure {
-    @apply my-10;
+  .prose figure,
+  .prose p:has(> img) {
+    @apply my-12;
   }
   .prose figcaption {
     @apply mt-2 label;
   }
 }
 
-/* Shiki dual themes: switch code colours with the site theme. */
-:root[data-theme='dark'] .astro-code,
-:root[data-theme='dark'] .astro-code span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
+/* Code in one ink: no syntax colours, comments in the muted tone (Shiki's comment colour). */
+.astro-code {
+  color: var(--c-fg) !important;
+  background-color: var(--c-surface) !important;
+}
+.astro-code span {
+  color: inherit !important;
+  background-color: transparent !important;
+}
+.astro-code span[style*='#6A737D' i] {
+  color: var(--c-muted) !important;
 }
 
 /* ==========================================================================
-   Motion. Section parts rise into place once as they enter (BaseLayout script);
-   the `js` class is set before paint, so without JavaScript nothing is hidden.
+   Motion: colour and underline changes only (150 ms). Nothing moves.
    ========================================================================== */
-
-@media (prefers-reduced-motion: no-preference) {
-  .js [data-reveal] > * {
-    opacity: 0;
-    transform: translateY(24px);
-    transition:
-      opacity 700ms var(--ease-out-strong),
-      transform 900ms var(--ease-out-strong);
-  }
-  .js [data-reveal].is-in > * {
-    opacity: 1;
-    transform: none;
-  }
-  .js [data-reveal].is-in > :nth-child(2) {
-    transition-delay: 80ms;
-  }
-  .js [data-reveal].is-in > :nth-child(3) {
-    transition-delay: 160ms;
-  }
-  .js [data-reveal].is-in > :nth-child(4) {
-    transition-delay: 240ms;
-  }
-  .js [data-reveal].is-in > :nth-child(n + 5) {
-    transition-delay: 320ms;
-  }
-
-  @view-transition {
-    navigation: auto;
-  }
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 160ms;
-    animation-timing-function: ease-out;
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -340,16 +368,12 @@
   :root[data-theme='dark'] {
     color-scheme: light;
     --c-bg: #fff;
-    --c-surface: #fff;
-    --c-surface-2: #fff;
     --c-fg: #000;
-    --c-fg-soft: #1a1a1a;
     --c-muted: #555;
-    --c-rule: #ccc;
-    --c-rule-strong: #999;
-    --c-accent: #7d0c14;
-    --c-accent-ink: #fff;
-    --c-accent-soft: #fff;
+    --c-rule: #000;
+    --c-surface: #fff;
+    --c-accent: #e8401f;
+    --c-accent-ink: #000;
   }
   html {
     font-size: 10pt;
@@ -362,9 +386,5 @@
   }
   .print-break-avoid {
     break-inside: avoid;
-  }
-  .js [data-reveal] > * {
-    opacity: 1 !important;
-    transform: none !important;
   }
 }

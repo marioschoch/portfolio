@@ -15,21 +15,18 @@ const rendered = await Promise.all(
 );
 ---
 
-<ol class="space-y-16">
+<ol class="border-t border-rule">
   {rendered.map(({ u, Content }) => (
-    <li id={u.id} data-reveal>
+    <li id={u.id} class="border-b border-rule py-4">
       <p class="label">
         <time datetime={isoDate(u.data.date)}>{formatDate(u.data.date, lang)}</time>
       </p>
-      <Heading class="mt-2 text-lead leading-snug">
-        <a
-          href={`#${u.id}`}
-          class="underline decoration-transparent decoration-1 underline-offset-4 transition-colors hover:decoration-current"
-        >
+      <Heading class="mt-2 text-lead font-medium">
+        <a href={`#${u.id}`} class="link-quiet">
           {u.data.title}
         </a>
       </Heading>
-      <div class="prose mt-3">
+      <div class="prose mt-2">
         <Content />
       </div>
     </li>

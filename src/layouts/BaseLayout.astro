@@ -26,16 +26,13 @@ const t = useTranslations(lang);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <ThemeScript />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#e2e2e2" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1a1112" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f2f1ec" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
     <meta name="generator" content={Astro.generator} />
     <meta name="author" content={site.name} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <Font
-      cssVariable="--font-plex-sans"
-      preload={[{ weight: '400', style: 'normal', subset: 'latin' }]}
-    />
+    <Font cssVariable="--font-inter-tight" preload={[{ style: 'normal' }]} />
     <Font cssVariable="--font-plex-mono" />
     <Seo {...props} />
     <slot name="head" />
@@ -49,17 +46,13 @@ const t = useTranslations(lang);
     </a>
     <Header lang={lang} />
     {!translated && lang !== 'en' && (
-      <div class="no-print bg-surface">
-        <p class="container-page py-3 text-small" lang={locales[lang]}>
+      <div class="no-print border-b border-rule">
+        <p class="container-page py-2 text-small" lang={locales[lang]}>
           {t('fallback.notice')}
         </p>
       </div>
     )}
-    <main
-      id="main"
-      class="flex-1 pb-24 sm:pb-32 lg:pb-40 has-[>[data-flush]:last-child]:pb-0"
-      lang={translated ? undefined : locales.en}
-    >
+    <main id="main" class="flex-1 pb-16 md:pb-24" lang={translated ? undefined : locales.en}>
       <slot />
     </main>
     <Footer lang={lang} />
@@ -72,24 +65,5 @@ const t = useTranslations(lang);
         data-cf-beacon={JSON.stringify({ token: site.analyticsToken })}
       />
     )}
-    <script>
-      // Section parts rise into place once as they enter the viewport (see global.css).
-      const parts = document.querySelectorAll<HTMLElement>('[data-reveal]');
-      if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver(
-          (entries) => {
-            for (const entry of entries) {
-              if (!entry.isIntersecting) continue;
-              entry.target.classList.add('is-in');
-              io.unobserve(entry.target);
-            }
-          },
-          { rootMargin: '0px 0px -8% 0px' },
-        );
-        parts.forEach((el) => io.observe(el));
-      } else {
-        parts.forEach((el) => el.classList.add('is-in'));
-      }
-    </script>
   </body>
 </html>

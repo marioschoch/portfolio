@@ -9,29 +9,15 @@ const { label } = Astro.props;
 <button
   type="button"
   data-theme-toggle
-  class="flex size-10 items-center justify-center text-fg transition-transform hover:rotate-12 active:scale-90"
+  class="flex size-10 items-center justify-center text-fg transition-colors duration-150 hover:text-muted"
   aria-label={label}
   aria-pressed="false"
 >
-  <!-- Sun (shown in dark mode) -->
-  <svg class="hidden dark:block" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-    <circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
-    <path
-      d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1 1M12 12l1 1M3 13l1-1M12 4l1-1"
-      stroke="currentColor"
-      stroke-width="1.5"
-      stroke-linecap="round"
-    ></path>
-  </svg>
-  <!-- Moon (shown in light mode) -->
-  <svg class="block dark:hidden" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-    <path
-      d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7Z"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.5"
-      stroke-linejoin="round"
-    ></path>
+  <!-- A circle, half ink: the right half is filled in light mode, the left half in dark mode. -->
+  <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+    <circle cx="8" cy="8" r="6.75" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+    <path class="dark:hidden" d="M8 1.25a6.75 6.75 0 0 1 0 13.5Z" fill="currentColor"></path>
+    <path class="hidden dark:block" d="M8 1.25a6.75 6.75 0 0 0 0 13.5Z" fill="currentColor"></path>
   </svg>
 </button>
 

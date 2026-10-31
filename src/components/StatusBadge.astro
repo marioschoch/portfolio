@@ -1,5 +1,5 @@
 ---
-/** "In progress" / "Completed": in progress is marked with a filled dot in the ink. */
+/** "In progress" / "Completed": in progress is marked with a small filled square in the ink. */
 import { useTranslations, type Lang } from '@/i18n/utils';
 
 interface Props {
@@ -11,6 +11,6 @@ const t = useTranslations(lang);
 ---
 
 <span class="inline-flex items-center gap-2 text-small text-muted">
-  {status === 'in-progress' && <span class="size-2 rounded-full bg-fg" aria-hidden="true" />}
+  {status === 'in-progress' && <span class="size-2 bg-fg" aria-hidden="true" />}
   {t(`status.${status}`)}
 </span>

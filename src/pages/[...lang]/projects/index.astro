@@ -1,6 +1,6 @@
 ---
 /**
- * Projects index: grid of cards with filters by tag and status.
+ * Projects index: a numbered list of project rows with filters by tag and status.
  * Without JavaScript every project is shown; with JS the filters work instantly and are
  * reflected in the URL (?tag=embedded&status=completed) so filtered views can be shared.
  */
@@ -24,64 +24,59 @@ const usedTags = projectTags.filter((tag) => projects.some((p) => p.entry.data.t
   <PageHeader title={t('projects.title')} intro={t('projects.intro')} />
 
   <div class="container-page">
-    <div
-      class="no-print mb-16 hidden flex-col gap-6 bg-surface p-5 sm:flex-row sm:items-center sm:gap-10 sm:p-6"
-      data-filters
-    >
-      <fieldset class="flex flex-wrap items-center gap-2">
-        <legend class="label mb-2 w-full sm:float-left sm:mr-3 sm:mb-0 sm:w-auto">
-          {t('projects.filter.tag')}
-        </legend>
-        <button
-          type="button"
-          class="filter-btn"
-          data-filter="tag"
-          data-value=""
-          aria-pressed="true"
-        >
-          {t('projects.filter.all')}
-        </button>
-        {usedTags.map((tag) => (
+    <div class="no-print mb-12 hidden border-t border-rule pt-2 md:mb-16" data-filters>
+      <div class="w-full space-y-1">
+        <fieldset class="filter-row">
+          <legend class="filter-legend label">{t('projects.filter.tag')}</legend>
           <button
             type="button"
             class="filter-btn"
             data-filter="tag"
-            data-value={tag}
-            aria-pressed="false"
+            data-value=""
+            aria-pressed="true"
           >
-            {t(`tag.${tag}`)}
+            {t('projects.filter.all')}
           </button>
-        ))}
-      </fieldset>
-      <fieldset class="flex flex-wrap items-center gap-2">
-        <legend class="label mb-2 w-full sm:float-left sm:mr-3 sm:mb-0 sm:w-auto">
-          {t('projects.filter.status')}
-        </legend>
-        <button
-          type="button"
-          class="filter-btn"
-          data-filter="status"
-          data-value=""
-          aria-pressed="true"
-        >
-          {t('projects.filter.all')}
-        </button>
-        {projectStatuses.map((status) => (
+          {usedTags.map((tag) => (
+            <button
+              type="button"
+              class="filter-btn"
+              data-filter="tag"
+              data-value={tag}
+              aria-pressed="false"
+            >
+              {t(`tag.${tag}`)}
+            </button>
+          ))}
+        </fieldset>
+        <fieldset class="filter-row">
+          <legend class="filter-legend label">{t('projects.filter.status')}</legend>
           <button
             type="button"
             class="filter-btn"
             data-filter="status"
-            data-value={status}
-            aria-pressed="false"
+            data-value=""
+            aria-pressed="true"
           >
-            {t(`status.${status}`)}
+            {t('projects.filter.all')}
           </button>
-        ))}
-      </fieldset>
-      <p class="label sm:ml-auto" aria-live="polite" data-count></p>
+          {projectStatuses.map((status) => (
+            <button
+              type="button"
+              class="filter-btn"
+              data-filter="status"
+              data-value={status}
+              aria-pressed="false"
+            >
+              {t(`status.${status}`)}
+            </button>
+          ))}
+        </fieldset>
+        <p class="filter-row label tabular-nums" aria-live="polite" data-count></p>
+      </div>
     </div>
 
-    <div class="grid gap-x-8 gap-y-20 md:grid-cols-2">
+    <div class="border-t border-rule">
       {projects.map((project, i) => (
         <ProjectCard project={project} lang={lang} index={i} eager={i === 0} />
       ))}
@@ -94,11 +89,22 @@ const usedTags = projectTags.filter((tag) => projects.some((p) => p.entry.data.t
 
 <style>
   @reference '../../../styles/global.css';
+  /* Legends in the label column, options from column 4: 25% + a quarter gutter is exactly where
+     column 4 starts on the 12-column grid. A floated legend is laid out like any flex item. */
+  .filter-row {
+    @apply flex flex-wrap items-baseline;
+  }
+  .filter-legend {
+    @apply w-full py-2 md:float-left md:w-[calc(25%+var(--gutter)/4)];
+  }
+  p.filter-row {
+    @apply block py-2 md:pl-[calc(25%+var(--gutter)/4)];
+  }
   .filter-btn {
-    @apply min-h-10 bg-bg px-3.5 py-1.5 text-small text-fg transition-[background-color,color,transform] duration-150 hover:bg-surface-2 active:scale-95;
+    @apply mr-4 min-h-10 py-2 text-small text-fg underline decoration-transparent decoration-1 underline-offset-[6px] transition-[text-decoration-color] duration-150 hover:decoration-current;
   }
   .filter-btn[aria-pressed='true'] {
-    @apply bg-fg text-bg;
+    @apply font-medium decoration-fg decoration-2;
   }
 </style>
 

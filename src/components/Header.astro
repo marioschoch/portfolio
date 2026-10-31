@@ -1,6 +1,7 @@
 ---
 /**
- * Site header: wordmark, primary navigation, search (command palette), language and theme switch.
+ * Site header: wordmark, primary navigation, search (command palette), language and theme switch,
+ * on the page grid (name on column 1, navigation from column 7) with a hairline below.
  * On small screens the navigation collapses into a disclosure menu.
  */
 import { localizePath, stripLang, useTranslations, type Lang, type UiKey } from '@/i18n/utils';
@@ -24,26 +25,24 @@ const nav: { key: UiKey; path: string }[] = [
 const isActive = (path: string) => current.startsWith(path);
 ---
 
-<header class="no-print sticky top-0 z-40 bg-bg">
-  <div class="container-page flex h-16 items-center gap-6">
+<header class="no-print sticky top-0 z-40 border-b border-rule bg-bg">
+  <div class="container-page flex h-14 items-center justify-between gap-4 lg:grid-page">
     <a
       href={localizePath('/', lang)}
-      class="group flex items-baseline gap-3 text-[1.0625rem] font-semibold tracking-tight"
+      class="link-quiet flex items-baseline gap-2 text-small font-medium lg:col-span-6"
     >
       <span>{site.name}</span>
-      <span class="label hidden font-normal transition-colors group-hover:text-fg lg:inline">
-        ETH · D-MAVT
-      </span>
+      <span class="label hidden font-normal sm:inline">ETH · D-MAVT</span>
     </a>
 
-    <nav aria-label={t('nav.main')} class="ml-auto hidden lg:block">
-      <ul class="flex items-center gap-1">
+    <nav aria-label={t('nav.main')} class="hidden lg:col-span-4 lg:col-start-7 lg:block">
+      <ul class="flex items-center gap-6 text-small">
         {nav.map(({ key, path }) => (
           <li>
             <a
               href={localizePath(path, lang)}
               aria-current={isActive(path) ? 'page' : undefined}
-              class="nav-link px-2.5 py-1.5"
+              class="nav-link"
             >
               {t(key)}
             </a>
@@ -52,22 +51,17 @@ const isActive = (path: string) => current.startsWith(path);
       </ul>
     </nav>
 
-    <div class="-mr-2.5 ml-auto flex items-center gap-1 lg:ml-2">
+    <div class="-mr-2 flex items-center justify-end lg:col-span-2 lg:col-start-11">
       <button
         type="button"
         data-palette-open
-        class="flex h-10 items-center gap-2 px-2 text-muted transition-colors hover:text-fg"
+        class="flex h-10 items-center gap-2 px-2 text-fg transition-colors duration-150 hover:text-muted"
         aria-label={t('palette.open')}
         aria-keyshortcuts="Control+K Meta+K"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <circle cx="7" cy="7" r="4.75" stroke="currentColor" stroke-width="1.6"></circle>
-          <path
-            d="m10.5 10.5 3.5 3.5"
-            stroke="currentColor"
-            stroke-width="1.6"
-            stroke-linecap="round"
-          ></path>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"></circle>
+          <path d="m10.5 10.5 4 4" stroke="currentColor" stroke-width="1.5"></path>
         </svg>
         <kbd class="hidden font-sans text-small xl:inline">⌘K</kbd>
       </button>
@@ -81,32 +75,36 @@ const isActive = (path: string) => current.startsWith(path);
         aria-controls="mobile-nav"
         aria-label={t('nav.menu')}
       >
-        <svg width="20" height="20" viewBox="0 0 18 18" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
           <path
             class="menu-icon-open"
-            d="M2 5h14M2 9h14M2 13h14"
+            d="M1 5h16M1 9h16M1 13h16"
             stroke="currentColor"
-            stroke-width="1.6"
+            stroke-width="1.5"
           ></path>
           <path
             class="menu-icon-close hidden"
-            d="m4 4 10 10M14 4 4 14"
+            d="m3 3 12 12M15 3 3 15"
             stroke="currentColor"
-            stroke-width="1.6"
+            stroke-width="1.5"
           ></path>
         </svg>
       </button>
     </div>
   </div>
 
-  <nav id="mobile-nav" aria-label={t('nav.main')} class="hidden bg-bg lg:hidden">
-    <ul class="container-page pt-2 pb-8">
+  <nav
+    id="mobile-nav"
+    aria-label={t('nav.main')}
+    class="hidden border-t border-rule bg-bg lg:hidden"
+  >
+    <ul class="container-page pb-8">
       {nav.map(({ key, path }) => (
-        <li>
+        <li class="border-b border-rule">
           <a
             href={localizePath(path, lang)}
             aria-current={isActive(path) ? 'page' : undefined}
-            class="flex items-center justify-between py-2 heading text-fg aria-[current=page]:text-muted"
+            class="flex items-center justify-between py-4 heading text-fg aria-[current=page]:text-accent"
           >
             {t(key)}
             <span class="text-lead" aria-hidden="true">
@@ -121,12 +119,12 @@ const isActive = (path: string) => current.startsWith(path);
 
 <style>
   @reference '../styles/global.css';
-  /* Current page: a filled block in the ink. Hover: a step in tone. */
+  /* Hover: a hairline underline. Current page: the red underline. */
   .nav-link {
-    @apply relative block text-fg transition-colors hover:bg-surface;
+    @apply block py-1 text-fg underline decoration-transparent decoration-1 underline-offset-[6px] transition-[text-decoration-color] duration-150 hover:decoration-current;
   }
   .nav-link[aria-current='page'] {
-    @apply bg-fg text-bg hover:bg-fg;
+    @apply decoration-accent decoration-2;
   }
 </style>
 

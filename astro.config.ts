@@ -41,9 +41,35 @@ export default defineConfig({
   // Prefetch internal links on hover/focus for near-instant navigation.
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
 
-  // Self-hosted fonts from the locally installed @fontsource packages (no network at build time).
-  // Astro generates metric-matched fallback faces, which prevents layout shift while fonts load.
+  // Self-hosted fonts (no network at build time). Astro generates metric-matched fallback faces,
+  // which prevents layout shift while fonts load.
+  // Inter Tight (OFL, src/assets/fonts/OFL.txt) is a variable-weight subset (400–600, Latin plus the
+  // arrows and symbols the texts use), so → ↗ ≈ ⌘ don't fall back to a system font.
+  // IBM Plex Mono (@fontsource) is only used for code and the NumTrip terminal.
   fonts: [
+    {
+      name: 'Inter Tight',
+      cssVariable: '--font-inter-tight',
+      provider: fontProviders.local(),
+      options: {
+        variants: [
+          {
+            weight: '400 600',
+            style: 'normal',
+            src: ['./src/assets/fonts/inter-tight-roman.woff2'],
+          },
+          {
+            weight: '400 600',
+            style: 'italic',
+            src: ['./src/assets/fonts/inter-tight-italic.woff2'],
+          },
+        ],
+      },
+      fallbacks: ['Arial', 'sans-serif'],
+      display: 'swap',
+    },
+    // Only for the dev-only A4 CV layout (src/pages/[...lang]/cv/pdf.astro), so `npm run cv:pdf`
+    // keeps producing the same PDFs.
     {
       name: 'IBM Plex Sans',
       cssVariable: '--font-plex-sans',

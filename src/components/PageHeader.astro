@@ -1,5 +1,5 @@
 ---
-/** Page header: the title set as a monument, with the intro beneath it on the right half. */
+/** Page header: the title set huge, then a hairline with the intro from column 4. */
 interface Props {
   title: string;
   intro?: string;
@@ -7,8 +7,12 @@ interface Props {
 const { title, intro } = Astro.props;
 ---
 
-<header class="container-page pt-16 pb-20 sm:pt-24 sm:pb-28" data-reveal>
+<header class="container-page pt-12 pb-16 md:pt-16 md:pb-24">
   <h1 class="display">{title}</h1>
-  {intro && <p class="mt-10 max-w-[36ch] text-lead md:ml-[50%] md:max-w-[32ch]">{intro}</p>}
+  {intro && (
+    <div class="mt-8 grid-page border-t border-rule pt-4 md:mt-12">
+      <p class="max-w-[36ch] text-lead md:col-span-7 md:col-start-4">{intro}</p>
+    </div>
+  )}
   <slot />
 </header>

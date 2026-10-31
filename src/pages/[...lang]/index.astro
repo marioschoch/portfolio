@@ -1,7 +1,8 @@
 ---
 /**
- * Home: the name as a monument, rolling past over a square crop of the hero photo; then Now,
- * featured projects (big names with a fixed preview) and latest updates.
+ * Home: the name set across the full grid, the photo and links below it; then Now (the one
+ * inverted section), featured projects as a numbered index with the cover of the active row in
+ * the label column, and latest updates.
  */
 import { Image, Picture } from 'astro:assets';
 import ImagePlaceholder from '@/components/ImagePlaceholder.astro';
@@ -30,6 +31,8 @@ const featured = await getFeaturedProjects(lang, 3);
 const projectTitles = Object.fromEntries((await getProjects(lang)).map((p) => [p.id, p.title]));
 const latest = (await getUpdates()).slice(0, 3);
 const nowDate = new Date(`${now.updated}T00:00:00Z`);
+/** Row numbers of the project index: 01, 02 … */
+const pad = (i: number) => String(i + 1).padStart(2, '0');
 ---
 
 <BaseLayout
@@ -38,68 +41,38 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
   description={site.tagline[lang]}
   jsonLd={personJsonLd}
 >
-  <!-- Intro: the name rolls past like a group of riders; letters turn light as they cross the photo -->
-  <section class="hero flex min-h-[calc(100svh-4rem)] flex-col">
-    <div class="hero-stage">
-      <figure class="hero-photo">
+  <!-- Intro: the name across all twelve columns, then label column, tagline and photo -->
+  <section class="container-page overflow-x-clip pt-8 pb-16 md:pt-12 md:pb-24">
+    <div class="grid-page">
+      <figure class="row-start-3 mt-6 md:col-span-3 md:col-start-10 md:row-span-2 md:row-start-3 md:mt-4">
         <Picture
           src={heroImage}
           alt={t('home.photoAlt')}
-          widths={[600, 900, 1300, 1800]}
-          sizes="(min-width: 640px) 52vw, 112vw"
+          widths={[480, 720, 960, 1300]}
+          sizes="(min-width: 768px) 25vw, 100vw"
           formats={['avif', 'webp']}
           loading="eager"
           fetchpriority="high"
-          class="size-full object-cover object-[28%_50%]"
+          class="aspect-[4/5] w-full object-cover object-[28%_50%]"
         />
       </figure>
-      <!--
-        The moving line is set twice: in the paper colour, clipped to the photo, and in the ink
-        with the photo's square cut out of it, so the two never overlap. Both are decorative; the
-        h1 holds the name once, visually hidden.
-      -->
-      <div class="hero-line hero-line--light" aria-hidden="true">
-        <span class="hero-track">
-          {[0, 1, 2, 3].map(() => (
-            <span class="hero-word">
-              {site.name}
-              <span class="hero-dot" />
-            </span>
-          ))}
-        </span>
+      <h1 class="hero-name md:row-start-1">{site.name}</h1>
+      <div class="mt-6 border-t border-rule md:row-start-2" aria-hidden="true"></div>
+      <div class="mt-4 md:col-span-6 md:col-start-4 md:row-start-3">
+        <p class="max-w-[24ch] heading">{site.tagline[lang]}</p>
+        {site.availableFrom && (
+          <p class="mt-4">
+            {t('home.openTo')} {site.availableFrom[lang]}
+          </p>
+        )}
       </div>
-      <h1 class="sr-only">{site.name}</h1>
-      <div class="hero-line hero-line--ink" aria-hidden="true">
-        <span class="hero-track">
-          {[0, 1, 2, 3].map(() => (
-            <span class="hero-word">
-              {site.name}
-              <span class="hero-dot" />
-            </span>
-          ))}
-        </span>
-      </div>
-    </div>
-
-    <div class="container-page mt-12 text-center sm:mt-16" data-reveal>
-      <p class="mx-auto max-w-[24ch] text-heading leading-tight font-medium tracking-[-0.02em]">
-        {site.tagline[lang]}
-      </p>
-      {site.availableFrom && (
-        <p class="mt-4">
-          {t('home.openTo')} {site.availableFrom[lang]}
-        </p>
-      )}
-    </div>
-
-    <div class="container-page mt-auto flex flex-col-reverse gap-6 pt-14 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
-      <p class="label">
+      <p class="mt-6 label md:col-span-3 md:col-start-1 md:row-start-3 md:mt-4">
         {tx(site.location, lang)}
         <span aria-hidden="true"> · </span>
         {t('home.photoCredit')} Lars Meier
       </p>
-      <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <ul class="flex flex-wrap gap-x-5 gap-y-2">
+      <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4 md:col-span-6 md:col-start-4 md:row-start-4 md:mt-12 md:self-end">
+        <ul class="flex flex-wrap gap-x-6 gap-y-2">
           <li>
             <a href={site.links.github} class="link" rel="me noopener">
               GitHub ↗
@@ -114,51 +87,50 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
             <ObfuscatedEmail class="link" label={t('contact.email')} />
           </li>
         </ul>
-        <a href={localizePath('/cv/', lang)} class="btn btn-primary w-full sm:w-auto">
+        <a href={localizePath('/cv/', lang)} class="btn btn-primary">
           {t('nav.cv')} →
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Now: a band one tone darker than the page -->
-  <section class="bg-surface" aria-labelledby="now-heading" data-flush>
-    <div class="container-page grid gap-10 py-24 sm:py-32 md:grid-cols-12" data-reveal>
-      <div class="md:col-span-5">
-        <h2 id="now-heading" class="display">
+  <!-- Now: the one inverted section -->
+  <section class="bg-fg text-bg" aria-labelledby="now-heading">
+    <div class="container-page grid-page gap-y-6 py-12 md:py-16">
+      <div class="md:col-span-3">
+        <h2 id="now-heading" class="section-title">
           {t('home.now')}
         </h2>
-        <p class="mt-4 label">
+        <p class="mt-2 text-small text-invert-muted">
           {t('home.nowUpdated')}{' '}
           <time datetime={isoDate(nowDate)}>{formatDate(nowDate, lang)}</time>
         </p>
       </div>
-      <ul class="space-y-6 md:col-span-7 md:self-end">
+      <ul class="space-y-4 md:col-span-8 md:col-start-4 md:pt-6">
         {now.items.map((item) => (
-          <li class="max-w-[36ch] text-lead leading-[1.25] tracking-[-0.01em] md:text-heading md:leading-[1.2]">
-            {tx(item, lang)}
-          </li>
+          <li class="max-w-[32ch] heading">{tx(item, lang)}</li>
         ))}
       </ul>
     </div>
   </section>
 
-  <!-- Featured projects: the names are the index, a fixed frame shows the active one -->
+  <!-- Featured projects: a numbered index; the active row's cover sits in the label column -->
   {featured.length > 0 && (
     <section class="container-page section" aria-labelledby="featured-heading" data-work>
-      <div class="mb-12 flex items-baseline justify-between gap-4" data-reveal>
-        <h2 id="featured-heading" class="heading">
+      <div class="grid-page gap-y-8 border-t border-rule pt-4">
+        <h2 id="featured-heading" class="section-title md:col-span-3">
           {t('home.featured')}
         </h2>
-        <a href={localizePath('/projects/', lang)} class="link">
+        <a
+          href={localizePath('/projects/', lang)}
+          class="link justify-self-start md:col-span-3 md:col-start-10 md:row-start-1 md:mt-6"
+        >
           {t('home.allProjects')} →
         </a>
-      </div>
-      <div class="grid gap-10 lg:grid-cols-12">
-        <ol class="space-y-14 lg:col-span-8 lg:space-y-0">
+        <ol class="grid grid-cols-subgrid content-start self-start border-t border-rule md:col-span-9 md:col-start-4 md:row-start-2">
           {featured.map((p, i) => (
-            <li data-reveal>
-              <div class="mb-5 lg:hidden">
+            <li class="col-span-full grid grid-cols-subgrid border-b border-rule">
+              <div class="col-span-full pt-4 md:hidden">
                 {p.cover ? (
                   <Image
                     src={p.cover.src}
@@ -174,14 +146,15 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
               </div>
               <a
                 href={localizePath(`/projects/${p.id}/`, lang)}
-                class="work-row group block py-2.5"
+                class="work-row col-span-full grid grid-cols-subgrid gap-y-2 py-4 md:py-6"
                 data-work-row={i}
                 aria-current={i === 0 ? 'true' : undefined}
               >
-                <span class="block text-[clamp(2.25rem,1rem+4vw,4.5rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-balance">
-                  {p.title}
+                <span class="num pt-1 md:pt-2" aria-hidden="true">
+                  {pad(i)}
                 </span>
-                <span class="mt-2 block label">
+                <span class="work-title col-span-3 heading md:col-span-5">{p.title}</span>
+                <span class="col-span-3 col-start-2 label md:col-span-3 md:col-start-7 md:pt-2">
                   {p.entry.data.tags.map((tag) => t(`tag.${tag}`)).join(', ')} ·{' '}
                   {p.entry.data.timeframe.start.getUTCFullYear()}
                 </span>
@@ -189,15 +162,15 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
             </li>
           ))}
         </ol>
-        <div class="hidden lg:col-span-4 lg:block">
-          <div class="sticky top-[15vh] aspect-[4/5] bg-surface">
+        <div class="hidden md:col-span-3 md:col-start-1 md:row-start-2 md:block">
+          <div class="sticky top-[calc(var(--header-h)+2rem)] aspect-[4/5] bg-surface">
             {featured.map((p, i) =>
               p.entry.data.cover ? (
                 <Image
                   src={p.entry.data.cover.src}
                   alt=""
                   widths={[480, 720]}
-                  sizes="30vw"
+                  sizes="25vw"
                   class="work-frame absolute inset-0 size-full object-cover"
                   data-work-frame={i}
                   data-active={i === 0 ? 'true' : undefined}
@@ -217,30 +190,25 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
     </section>
   )}
 
-  <!-- Latest updates: a statement heading with the list pushed to the right -->
+  <!-- Latest updates: dates in the label column, the entries on the right -->
   {latest.length > 0 && (
     <section class="container-page section" aria-labelledby="latest-heading">
-      <div class="grid gap-12 lg:grid-cols-12">
-        <div class="lg:col-span-4" data-reveal>
-          <h2 id="latest-heading" class="heading">
-            {t('home.latest')}
-          </h2>
-        </div>
-        <ol class="space-y-10 lg:col-span-8 lg:col-start-5">
+      <div class="grid-page gap-y-8 border-t border-rule pt-4">
+        <h2 id="latest-heading" class="section-title md:col-span-3">
+          {t('home.latest')}
+        </h2>
+        <ol class="grid grid-cols-subgrid content-start self-start border-t border-rule md:col-span-9 md:col-start-4">
           {latest.map((u) => (
-            <li
-              class="group relative grid gap-1 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8"
-              data-reveal
-            >
-              <p class="label">
+            <li class="group relative col-span-full grid grid-cols-subgrid gap-y-1 border-b border-rule py-4 md:py-6">
+              <p class="col-span-full label md:col-span-3">
                 <time datetime={isoDate(u.data.date)}>{formatDate(u.data.date, lang)}</time>
                 <span class="block">{projectTitles[u.data.project.id]}</span>
               </p>
-              <div>
-                <h3 class="text-lead leading-snug font-semibold">
+              <div class="col-span-full md:col-span-6">
+                <h3 class="text-lead font-medium">
                   <a
                     href={localizePath(`/projects/${u.data.project.id}/`, lang) + `#${u.id}`}
-                    class="underline decoration-transparent decoration-2 underline-offset-4 transition-colors after:absolute after:inset-0 group-hover:decoration-current"
+                    class="link-quiet after:absolute after:inset-0"
                   >
                     {u.data.title}
                   </a>
@@ -258,132 +226,35 @@ const nowDate = new Date(`${now.updated}T00:00:00Z`);
 <style>
   @reference '../../styles/global.css';
 
-  .hero-stage {
-    --s: clamp(13rem, 21vw, 21rem);
-    --fs: clamp(7.5rem, 15vw, 14.5rem);
-    --pad: clamp(2.5rem, 7vh, 5rem);
-    position: relative;
-    height: calc(var(--s) + 2 * var(--pad));
-    overflow: hidden;
+  /* The name fills the content width: it measures 5.46 em (Inter Tight 500 at -0.045em tracking,
+     side bearings included) on one line, and "Schoch", the longer word, 3.04 em when it breaks
+     on phones. */
+  .hero-name {
+    --k: 3.04;
+    font-size: calc((min(100vw, 96rem) - 2 * var(--margin)) / var(--k));
+    line-height: 0.84;
+    letter-spacing: -0.045em;
+    margin-left: -0.055em;
   }
-  @media (max-width: 639px) {
-    .hero-stage {
-      --s: 46vw;
-      --fs: 34vw;
-      --pad: 13vw;
+  @media (width >= 48rem) {
+    .hero-name {
+      --k: 5.46;
+      white-space: nowrap;
     }
   }
 
-  .hero-photo {
-    position: absolute;
-    pointer-events: none;
-    top: var(--pad);
-    left: calc(50% - var(--s) / 2);
-    width: var(--s);
-    height: var(--s);
-    overflow: hidden;
-    background: var(--c-surface);
+  /* Index: the active row (pointer or focus, the first one by default) has its title in red. */
+  .work-row[aria-current='true'] .work-title {
+    @apply md:text-accent;
   }
-  .hero-photo :global(img) {
-    animation: hero-drift 24s ease-in-out infinite alternate;
-  }
-
-  .hero-line {
-    /* Edges of the photo inside the line's box. */
-    --l: calc(50% - var(--s) / 2);
-    --r: calc(50% + var(--s) / 2);
-    --t: calc(var(--fs) * 0.53 - var(--s) / 2);
-    --b: calc(var(--fs) * 0.53 + var(--s) / 2);
-    display: block;
-    position: absolute;
-    inset-inline: 0;
-    top: calc(var(--pad) + var(--s) / 2 - var(--fs) * 0.53);
-    height: var(--fs);
-    font-size: var(--fs);
-    line-height: 1;
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    white-space: nowrap;
-    color: var(--c-fg);
-    text-wrap: nowrap;
-  }
-  .hero-line--ink {
-    clip-path: polygon(
-      evenodd,
-      0 -50%,
-      100% -50%,
-      100% 150%,
-      0 150%,
-      0 -50%,
-      var(--l) var(--t),
-      var(--l) var(--b),
-      var(--r) var(--b),
-      var(--r) var(--t),
-      var(--l) var(--t)
-    );
-  }
-  .hero-line--light {
-    pointer-events: none;
-    color: var(--c-bg);
-    clip-path: polygon(var(--l) var(--t), var(--r) var(--t), var(--r) var(--b), var(--l) var(--b));
-  }
-
-  .hero-track {
-    display: inline-flex;
-    animation: hero-roll 70s linear infinite;
-  }
-  .hero-word {
-    display: inline-flex;
-    align-items: center;
-    padding-inline-end: 0.3em;
-  }
-  .hero-dot {
-    display: inline-block;
-    width: 0.24em;
-    height: 0.24em;
-    margin-inline-start: 0.3em;
-    border-radius: 50%;
-    background: currentColor;
-  }
-
-  @keyframes hero-roll {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
-  }
-  @keyframes hero-drift {
-    from {
-      transform: scale(1);
-    }
-    to {
-      transform: scale(1.08) translateX(-2%);
-    }
-  }
-
-  /* Reduced motion: the line stops with the name centred across the photo. */
-  @media (prefers-reduced-motion: reduce) {
-    .hero-track {
-      animation: none;
-      transform: translateX(calc(50vw - 37.5%));
-    }
-  }
-
-  /* Project index: the active row is in the ink, the others in the muted ink. */
-  .work-row {
-    @apply transition-colors duration-200 lg:text-muted;
-  }
-  .work-row[aria-current='true'] {
-    @apply lg:text-fg;
+  .work-title {
+    @apply transition-colors duration-150;
   }
   .work-frame {
-    opacity: 0;
-    transition: opacity 200ms ease-out;
+    visibility: hidden;
   }
   .work-frame[data-active='true'] {
-    opacity: 1;
+    visibility: visible;
   }
 </style>
 
