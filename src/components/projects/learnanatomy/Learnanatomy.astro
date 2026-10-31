@@ -1,0 +1,404 @@
+---
+/**
+ * The atlas on its project page: a figure with bones, nerves and muscles, cut by a red line.
+ * Below the line the muscles are shown, above it only bones and nerves; dragging the line up and
+ * down takes the muscles off or puts them back, dragging the figure turns it. The layers can be
+ * switched off. The model is a reduced copy of the atlas's own (scripts/anatomy-model.mjs).
+ *
+ * Until the stage comes near the viewport only poster.png is shown: the same figure, rendered
+ * with the same framing, cut at INITIAL_CUT. Then three.js (anatomy-viewer.ts) and the model are
+ * loaded; with Save-Data on, only after a tap. Without JavaScript or WebGL the poster stays.
+ */
+import { statSync } from 'node:fs';
+import { join } from 'node:path';
+import { Image } from 'astro:assets';
+import { useTranslations, type Lang } from '@/i18n/utils';
+import poster from './poster.png';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const src = '/models/learnanatomy.glb';
+const atlas = 'https://learnanatomy.org/';
+const zAnatomy = 'https://github.com/Z-Anatomy/Models-of-human-anatomy';
+const licence = 'https://creativecommons.org/licenses/by-sa/4.0/';
+/** Height of the cut on the poster and at load, in metres (just below the ribs). */
+const INITIAL_CUT = 1.15;
+/** Triangles in the model, and in the same structures in the atlas (anatomy-model.mjs output). */
+const TRIANGLES = 394_252;
+const SOURCE_TRIANGLES = 3_144_131;
+
+/**
+ * The three layers with their number of structures. Bones and muscles keep their colour in dark
+ * mode (the figure is an object, not UI); the nerves are the page's red.
+ */
+const layers = [
+  { id: 'bones', label: t('anatomy.bones'), count: 269, colour: '#f2f1ec' },
+  { id: 'nerves', label: t('anatomy.nerves'), count: 534, colour: 'var(--c-accent)' },
+  { id: 'muscles', label: t('anatomy.muscles'), count: 609, colour: '#8a8781' },
+];
+
+const number = new Intl.NumberFormat(lang);
+const mb = statSync(join(process.cwd(), 'public', src)).size / 1e6;
+const size = `${new Intl.NumberFormat(lang, { maximumFractionDigits: 1 }).format(mb)} MB`;
+const meta = `GLB ${size} · ${number.format(TRIANGLES)} ${t('anatomy.triangles')}`;
+const reduced = t('anatomy.reduced')
+  .replace('{from}', number.format(SOURCE_TRIANGLES))
+  .replace('{to}', number.format(TRIANGLES));
+
+const strings = {
+  loading: t('anatomy.loading'),
+  tap: t('anatomy.tap').replace('{size}', size),
+  error: t('anatomy.error'),
+  cutValue: t('anatomy.cutValue'),
+  meta,
+};
+---
+
+<section
+  aria-labelledby="anatomy-heading"
+  class="grid-page gap-y-6 border-t border-rule pt-4 lg:gap-y-0"
+  data-anatomy
+  data-src={src}
+  data-cut={INITIAL_CUT}
+  data-strings={JSON.stringify(strings)}
+>
+  <div class="flex flex-col items-start gap-6 lg:col-span-3">
+    <h2 id="anatomy-heading" class="section-title">
+      {t('anatomy.heading')}
+    </h2>
+    <p class="max-w-[36ch]">{t('anatomy.intro')}</p>
+    <fieldset class="w-full border-t border-rule" data-layers disabled>
+      <legend class="sr-only">{t('anatomy.layers')}</legend>
+      {layers.map((layer) => (
+        <label class="layer flex min-h-11 items-center gap-3 border-b border-rule py-2">
+          <input type="checkbox" class="peer sr-only" value={layer.id} checked />
+          <span
+            class="swatch size-3.5 shrink-0 border border-fg"
+            style={`--swatch: ${layer.colour}`}
+            data-swatch={layer.id}
+            aria-hidden="true"
+          />
+          <span class="flex-1">{layer.label}</span>
+          <span class="label tabular-nums">
+            {number.format(layer.count)}
+            <span class="sr-only">{t('anatomy.structures')}</span>
+          </span>
+        </label>
+      ))}
+    </fieldset>
+    <a href={atlas} class="btn" rel="noopener">
+      {t('anatomy.open')}
+      <span aria-hidden="true">↗</span>
+    </a>
+  </div>
+
+  <div class="min-w-0 lg:col-span-9 lg:col-start-4 lg:row-start-1">
+    <div
+      class="relative aspect-[4/5] max-h-[85svh] w-full overflow-hidden bg-surface select-none sm:aspect-[4/3]"
+      data-stage
+    >
+      <Image
+        src={poster}
+        alt={t('anatomy.posterAlt')}
+        widths={[354, 708]}
+        sizes="(min-width: 1024px) 360px, 50vw"
+        class="absolute inset-0 size-full object-contain"
+        loading="eager"
+        fetchpriority="high"
+        data-poster
+      />
+      <canvas
+        class="absolute inset-0 size-full cursor-grab touch-pan-y focus-visible:outline-offset-[-2px] active:cursor-grabbing"
+        tabindex="0"
+        aria-label={t('anatomy.stage')}
+        hidden
+        data-canvas
+      ></canvas>
+      <div
+        class="pointer-events-none absolute inset-y-0 left-0"
+        aria-hidden="true"
+        data-ruler
+      ></div>
+      <div class="absolute inset-x-0 top-0" hidden data-cut-line>
+        <div
+          class="absolute inset-x-0 -top-3 h-6 cursor-ns-resize touch-pan-y"
+          data-cut-drag
+          aria-hidden="true"
+        >
+          <div class="absolute inset-x-0 top-3 border-t border-accent"></div>
+        </div>
+        <div
+          class="absolute top-0 right-0 flex min-h-8 -translate-y-1/2 cursor-ns-resize touch-none items-center gap-2 bg-accent px-3 text-small text-accent-ink tabular-nums"
+          role="slider"
+          tabindex="0"
+          aria-label={t('anatomy.cut')}
+          aria-orientation="vertical"
+          aria-valuemin="0"
+          aria-valuemax="175"
+          data-cut-handle
+        >
+          <span aria-hidden="true">↕</span>
+          <span data-readout></span>
+        </div>
+      </div>
+    </div>
+    <p class="mt-2 label" aria-live="polite" data-status>
+      {meta}
+    </p>
+    <p class="mt-1 label">
+      {t('anatomy.model')}:{' '}
+      <a href={zAnatomy} class="link" rel="noopener">
+        Z-Anatomy
+      </a>
+      , BodyParts3D © DBCLS ·{' '}
+      <a href={licence} class="link" rel="noopener">
+        CC BY-SA 4.0
+      </a>
+      . {reduced}
+    </p>
+  </div>
+</section>
+
+<style>
+  @reference '../../../styles/global.css';
+
+  /* Checked: the swatch is filled with the layer's colour; off: an empty square. */
+  .layer {
+    @apply cursor-pointer;
+  }
+  .layer:has(:checked) .swatch {
+    background: var(--swatch);
+  }
+  /* Off: a struck-through empty square and muted text (the bone colour is close to the paper). */
+  .layer:not(:has(:checked)) {
+    @apply text-muted;
+  }
+  .layer:not(:has(:checked)) .swatch {
+    @apply relative border-muted;
+  }
+  .layer:not(:has(:checked)) .swatch::after {
+    content: '';
+    @apply absolute inset-x-[-2px] top-1/2 -rotate-45 border-t border-muted;
+  }
+  .layer:has(:focus-visible) {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
+  }
+  [data-layers]:disabled .layer {
+    @apply cursor-default;
+  }
+  [data-layers]:disabled .layer > :not(.swatch) {
+    @apply text-muted;
+  }
+
+  /* Ruler on the left edge: a tick every 10 cm, a number every 50 cm. */
+  [data-ruler] :global(span) {
+    @apply absolute left-0 w-2 border-t border-fg;
+  }
+  [data-ruler] :global(span[data-cm]) {
+    @apply w-4;
+  }
+  [data-ruler] :global(span[data-cm])::after {
+    content: attr(data-cm);
+    @apply absolute top-0 left-5 -translate-y-1/2 text-small text-muted tabular-nums;
+  }
+</style>
+
+<script>
+  import type { AnatomyViewer, Layer } from './anatomy-viewer';
+
+  /** Turning speed when idle (radians per second) and per dragged pixel. */
+  const SPIN = 0.2;
+  const DRAG = 0.01;
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-anatomy]')) {
+    const strings = JSON.parse(root.dataset.strings ?? '{}') as Record<string, string>;
+    const stage = root.querySelector<HTMLElement>('[data-stage]')!;
+    const canvas = root.querySelector<HTMLCanvasElement>('[data-canvas]')!;
+    const poster = root.querySelector<HTMLElement>('[data-poster]')!;
+    const ruler = root.querySelector<HTMLElement>('[data-ruler]')!;
+    const line = root.querySelector<HTMLElement>('[data-cut-line]')!;
+    const drag = root.querySelector<HTMLElement>('[data-cut-drag]')!;
+    const handle = root.querySelector<HTMLElement>('[data-cut-handle]')!;
+    const readout = root.querySelector<HTMLElement>('[data-readout]')!;
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const fieldset = root.querySelector<HTMLFieldSetElement>('[data-layers]')!;
+
+    let viewer: AnatomyViewer | undefined;
+    let cut = Number(root.dataset.cut);
+    let yaw = 0;
+    let spinning = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let visible = true;
+
+    const colours = () =>
+      Object.fromEntries(
+        [...root.querySelectorAll<HTMLElement>('[data-swatch]')].map((swatch) => [
+          swatch.dataset.swatch,
+          getComputedStyle(swatch).getPropertyValue('--swatch').trim(),
+        ]),
+      ) as Record<Layer, string>;
+
+    /** Places the ruler and the cut line where the model's heights are on screen. */
+    const layout = () => {
+      if (!viewer) return;
+      const ticks = ruler.children;
+      for (let cm = 0, i = 0; cm <= viewer.height * 100; cm += 10, i++) {
+        let tick = ticks[i] as HTMLElement | undefined;
+        if (!tick) {
+          tick = ruler.appendChild(document.createElement('span'));
+          if (cm % 50 === 0) tick.dataset.cm = String(cm);
+        }
+        tick.style.top = `${viewer.toScreen(cm / 100)}px`;
+      }
+      line.style.transform = `translateY(${viewer.toScreen(cut)}px)`;
+    };
+
+    const setCut = (y: number) => {
+      if (!viewer) return;
+      cut = Math.min(Math.max(y, 0), viewer.height);
+      const cm = Math.round(cut * 100);
+      viewer.setCut(cut);
+      readout.textContent = `${cm} cm`;
+      handle.setAttribute('aria-valuenow', String(cm));
+      handle.setAttribute('aria-valuemax', String(Math.round(viewer.height * 100)));
+      handle.setAttribute('aria-valuetext', strings.cutValue!.replace('{cm}', String(cm)));
+      line.style.transform = `translateY(${viewer.toScreen(cut)}px)`;
+    };
+
+    // Turns slowly on its own until the visitor turns it (never with reduced motion).
+    const stopSpin = () => (spinning = false);
+    let last = 0;
+    const spin = (now: number) => {
+      if (!spinning || !viewer) return;
+      if (visible && last) viewer.setYaw((yaw += (SPIN * (now - last)) / 1000));
+      last = visible ? now : 0;
+      requestAnimationFrame(spin);
+    };
+
+    let started = false;
+    const start = async () => {
+      if (started) return;
+      started = true;
+      status.textContent = strings.loading!;
+      canvas.hidden = false;
+      try {
+        const { createAnatomyViewer } = await import('./anatomy-viewer');
+        viewer = await createAnatomyViewer(canvas, root.dataset.src!);
+      } catch {
+        canvas.hidden = true;
+        status.textContent = strings.error!;
+        return;
+      }
+      viewer.setColours(colours());
+      setCut(cut);
+      layout();
+      line.hidden = false;
+      fieldset.disabled = false;
+      status.textContent = strings.meta!;
+      requestAnimationFrame(() => (poster.hidden = true));
+      setTimeout(() => requestAnimationFrame(spin), 1200);
+    };
+
+    // Load when the stage comes near the viewport, unless the visitor asked to save data.
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+      ?.saveData;
+    if (saveData) status.textContent = strings.tap!;
+    else {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            observer.disconnect();
+            void start();
+          }
+        },
+        { rootMargin: '200px 0px' },
+      );
+      observer.observe(stage);
+    }
+    stage.addEventListener('pointerdown', () => void start(), { once: true });
+    // Only spin while the stage is on screen.
+    new IntersectionObserver(
+      (entries) => (visible = entries.some((e) => e.isIntersecting)),
+    ).observe(stage);
+
+    new ResizeObserver(() => {
+      viewer?.resize();
+      layout();
+    }).observe(stage);
+
+    // Colours follow the theme (the accent is a little brighter in dark mode).
+    const recolour = () => viewer?.setColours(colours());
+    new MutationObserver(recolour).observe(document.documentElement, {
+      attributeFilter: ['data-theme'],
+    });
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', recolour);
+
+    fieldset.addEventListener('change', (e) => {
+      const input = e.target as HTMLInputElement;
+      viewer?.setVisible(input.value as Layer, input.checked);
+      // The line only cuts the muscles.
+      if (input.value === 'muscles') line.hidden = !input.checked;
+    });
+
+    // Turning: drag sideways on the figure (vertical drags still scroll on touch screens).
+    let turnFrom: number | undefined;
+    canvas.addEventListener('pointerdown', (e) => {
+      turnFrom = e.clientX;
+      canvas.setPointerCapture(e.pointerId);
+      stopSpin();
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (turnFrom === undefined || !viewer) return;
+      viewer.setYaw((yaw += (e.clientX - turnFrom) * DRAG));
+      turnFrom = e.clientX;
+    });
+    const endTurn = () => (turnFrom = undefined);
+    canvas.addEventListener('pointerup', endTurn);
+    canvas.addEventListener('pointercancel', endTurn);
+    canvas.addEventListener('keydown', (e) => {
+      const step = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
+      if (!step || !viewer) return;
+      e.preventDefault();
+      stopSpin();
+      viewer.setYaw((yaw += (step * Math.PI) / 12));
+    });
+
+    // Cutting: drag the line or its handle.
+    let cutting = false;
+    for (const target of [drag, handle]) {
+      target.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        cutting = true;
+        target.setPointerCapture(e.pointerId);
+      });
+      target.addEventListener('pointermove', (e) => {
+        if (!cutting || !viewer) return;
+        setCut(viewer.fromScreen(e.clientY - stage.getBoundingClientRect().top));
+      });
+      target.addEventListener('pointerup', () => (cutting = false));
+      target.addEventListener('pointercancel', () => (cutting = false));
+    }
+    handle.addEventListener('keydown', (e) => {
+      if (!viewer) return;
+      const cm = (
+        {
+          ArrowUp: 2,
+          ArrowRight: 2,
+          ArrowDown: -2,
+          ArrowLeft: -2,
+          PageUp: 10,
+          PageDown: -10,
+          Home: -1000,
+          End: 1000,
+        } as Record<string, number>
+      )[e.key];
+      if (!cm) return;
+      e.preventDefault();
+      setCut(cut + cm / 100);
+    });
+  }
+</script>

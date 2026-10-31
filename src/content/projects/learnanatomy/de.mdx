@@ -1,0 +1,34 @@
+---
+title: '3D-Anatomieatlas: learnanatomy.org'
+summary: Ein kostenloser 3D-Anatomieatlas für Medizinstudierende, der im Browser läuft. 3873 Strukturen mit lateinischen und englischen Namen ein- und ausblenden, schneiden und abfragen. Ohne Anmeldung, ohne Tracking.
+role: 'Konzept und Entwicklung'
+coverAlt: Oberkörper der 3D-Figur, Schädel, Rippen und rote Nerven über einem Schnitt, graue Muskeln darunter
+keyFigureLabels:
+  - Strukturen in 3D
+  - Körpersysteme, jedes eine Ebene
+  - 'Quiz-Modi: finden, auswählen, benennen'
+  - Anmeldungen, Tracker oder Server
+---
+
+{/* TODO: Entwurf aus dem learnanatomy.org-Repository (README, ARCHITECTURE.md). Fakten prüfen und in eigene Worte fassen. */}
+
+## Was es ist
+
+learnanatomy.org ist ein kostenloser 3D-Anatomieatlas für Medizinstudierende. Er läuft im Browser, ohne Installation und ohne Konto. Neun Körpersysteme sind Ebenen, die sich ein- und ausblenden, durchsichtig machen oder als Röntgenbild zeigen lassen: Skelett, Muskeln, Muskelansätze, Gelenke, Organe, Herz und Gefässe, lymphatische Organe, Nervensystem und die Regionen der Haut. Jede Struktur trägt ihren lateinischen und englischen Namen nach der Terminologia Anatomica, die Oberfläche ist auf Deutsch und Englisch. Der Atlas ist zum Lernen gedacht, nicht für die Diagnostik.
+
+## Was man damit machen kann
+
+- Auf Latein, Englisch und mit Synonymen suchen oder den Strukturbaum durchgehen. Das Infofeld zeigt eine kurze Definition aus Wikipedia, als ungeprüft markiert, bis ein Mensch sie kontrolliert hat.
+- Eine Struktur isolieren, allein oder mit ihrer Umgebung, den Körper mit Sagittal-, Frontal- und Transversalebenen schneiden oder ihn in einer Explosionsansicht auseinanderziehen.
+- Sich selbst abfragen: eine Struktur in 3D finden, ihren Namen aus einer Liste wählen oder ihn eintippen (kleine Tippfehler werden akzeptiert). Verteiltes Wiederholen bringt die falsch beantworteten zurück.
+- Eine Ansicht teilen: Der Link enthält die Ebenen, die Auswahl, die Schnittebenen und die Kamera.
+
+## Wie es funktioniert
+
+Die Anatomie stammt aus Z-Anatomy, einem offenen 3D-Atlas auf der Grundlage von BodyParts3D, beide unter CC-BY-SA-Lizenzen. Die Blender-Datei enthält rund 7000 Objekte. Eine Asset-Pipeline startet Blender ohne Fenster, exportiert jedes Körpersystem, rechnet es in die Koordinaten des Atlas um (Meter, oben ist oben, der Körper schaut nach vorn, links und rechts wie beim Menschen) und prüft, dass jede linke Struktur auch links liegt. Danach vereinfachen, quantisieren und komprimieren glTF Transform und meshoptimizer die Netze zu einer GLB-Datei pro System. Bei einem Fehler in Ausrichtung oder Seite bricht der Build ab.
+
+Die Ansicht ist mit React und three.js gebaut. Jedes Körpersystem wird als ein gebündeltes Netz gezeichnet, so brauchen Tausende von Strukturen nur wenige Draw Calls. Die Website ist statisch und liegt auf Cloudflare Pages, dazu kommen rund 6000 Seiten für Suchmaschinen, eine pro Struktur. Unit- und Komponententests laufen mit Vitest, End-to-End-Tests mit Playwright in Desktop- und Handygrösse.
+
+## Das Modell auf dieser Seite
+
+Die Figur oben ist eine verkleinerte Kopie von drei Systemen des Atlas: 269 Knochen, 534 Strukturen des Nervensystems und 609 Muskeln. Jede Ebene ist zu einem Netz zusammengefügt und auf ein Achtel ihrer Dreiecke vereinfacht. So werden die drei Systeme von 17,5 MB auf 2,8 MB kleiner. Die rote Linie ist eine Schnittebene durch die Muskeln.

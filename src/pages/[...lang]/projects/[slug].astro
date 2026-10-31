@@ -18,6 +18,8 @@ import Timeline from '@/components/Timeline.astro';
 import ImagePlaceholder from '@/components/ImagePlaceholder.astro';
 import Numtrip from '@/components/projects/numtrip/Numtrip.astro';
 import Maturarbeit from '@/components/projects/maturarbeit/Maturarbeit.astro';
+import Learnanatomy from '@/components/projects/learnanatomy/Learnanatomy.astro';
+import DeliveryRobot from '@/components/projects/delivery-robot/DeliveryRobot.astro';
 import { getCollection } from 'astro:content';
 import { getProjectUpdates, localizeProject } from '@/lib/content';
 import { site } from '@/data/site';
@@ -51,7 +53,12 @@ const { data } = entry;
 const { Content } = await render(project.translation ?? entry);
 const updates = await getProjectUpdates(entry.id);
 /** Interactive sections per project slug, shown between the spec sheet and the write-up. */
-const showcases: Record<string, typeof Numtrip> = { numtrip: Numtrip, maturarbeit: Maturarbeit };
+const showcases: Record<string, typeof Numtrip> = {
+  numtrip: Numtrip,
+  maturarbeit: Maturarbeit,
+  learnanatomy: Learnanatomy,
+  'delivery-robot': DeliveryRobot,
+};
 const Showcase = showcases[entry.id];
 
 const jsonLd = {
@@ -165,7 +172,7 @@ const jsonLd = {
     {(data.gallery.length > 0 || data.model) && (
       <div class="container-page mt-16 space-y-16 md:mt-24 md:space-y-24">
         <Gallery images={data.gallery} lang={lang} />
-        {data.model && <ModelViewer {...data.model} lang={lang} />}
+        {data.model && <ModelViewer models={[data.model]} lang={lang} />}
       </div>
     )}
   </article>

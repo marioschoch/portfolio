@@ -170,6 +170,19 @@ It appears in the project's log and on the home page (latest three).
 The viewer only downloads the model and the viewer library when a visitor clicks "Load 3D model", so it
 never slows down the page.
 
+**From STEP files:** `scripts/step-to-glb.py` converts a STEP export into a GLB in the site's colours (printed
+parts grey, chosen solids red). It needs Python with build123d, in a venv that git ignores:
+
+```bash
+python3 -m venv .venv-cad && .venv-cad/bin/pip install build123d trimesh
+.venv-cad/bin/python scripts/step-to-glb.py part.step public/models/part.glb --list    # shows the solids
+.venv-cad/bin/python scripts/step-to-glb.py part.step public/models/part.glb --red 3,5 # solids 3 and 5 in red
+```
+
+**Several parts:** a project with more than one model registers a showcase that passes a list to
+`ModelViewer` (see `src/components/projects/delivery-robot/DeliveryRobot.astro`); the parts are listed
+next to the viewer.
+
 ## Translations (EN/DE)
 
 - UI texts (navigation, labels, buttons) are in `src/i18n/ui.ts`.
@@ -263,6 +276,12 @@ are removed; nothing else on the server is touched.
   port 2121 (port 22 is firewalled), so the deploy uses SFTP to `venus.kreativmedia.ch:2121` with an SSH key.
 - **No page transitions or scroll animations:** every page is a normal page load, without Astro's
   `<ClientRouter>` or View Transitions. Prefetching on hover keeps navigation fast.
+- **Anatomy model** (`public/models/learnanatomy.glb`, the learnanatomy project): a reduced copy of the
+  learnanatomy.org atlas's bones, nerves and muscles, made by `node scripts/anatomy-model.mjs <atlas repo>`
+  from that repository's built assets. The page draws it with three.js
+  (`src/components/projects/learnanatomy/`); `poster.png` there is a render with the same framing, and the
+  structure counts in `Learnanatomy.astro` come from the script's output. The model is CC BY-SA 4.0 (credit on
+  the page).
 - **Code blocks** are monochrome: `global.css` overrides Shiki's theme colours with ink, comments in grey,
   so red stays the only accent.
 - **Reading time** is computed from the raw entry body (`src/lib/reading-time.ts`), because Astro 7's

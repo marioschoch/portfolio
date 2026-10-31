@@ -69,6 +69,7 @@ const en = {
   'project.model': '3D model',
   'project.modelLoad': 'Load interactive 3D model',
   'project.modelHint': 'Drag to rotate · scroll or pinch to zoom',
+  'project.modelParts': 'Parts',
   'project.log': 'Project log',
   'project.logEmpty': 'No updates yet.',
   'project.back': 'All projects',
@@ -187,6 +188,36 @@ const en = {
   'pdf.exitFullscreen': 'Exit full screen',
   'pdf.loading': 'Loading document…',
   'pdf.error': 'The reader could not load the document. You can still open or download the PDF.',
+  'anatomy.heading': 'Layers',
+  'anatomy.intro':
+    'A reduced copy of the atlas model. Drag the red line to take the muscles off or put them back, and drag the body sideways to turn it.',
+  'anatomy.layers': 'Layers shown',
+  'anatomy.bones': 'Bones',
+  'anatomy.nerves': 'Nerves',
+  'anatomy.muscles': 'Muscles',
+  'anatomy.structures': 'structures',
+  'anatomy.open': 'Open the full atlas',
+  'anatomy.posterAlt':
+    'Front view of the 3D figure: skeleton and red nerves above the waist, grey muscles below it',
+  'anatomy.stage': '3D figure. Drag sideways, or use the left and right arrow keys, to turn it.',
+  'anatomy.cut': 'Height of the cut',
+  'anatomy.cutValue': 'Muscles up to {cm} cm',
+  'anatomy.loading': 'Loading the 3D model…',
+  'anatomy.tap': 'Tap the figure to load the 3D model ({size}).',
+  'anatomy.error':
+    'The 3D model could not be shown in this browser. The full atlas is at learnanatomy.org.',
+  'anatomy.triangles': 'triangles',
+  'anatomy.model': 'Model',
+  'anatomy.reduced': 'Reduced for this page from {from} to {to} triangles, same licence.',
+  'robot.shooter': 'Shooter V3.5',
+  'robot.shooterAlt':
+    'Shooter V3.5: housing, tube and holder in grey, the half gear and the toothed slider in red',
+  'robot.shooterNote':
+    'In red: the half gear and the toothed slider. The gear pulls the slider back against the springs; where its teeth end, it lets go and the slider shoots the parcel. 221 × 90 × 48 mm.',
+  'robot.funnel': 'Funnel V03',
+  'robot.funnelAlt': 'Funnel V03, the hopper that catches the parcels at the distribution centre',
+  'robot.funnelNote':
+    'Catches the 30 parcels when the robot opens the flap at the distribution centre. A wheel with 17 pockets then feeds them to the shooter. 150 × 170 × 200 mm.',
   'fallback.notice': 'This page is not yet available in German — showing the English version.',
   'footer.source': 'Built with Astro · hosted in Switzerland',
   'notFound.title': 'Page not found',
@@ -258,6 +289,7 @@ const de: Record<UiKey, string> = {
   'project.model': '3D-Modell',
   'project.modelLoad': 'Interaktives 3D-Modell laden',
   'project.modelHint': 'Ziehen zum Drehen · Scrollen oder Pinch zum Zoomen',
+  'project.modelParts': 'Teile',
   'project.log': 'Projektlog',
   'project.logEmpty': 'Noch keine Updates.',
   'project.back': 'Alle Projekte',
@@ -382,6 +414,37 @@ const de: Record<UiKey, string> = {
   'pdf.loading': 'Dokument wird geladen…',
   'pdf.error':
     'Die Ansicht konnte das Dokument nicht laden. Das PDF lässt sich trotzdem öffnen oder herunterladen.',
+  'anatomy.heading': 'Schichten',
+  'anatomy.intro':
+    'Eine verkleinerte Kopie des Atlas-Modells. Die rote Linie ziehen, um die Muskeln abzunehmen oder wieder anzulegen, und den Körper seitwärts ziehen, um ihn zu drehen.',
+  'anatomy.layers': 'Angezeigte Schichten',
+  'anatomy.bones': 'Knochen',
+  'anatomy.nerves': 'Nerven',
+  'anatomy.muscles': 'Muskeln',
+  'anatomy.structures': 'Strukturen',
+  'anatomy.open': 'Ganzen Atlas öffnen',
+  'anatomy.posterAlt':
+    'Vorderansicht der 3D-Figur: Skelett und rote Nerven über der Taille, graue Muskeln darunter',
+  'anatomy.stage':
+    '3D-Figur. Seitwärts ziehen oder mit den Pfeiltasten links und rechts, um sie zu drehen.',
+  'anatomy.cut': 'Höhe des Schnitts',
+  'anatomy.cutValue': 'Muskeln bis {cm} cm',
+  'anatomy.loading': '3D-Modell wird geladen…',
+  'anatomy.tap': 'Auf die Figur tippen, um das 3D-Modell zu laden ({size}).',
+  'anatomy.error':
+    'Das 3D-Modell kann in diesem Browser nicht angezeigt werden. Der ganze Atlas ist auf learnanatomy.org.',
+  'anatomy.triangles': 'Dreiecke',
+  'anatomy.model': 'Modell',
+  'anatomy.reduced': 'Für diese Seite von {from} auf {to} Dreiecke reduziert, gleiche Lizenz.',
+  'robot.shooter': 'Schussmechanismus V3.5',
+  'robot.shooterAlt':
+    'Schussmechanismus V3.5: Gehäuse, Rohr und Halter in Grau, Halbzahnrad und Zahnschieber in Rot',
+  'robot.shooterNote':
+    'In Rot: das Halbzahnrad und der Zahnschieber. Das Zahnrad zieht den Schieber gegen die Federn zurück; wo seine Zähne enden, lässt es ihn los, und der Schieber schiesst das Paket ab. 221 × 90 × 48 mm.',
+  'robot.funnel': 'Trichter V03',
+  'robot.funnelAlt': 'Trichter V03, der die Pakete im Verteilzentrum auffängt',
+  'robot.funnelNote':
+    'Fängt die 30 Pakete auf, wenn der Roboter im Verteilzentrum die Klappe öffnet. Ein Rad mit 17 Taschen führt sie danach dem Schussmechanismus zu. 150 × 170 × 200 mm.',
   'fallback.notice':
     'Diese Seite ist noch nicht auf Deutsch verfügbar — angezeigt wird die englische Version.',
   'footer.source': 'Gebaut mit Astro · gehostet in der Schweiz',

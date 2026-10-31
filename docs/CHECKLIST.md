@@ -37,10 +37,12 @@ Run `npm run todos` to list every placeholder in the code. Each item below says 
 - [ ] **Portrait photo** → `src/assets/portrait.jpg` (portrait format, ≥ 800 px wide), shown on the CV page
 - [ ] **Project photos** (per project: 1 cover + 2–6 gallery images, each with a one-line description of what's
       visible)
-  - [ ] Delivery robot: robot on the track, motor shield, shooter mechanism, web interface screenshot
+  - [ ] Delivery robot: robot on the track, shooter, pickup wheel, web interface screenshot (the page shows CAD
+        renders so far)
   - [ ] BMC Hinge Fork: CAD model, FE stress plot, comparison chart
   - [ ] VELOVE website: desktop + mobile screenshots
-- [ ] **3D model** of the robot (GLB, < 5 MB) → replaces the placeholder `public/models/delivery-robot.glb`
+- [x] **3D models** of the robot: shooter V3.5 and funnel V03 in `public/models/delivery-robot-*.glb` (made with
+      `scripts/step-to-glb.py`); add more parts in `src/components/projects/delivery-robot/DeliveryRobot.astro`
 - [ ] **Report PDF** for the Hinge Fork analysis (optional) → `public/files/`, then `links.report` in its `index.mdx`
 
 ### Texts (everything marked TODO)
@@ -51,8 +53,8 @@ Run `npm run todos` to list every placeholder in the code. Each item below says 
       them).
 - [ ] **CV** (`src/data/cv.ts`): school, start dates, work experience, skills, language levels, awards
 - [ ] **Now** (`src/data/now.ts`): 2–4 current items
-- [ ] **German translation** of the robot project (`delivery-robot/de.mdx`): review once the English text
-      is final. Add `de.mdx` for other projects whenever you like.
+- [ ] **Delivery robot and learnanatomy** (`index.mdx` and `de.mdx`): drafts from the project files, marked
+      TODO. Check the facts (especially your role on the robot) and put them in your own words.
 
 ### Links
 

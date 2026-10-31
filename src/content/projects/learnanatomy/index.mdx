@@ -1,0 +1,51 @@
+---
+title: '3D anatomy atlas: learnanatomy.org'
+summary: A free 3D anatomy atlas for medical students that runs in the browser. Show, hide, cut and quiz yourself on 3,873 structures with Latin and English names. No sign-up, no tracking.
+role: 'Design and development'
+timeframe:
+  # From the git history of learnanatomy.org: first commit 29 Oct 2026, live since 30 Oct.
+  start: 2026-10-29
+teamSize: 1
+tools: [TypeScript, React, three.js, Blender, glTF Transform, Playwright]
+tags: [web, software]
+status: in-progress
+updated: 2026-10-31
+# Card thumbnail: the reduced model from this page. (The project page shows it live instead.)
+cover:
+  src: ./cover.png
+  alt: Upper body of the 3D figure, skull, ribs and red nerves above a cut, grey muscles below it
+links:
+  website: https://learnanatomy.org
+keyFigures:
+  - value: '3873'
+    label: structures in 3D
+  - value: '9'
+    label: body systems, each a layer
+  - value: '3'
+    label: 'quiz modes: find it, pick it, name it'
+  - value: '0'
+    label: sign-ups, trackers or servers
+---
+
+{/* TODO: draft written from the learnanatomy.org repository (README, ARCHITECTURE.md). Check the facts and put it in your own words. */}
+
+## What it is
+
+learnanatomy.org is a free 3D anatomy atlas for medical students. It runs in the browser, with nothing to install and no account. Nine body systems are layers that can be shown, hidden, made transparent or seen as an X-ray: the skeleton, muscles, muscle attachments, joints, organs, heart and vessels, lymphoid organs, the nervous system and the skin's regions. Every structure has its Latin and English name following the Terminologia Anatomica, and the interface is in German and English. It is meant for learning, not for diagnosis.
+
+## What you can do with it
+
+- Search in Latin, English and synonyms, or browse the tree of structures. The info panel shows a short definition from Wikipedia, marked as unreviewed until a person has checked it.
+- Isolate a structure, alone or with its surroundings, cut the body with sagittal, coronal and transverse planes, or pull it apart in an exploded view.
+- Quiz yourself: find a structure in 3D, pick its name from a list, or type it (small typos are accepted). Spaced repetition brings back the ones you got wrong.
+- Share a view: the link holds the layers, the selection, the cutting planes and the camera.
+
+## How it works
+
+The anatomy comes from Z-Anatomy, an open 3D atlas built on BodyParts3D, both under CC BY-SA licences. Its Blender file holds about 7,000 objects. An asset pipeline runs Blender without a window to export each body system, converts it to the atlas's coordinates (metres, up is up, the body faces forward, true left and right) and checks that every left structure is on the left. Then glTF Transform and meshoptimizer simplify, quantize and compress the meshes into one GLB file per system. The build stops on any orientation or side error.
+
+The viewer is React with three.js. Each body system is drawn as one batched mesh, so thousands of structures need only a few draw calls. The site is static, hosted on Cloudflare Pages, with about 6,000 pages generated for search engines, one per structure. Unit and component tests run with Vitest, end-to-end tests with Playwright on a desktop and a phone screen size.
+
+## The model on this page
+
+The figure above is a reduced copy of three of the atlas's systems: 269 bones, 534 structures of the nervous system and 609 muscles. Each layer is joined into one mesh and simplified to an eighth of its triangles, which brings the three systems from 17.5 MB to 2.8 MB. The red line is a clipping plane on the muscles.

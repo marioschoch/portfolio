@@ -1,0 +1,45 @@
+---
+title: 'Innovationsprojekt: Lieferroboter'
+summary: Ein autonomer Roboter für das Innovationsprojekt an der ETH Zürich. Er folgt einer Linie, nimmt 30 Pakete auf und wirft jedes auf einen anderen Balkon, alles in vier Minuten. Fünferteam, Wettbewerb im Dezember 2026.
+role: 'CAD-Konstruktion, Firmware und Webinterface'
+coverAlt: CAD-Rendering des Schussmechanismus, Version 3.5, Gehäuse, Rohr und Halter in Grau, Halbzahnrad und Zahnschieber in Rot
+keyFigureLabels:
+  - Pakete auf 30 verschiedene Balkone
+  - für die ganze Fahrt, vollständig autonom
+  - Würfel, in den der Roboter passen muss, höchstens 1,5 kg
+  - zum Spannen der Schussfedern, gemessen
+tools: [ESP32-S3, C++, CH32V003, JavaScript, 3D-Druck, Lasercutting]
+---
+
+{/* TODO: Entwurf aus dem Team-Repository und deinen Notizen. Fakten, deine Rolle und die Formulierungen prüfen. */}
+
+## Die Aufgabe
+
+Das Innovationsprojekt ist ein Kurs im dritten Semester Maschinenbau an der ETH Zürich: in Fünferteams von der Idee bis zum funktionierenden, getesteten System. Die diesjährige Aufgabe, «Innovation Delivered», ist ein Lieferroboter, dessen Pakete die letzten Meter durch die Luft zurücklegen. Von einer öffentlichen Linie aus wirft er sie auf Balkone, ohne Gehwege zu blockieren oder private Gärten zu überqueren.
+
+Auf der Wettbewerbsstrecke hat der Roboter vier Minuten, um selbständig:
+
+1. einer 10 mm breiten schwarzen Linie zum Verteilzentrum zu folgen,
+2. dort 30 Pakete aufzunehmen (15-mm-Würfel aus PLA, je 1,7 g), indem er einen Hebel drückt, der eine Klappe öffnet,
+3. jedes davon auf einen anderen Balkon von drei Häusern zu werfen, die in verschiedenen Abständen zur Linie hinter Hecken stehen, über die kein Teil des Roboters ragen darf,
+4. und zum Verteilzentrum zurückzukehren.
+
+Er muss in einen Würfel von 210 mm passen und mit Akku höchstens 1,5 kg wiegen. Erlaubt sind nur Motoren aus dem Kiosk des Kurses und keine Energiequelle ausser dem Akku, also keine vorgespannten Federn. Jedes aufgenommene Paket gibt 1 Punkt, jedes Paket, das am Ende noch auf einem Balkon liegt, 2 und die rechtzeitige Rückkehr 10, zusammen höchstens 100. Die Qualifikation am 7. Dezember 2026 zählt für die Note; die zehn besten Teams treten am 15. Dezember im ETH-Hauptgebäude im Finale nochmals an.
+
+## Wie wir arbeiten
+
+Wir arbeiten in Sprints, die jeweils mit einem Review und einer Retrospektive enden, und planen und dokumentieren auf einem GitLab-Issue-Board mit Testkarten. Für jede Funktion hat jeder von uns fünf Minuten lang Ideen skizziert, die besten wurden zu Prototypen. Fürs Werfen waren es vier: zwei Federschussmechanismen, ein Exzenterpleuel und mein Servo-Katapult. Wir haben getestet, wie eng jeder seine Schüsse auf ein A5-Blatt setzt und ob er jeden Balkon erreicht, und sie in einer Entscheidungsmatrix bewertet, die auch berücksichtigte, wie gut sie auf den Roboter passen und wie viel Verbesserungspotenzial sie haben. Gewonnen hat ein Federschussmechanismus.
+
+## Der Roboter bisher
+
+**Fahrgestell.** Der Kurs stellt ein Fahrgestell mit ESP32-S3, Motorshield und Liniensensor. Am Ende des ersten Sprints fuhr es mit 0,5 kg Last die ganze Strecke hin und zurück und hielt an den richtigen Querlinien. Seither haben wir einen neuen Rahmen und neue Motorhalterungen gebaut und Fahrstrecke und Drehwinkel mit einem Massband kalibriert.
+
+**Schussmechanismus.** Ein Halbzahnrad zieht einen Zahnschieber gegen Federn zurück; wo seine Zähne enden, lässt es ihn los, und der Schieber schiesst das Paket aus dem Rohr (das Modell oben). Mit einem Gewicht und einer Küchenwaage haben wir gemessen, dass das Spannen etwa 6 N braucht, und deshalb den TT-Motor durch einen kleinen Getriebemotor GA12-N20 mit 12 V und 60 U/min ersetzt. Diese Last liegt über seinem Nenndrehmoment, aber weit unter dem Anhaltemoment, und er läuft pro Schuss nur etwa 300 ms. Ein Servo neigt das Rohr, um auf die verschiedenen Stockwerke zu zielen. Bei kleinen Winkeln landen die Schüsse gleichmässig, bei steilen streuen sie noch stark.
+
+**Aufnahme.** Ein Trichter fängt die Pakete im Verteilzentrum auf, und ein Rad mit 17 Taschen soll sie einzeln dem Schussmechanismus zuführen. Unsere ersten Sammelmechanismen bauten alle auf demselben Trichter auf, der nicht funktionierte; der aktuelle Trichter (V03, oben) ist die Neukonstruktion. Der Motor des Rads hat noch nicht genug Drehmoment, um es zu drehen.
+
+**Firmware und Webinterface.** Ich habe die Firmware des Kurses neu geschrieben. Encoder an den Pulszählern des ESP32 messen die gefahrene Strecke, und der Roboter weiss per Odometrie, wo er sich auf der Strecke befindet, korrigiert an jeder erkannten Querlinie. Aufnahme, Schussmechanismus und die ganze Fahrt sind Zustandsautomaten, die die Fahrschleife nie blockieren; WLAN und Webinterface laufen auf dem anderen Kern. Der Schussmechanismus hat keinen Encoder: Die Firmware erkennt am Motorstrom, wann die Federn auslösen. Über das eigene WLAN des Roboters zeigt eine Webseite eine Live-Karte mit seiner Position, alle Sensoren und Motorströme und erlaubt PID-Tuning und Fahren per Tastatur. Für den Wettbewerb führt ein Build ohne WLAN denselben Missionscode aus. Ein CH32V003-Mikrocontroller auf einer neuen Platine liest alle 15 Kanäle der Liniensensoren parallel und sendet sie an den ESP32, der ihn auch flashen kann.
+
+## Als Nächstes
+
+Bis zur Qualifikation: das Aufnahmerad antreiben, die Neigung des Rohrs mit der Firmware zum Laufen bringen, die Seitensensoren montieren, die Schusstabelle für alle 30 Balkone füllen und ganze Fahrten testen.

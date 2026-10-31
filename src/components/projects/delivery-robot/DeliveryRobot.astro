@@ -1,0 +1,37 @@
+---
+/**
+ * The delivery robot on its project page: the CAD of the shooter and the funnel in the 3D viewer.
+ * The GLBs were converted from the STEP exports with scripts/step-to-glb.py (shooter: `--red 3,5`,
+ * the half gear and the toothed slider); the posters are renders of the same files.
+ */
+import ModelViewer from '@/components/ModelViewer.astro';
+import { useTranslations, type Lang } from '@/i18n/utils';
+import shooter from './shooter.png';
+import funnel from './funnel.png';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<ModelViewer
+  lang={lang}
+  models={[
+    {
+      src: '/models/delivery-robot-shooter.glb',
+      label: t('robot.shooter'),
+      alt: t('robot.shooterAlt'),
+      note: t('robot.shooterNote'),
+      poster: shooter,
+    },
+    {
+      src: '/models/delivery-robot-funnel.glb',
+      label: t('robot.funnel'),
+      alt: t('robot.funnelAlt'),
+      note: t('robot.funnelNote'),
+      poster: funnel,
+    },
+  ]}
+/>

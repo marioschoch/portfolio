@@ -1,0 +1,62 @@
+---
+title: 'Innovation project: delivery robot'
+summary: An autonomous robot for the Innovation Project at ETH Zürich. It follows a line, picks up 30 parcels and throws each onto a different balcony, all within four minutes. Team of five, competition in December 2026.
+role: 'CAD design, firmware and web interface'
+timeframe:
+  # From the team repository: first commit 14 Sept 2026. Qualification 7 Dec, final 15 Dec 2026.
+  start: 2026-09-14
+teamSize: 5
+tools: [ESP32-S3, C++, CH32V003, JavaScript, 3D printing, Laser cutting]
+tags: [mechatronics, embedded, cad]
+status: in-progress
+updated: 2026-10-31
+# Card thumbnail: a render of the shooter CAD. (The project page shows the 3D viewer instead.)
+cover:
+  src: ./cover.png
+  alt: CAD render of the shooter, version 3.5, grey housing, tube and holder, the half gear and the toothed slider in red
+keyFigures:
+  - value: '30'
+    label: parcels onto 30 different balconies
+  - value: '4'
+    unit: min
+    label: for the whole run, fully autonomous
+  - value: '210'
+    unit: mm
+    label: cube the robot must fit in, at most 1.5 kg
+  - value: '6'
+    unit: N
+    label: to tension the shooter springs, measured
+---
+
+{/* TODO: draft written from the team repository and your notes. Check the facts, your role and the wording. */}
+
+## The task
+
+The Innovation Project (Innovationsprojekt) is a third-semester course in mechanical engineering at ETH Zürich: in teams of five, from an idea to a working, tested system. This year's task, "Innovation Delivered", is a delivery robot whose parcels travel the last metres through the air. From a public line, it throws them onto balconies, without blocking the pavement or crossing private gardens.
+
+On the competition field, the robot has four minutes to do this on its own:
+
+1. follow a 10 mm black line to the distribution centre,
+2. pick up 30 parcels there (15 mm PLA cubes of 1.7 g) by pushing a lever that opens a flap,
+3. throw each one onto a different balcony of three houses, which stand at different distances from the line behind hedges that no part of the robot may cross,
+4. and return to the distribution centre.
+
+It has to fit into a 210 mm cube and weigh at most 1.5 kg with its battery. Only motors from the course's kiosk are allowed, and no energy source other than the battery, so no springs tensioned in advance. Each parcel picked up scores 1 point, each parcel still on a balcony at the end 2, and returning in time 10, for at most 100. The qualification on 7 December 2026 counts for the grade; the ten best teams meet again in the final on 15 December in the ETH main building.
+
+## How we work
+
+We work in sprints, each closed with a review and a retrospective, and plan and document on a GitLab issue board with test cards. For each function, every one of us sketched ideas in five minutes, and the best became prototypes. For throwing there were four: two spring shooters, an eccentric crank and my servo catapult. We tested how tightly each one grouped its shots on an A5 sheet and whether it could reach every balcony, and scored them in a decision matrix that also weighed how well they fit on the robot and how much they could still improve. A spring shooter won.
+
+## The robot so far
+
+**Chassis.** The course provides a chassis with an ESP32-S3, a motor shield and a line sensor. At the end of the first sprint it drove the whole track there and back with 0.5 kg on board, stopping at the right cross lines. Since then we have built a new frame and motor mounts, and calibrated driving distance and turning angle with a tape measure.
+
+**Shooter.** A half gear pulls a toothed slider back against springs; where its teeth end, it lets go and the slider shoots the parcel out of the tube (the model above). With a weight and a kitchen scale we measured that tensioning takes about 6 N, so we replaced the TT motor with a small 12 V, 60 rpm GA12-N20 gear motor. That load is above its rated torque, but far below its stall torque, and it only runs for about 300 ms per shot. A servo tilts the tube to aim at the different floors. At low angles the shots land consistently; at steep angles they still scatter a lot.
+
+**Pickup.** A funnel catches the parcels at the distribution centre, and a wheel with 17 pockets is to feed them into the shooter one at a time. Our first collectors were all built around the same funnel, which did not work; the current funnel (V03, above) is the redesign. The wheel's motor does not yet have enough torque to turn it.
+
+**Firmware and web interface.** I rewrote the course firmware. Encoders on the ESP32's pulse counters give the distance driven, and the robot knows where it is along the route by odometry, corrected at every cross line it detects. Pickup, shooter and the whole run are state machines that never block the drive loop; Wi-Fi and the web interface run on the other core. The shooter has no encoder: the firmware sees from the motor current when the springs are released. Over the robot's own Wi-Fi, a web page shows a live map with the robot's position, all sensors and motor currents, and allows PID tuning and driving by keyboard. For the competition, a build without Wi-Fi runs the same mission code. A CH32V003 microcontroller on a new board reads all 15 line-sensor channels in parallel and streams them to the ESP32, which can also flash it.
+
+## Next
+
+Until the qualification: drive the pickup wheel, make the tube's tilt work with the firmware, mount the side sensors, fill the shot table for all 30 balconies and test complete runs.
