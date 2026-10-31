@@ -1,8 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- "MS" is Inter Tight SemiBold (OFL) as outlines, so the icon doesn't depend on installed fonts. -->
   <style>
-    rect { fill: #15171b; } text { fill: #fafaf9; }
-    @media (prefers-color-scheme: dark) { rect { fill: #e8eaed; } text { fill: #0d0f12; } }
+    .bg { fill: #111111; } .ink { fill: #f2f1ec; }
+    @media (prefers-color-scheme: dark) { .bg { fill: #f2f1ec; } .ink { fill: #111111; } }
   </style>
-  <rect width="32" height="32" rx="4"/>
-  <text x="16" y="21.5" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="14" font-weight="600">MS</text>
+  <rect class="bg" width="32" height="32"/>
+  <rect x="24" y="2" width="6" height="6" fill="#e8401f"/>
+  <path class="ink" d="M2 15H5.33L9.78 25.86H9.96L14.41 15H17.78V30H15.12V19.69H14.99L10.82 29.95H8.88L4.75 19.68H4.62V30H2ZM24.32 30.23Q22.58 30.23 21.29 29.69Q20 29.14 19.27 28.1Q18.55 27.06 18.49 25.57H21.16Q21.23 26.35 21.65 26.87Q22.07 27.39 22.76 27.65Q23.45 27.91 24.3 27.91Q25.18 27.91 25.86 27.64Q26.53 27.37 26.91 26.89Q27.3 26.41 27.3 25.76Q27.3 25.18 26.95 24.8Q26.61 24.42 26.01 24.16Q25.4 23.9 24.59 23.7L22.89 23.26Q21.04 22.78 19.97 21.81Q18.9 20.84 18.9 19.22Q18.9 17.89 19.62 16.9Q20.33 15.91 21.58 15.35Q22.82 14.8 24.39 14.8Q25.99 14.8 27.2 15.35Q28.4 15.91 29.09 16.88Q29.78 17.86 29.8 19.12H27.18Q27.08 18.17 26.33 17.63Q25.57 17.1 24.36 17.1Q23.51 17.1 22.91 17.35Q22.3 17.61 21.97 18.05Q21.65 18.49 21.65 19.06Q21.65 19.68 22.03 20.08Q22.41 20.48 22.99 20.72Q23.58 20.96 24.19 21.12L25.59 21.48Q26.44 21.68 27.23 22.01Q28.01 22.35 28.64 22.86Q29.27 23.37 29.64 24.09Q30.01 24.81 30.01 25.79Q30.01 27.1 29.33 28.11Q28.66 29.11 27.39 29.67Q26.12 30.23 24.32 30.23Z"/>
 </svg>
